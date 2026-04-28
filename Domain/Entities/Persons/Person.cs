@@ -2,7 +2,7 @@ using Domain.Value_Objects;
 
 namespace Domain.Entities.Persons
 {
-        public class Person
+        public abstract class Person
         {
                 public Guid Id { get; private set; }
                 public string FirstName { get; private set; }
