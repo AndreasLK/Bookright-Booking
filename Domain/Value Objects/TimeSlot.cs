@@ -1,4 +1,4 @@
-namespace Domain.ValueObjects
+namespace Domain.Value_Objects
 {
         /// <summary>
         /// Represents a specific temporal interval with a fixed start and end point.

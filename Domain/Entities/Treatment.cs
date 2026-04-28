@@ -1,6 +1,6 @@
 
 using Domain.Value_Objects.Ids;
-using Domain.ValueObjects;
+using Domain.Value_Objects;
 namespace Domain.Entities
 {
         public abstract class Treatment
