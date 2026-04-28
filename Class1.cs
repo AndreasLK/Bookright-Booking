@@ -1,7 +1,8 @@
-﻿namespace Bookright_Booking
+namespace Bookright_Booking
 {
-    public class Class1
-    {
+        public class Class1
+        {
 
-    }
+                public string test = "sdas";
+        }
 }

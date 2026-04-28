@@ -1,0 +1,83 @@
+# Radical Styleguide for 2. Semester Eksamensopgave
+root = true
+
+[*]
+indent_style = space
+indent_size = 8
+tab_width = 8
+insert_final_newline = true
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*.{cs,csx}]
+# Force 8-space indentation as a build error
+dotnet_diagnostic.IDE0055.severity = error
+
+#### NAMING CONVENTIONS ####
+# Classes, Records, Interfaces, Enums, Methods, Properties (PascalCase)
+dotnet_naming_rule.pascal_case_rule.severity = error
+dotnet_naming_rule.pascal_case_rule.symbols = pascal_case_elements
+dotnet_naming_rule.pascal_case_rule.style = pascal_case_style
+dotnet_naming_symbols.pascal_case_elements.applicable_kinds = class, struct, interface, enum, property, method, record
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# Interfaces must start with I
+dotnet_naming_rule.interface_i_rule.severity = error
+dotnet_naming_rule.interface_i_rule.symbols = interface_symbols
+dotnet_naming_rule.interface_i_rule.style = prefix_i_style
+dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
+dotnet_naming_style.prefix_i_style.required_prefix = I
+dotnet_naming_style.prefix_i_style.capitalization = pascal_case
+
+# Private fields (_camelCase)
+dotnet_naming_rule.private_fields_rule.severity = error
+dotnet_naming_rule.private_fields_rule.symbols = private_field_symbols
+dotnet_naming_rule.private_fields_rule.style = private_field_style
+dotnet_naming_symbols.private_field_symbols.applicable_kinds = field
+dotnet_naming_symbols.private_field_symbols.applicable_accessibilities = private
+dotnet_naming_style.private_field_style.required_prefix = _
+dotnet_naming_style.private_field_style.capitalization = camel_case
+
+# Constants & Static Readonly (SCREAMING_SNAKE_CASE)
+dotnet_naming_rule.constants_rule.severity = error
+dotnet_naming_rule.constants_rule.symbols = constant_symbols
+dotnet_naming_rule.constants_rule.style = screaming_snake_style
+dotnet_naming_symbols.constant_symbols.applicable_kinds = field, local
+dotnet_naming_symbols.constant_symbols.required_modifiers = static, readonly
+dotnet_naming_style.screaming_snake_style.capitalization = all_upper
+dotnet_naming_style.screaming_snake_style.word_separator = _
+
+#### EXPLICIT READABILITY ####
+# Force 'this.' usage
+dotnet_style_qualification_for_field = true:error
+dotnet_style_qualification_for_property = true:error
+dotnet_style_qualification_for_method = true:error
+
+# Named Arguments (Requires Posseth.NamedArguments NuGet)
+dotnet_diagnostic.PNA1000.severity = error
+
+#### LOGIC & FLOW ####
+# The Rule of Three (Nesting Limit) - (Requires SonarAnalyzer NuGet)
+# S134: Control flow statements should not be nested too deeply
+dotnet_diagnostic.S134.severity = error
+sonar.cs.max_control_flow_nesting_depth = 3
+
+# Guard Clauses / Early Return
+csharp_style_conditional_delegate_call = true:error
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true:error
+
+# Async Suffix enforcement
+dotnet_naming_rule.async_methods_rule.severity = error
+dotnet_naming_rule.async_methods_rule.symbols = async_method_symbols
+dotnet_naming_rule.async_methods_rule.style = async_suffix_style
+dotnet_naming_symbols.async_method_symbols.applicable_kinds = method
+dotnet_naming_symbols.async_method_symbols.required_modifiers = async
+dotnet_naming_style.async_suffix_style.required_suffix = Async
+
+#### DOCUMENTATION ####
+# CS1591: Missing XML comment for public members
+dotnet_diagnostic.CS1591.severity = error
+# CS1573: Parameter has no matching param tag
+dotnet_diagnostic.CS1573.severity = error
+dotnet_style_require_accessibility_modifiers =always:suggestion
+csharp_style_default_access_modifier = public:suggestion
