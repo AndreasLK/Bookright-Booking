@@ -52,34 +52,14 @@ namespace Domain.Entities.People
 
                 public Customer(
                         CustomerId id,
-                        LoyalityLevel loyality,
                         string? personalNote,
                         string? importantNote,
                         Guid? preferredPratitionerId,
                         Gender? preferredGender,
                         bool sygsikringDanmarkMember,
-                        string legalFirstName,
-                        string legalLastName,
-                        string pronouns,
-                        DateOnly dateOfBirth,
-                        PhoneNumber phoneNumber,
-                        EmailAddress email,
-                        Gender gender,
-                        string? preferredFirstName = null,
-                        string? preferredLastName = null) : base(
-                                legalFirstName: legalFirstName,
-                                legalLastName: legalLastName,
-                                pronouns: pronouns,
-                                dateOfBirth: dateOfBirth,
-                                phoneNumber: phoneNumber,
-                                email: email,
-                                gender: gender,
-                                preferredFirstName: preferredFirstName,
-                                preferredLastName: preferredLastName
-                              )
+                        PersonDetails details) : base(details: details)
                 {
                         this.Id = id;
-                        this.Loyality = loyality;
                         this.PersonalNote = personalNote;
                         this.ImportantNote = importantNote;
                         this.PreferredPratitionerId = preferredPratitionerId;
