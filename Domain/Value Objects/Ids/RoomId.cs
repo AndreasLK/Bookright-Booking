@@ -1,23 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Domain.Value_Objects.Ids;
 
 namespace Domain.Value_Objects
 {
-        public record RoomId
-        {
-                public Guid Value { get; init; }
-
-                public RoomId(Guid value)
-                {
-                        if (value == Guid.Empty)
-                        {
-                                throw new ArgumentException(
-                                        message: "ID must not be empty",
-                                        paramName: nameof(value));
-                        }
-                        this.Value = value;
-
-                }
-        }
+        /// <summary>Unique identifier for a Room.</summary>
+        public record RoomId(Guid Value) : StronglyTypedId<Guid>(Value);
 }

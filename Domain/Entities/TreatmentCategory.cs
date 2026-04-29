@@ -1,6 +1,5 @@
 using Domain.Enums;
 using Domain.Value_Objects.Ids;
-using System.Net;
 
 namespace Domain.Entities
 {
