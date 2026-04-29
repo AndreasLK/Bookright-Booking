@@ -1,12 +1,12 @@
 namespace Domain.Value_Objects.Ids
 {
-        public record CustomerId
+        public record CertificateId
         {
-                public Guid Value { get; init; }
+                public string Value { get; init; }
 
-                public CustomerId(Guid value)
+                public CertificateId(string value)
                 {
-                        if (value == Guid.Empty)
+                        if (string.IsNullOrWhiteSpace(value))
                         {
                                 throw new ArgumentException(
                                         message: "ID must not be empty",
