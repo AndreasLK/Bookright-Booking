@@ -1,6 +1,6 @@
 
-using Domain.Value_Objects.Ids;
 using Domain.Value_Objects;
+using Domain.Value_Objects.Ids;
 namespace Domain.Entities
 {
         /// <summary>

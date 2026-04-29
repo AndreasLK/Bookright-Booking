@@ -1,9 +1,5 @@
 using Domain.Enums;
 using Domain.Value_Objects.Ids;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Xml.Linq;
 
 namespace Domain.Entities
 {
