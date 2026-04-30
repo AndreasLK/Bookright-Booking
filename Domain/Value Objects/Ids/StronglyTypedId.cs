@@ -20,7 +20,7 @@ namespace Domain.Value_Objects.Ids
                 /// <exception cref="ArgumentException">Thrown if value is empty string or empty Guid.</exception>
                 protected StronglyTypedId(TValue value)
                 {
-                        if (value == null) throw new ArgumentNullException(nameof(value));
+                        if (value is null) throw new ArgumentNullException(nameof(value));
 
                         if (value is string s && string.IsNullOrWhiteSpace(s))
                         {
