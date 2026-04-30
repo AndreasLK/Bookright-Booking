@@ -41,9 +41,38 @@ namespace Domain.Entities
                 /// <summary>
                 /// Associated treatment room identifiers.
                 /// </summary>
-                public List<Guid> RoomIds = new List<Guid>();
+                private readonly List<Guid> RoomIds = new List<Guid>();
 
 
+                public Clinic(ClinicId id,
+                                string Name,
+                                Address Address,
+                                PhoneNumber PhoneNumber,
+                                EmailAddress Email,
+                                List<Guid> RoomIds)
+
+                {
+                        if (id == null)
+                                throw new ArgumentNullException(nameof(id));
+                        if (Name == null)
+                                throw new ArgumentNullException(nameof(Name));
+                        if (Address == null)
+                                throw new ArgumentNullException(nameof(Address));
+                        if (PhoneNumber == null)
+                                throw new ArgumentNullException(nameof(PhoneNumber));
+                        if (Email == null)
+                                throw new ArgumentNullException(nameof(Email));
+                        if (RoomIds == null)
+                                throw new ArgumentNullException(nameof(RoomIds));
+
+                        this.Id = id;
+                        this.Name = Name;
+                        this.Address = Address;
+                        this.PhoneNumber = PhoneNumber;
+                        this.Email = Email;
+                        this.RoomIds = RoomIds;
+
+                }
 
         }
 }

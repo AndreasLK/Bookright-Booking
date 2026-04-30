@@ -45,17 +45,28 @@ namespace Domain.Entities
 
                 {
                         if (id == null)
-                                {
-                                throw new ArgumentException(
-                                message: "ID kan ikke være tomt")
-                                {
+                                throw new ArgumentNullException(nameof(id));
 
-                                };
-                                this.Id = id;
-                        this.Clinic = clinic;
-                        this.Practitioner = practitioner;
-                        this.Treatment = treatment;
+                        if (clinic == null)
+                                throw new ArgumentNullException(nameof(clinic));
+
+                        if (practitioner == null)
+                                throw new ArgumentNullException(nameof(practitioner));
+
+                        if (treatment == null)
+                                throw new ArgumentNullException(nameof(treatment));
+
+                        if (timeslot == null)
+                                throw new ArgumentNullException(nameof(timeslot));
+
+                        this.Id = id;
+                        this.ClinicId = clinic.Id;
+                        this.PractitionerId = practitioner.Id;
+                        this.TreatmentId = treatment.Id;
                         this.Timeslot = timeslot;
                 }
         }
 }
+
+
+
