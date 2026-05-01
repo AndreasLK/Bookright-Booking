@@ -53,50 +53,42 @@ namespace Domain.Entities.Persons
                 /// </summary>
                 public Gender Gender { get; private set; }
 
-                public Person(
-                        string legalFirstName,
-                        string legalLastName,
-                        string pronouns,
-                        DateOnly dateOfBirth,
-                        PhoneNumber phoneNumber,
-                        EmailAddress email,
-                        Gender gender,
-                        string? preferredFirstName = null,
-                        string? preferredLastName = null)
+                protected Person(PersonDetails details)
                 {
-
                         //Guard clauses
-                        if (legalFirstName.IsWhiteSpace())
+                        if (details is null) throw new ArgumentNullException(nameof(details));
+
+                        if (string.IsNullOrWhiteSpace(details.LegalFirstName))
                         {
                                 throw new ArgumentException(
                                         message: "Legal first name cannot be blank",
-                                        paramName: nameof(legalFirstName)
+                                        paramName: nameof(details.LegalFirstName)
                                         );
                         }
-                        if (legalLastName.IsWhiteSpace())
+                        if (string.IsNullOrWhiteSpace(details.LegalLastName))
                         {
                                 throw new ArgumentException(
                                         message: "Legal last name cannot be blank",
-                                        paramName: nameof(legalLastName)
+                                        paramName: nameof(details.LegalLastName)
                                         );
                         }
-                        if (pronouns.IsWhiteSpace())
+                        if (string.IsNullOrWhiteSpace(details.Pronouns))
                         {
                                 throw new ArgumentException(
                                         message: "Person must have pronouns",
-                                        paramName: nameof(pronouns)
+                                        paramName: nameof(details.Pronouns)
                                         );
                         }
 
-                        this.LegalFirstName = legalFirstName;
-                        this.LegalLastName = legalLastName;
-                        this.PreferredFirstName = preferredFirstName;
-                        this.PreferredLastName = preferredLastName;
-                        this.Pronouns = pronouns;
-                        this.DateOfBirth = dateOfBirth;
-                        this.PhoneNumber = phoneNumber;
-                        this.Email = email;
-                        this.Gender = gender;
+                        this.LegalFirstName = details.LegalFirstName;
+                        this.LegalLastName = details.LegalLastName;
+                        this.PreferredFirstName = details.PreferredFirstName;
+                        this.PreferredLastName = details.PreferredLastName;
+                        this.Pronouns = details.Pronouns;
+                        this.DateOfBirth = details.DateOfBirth;
+                        this.PhoneNumber = details.PhoneNumber;
+                        this.Email = details.Email;
+                        this.Gender = details.Gender;
                 }
         }
 }

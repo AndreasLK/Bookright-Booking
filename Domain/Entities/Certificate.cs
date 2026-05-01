@@ -1,40 +1,48 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Domain.Enums;
+using Domain.Value_Objects.Ids;
 
 namespace Domain.Entities
 {
+        /// <summary>
+        /// Represents a professional accreditation or license.
+        /// </summary>
         public record Certificate
         {
-                /// <summary>
-                /// Official title of the accreditation.
-                /// </summary>
-                public string Name { get; private set; }
+                public string Name { get; init; }
+                public CertificateId CertificateId { get; init; }
+                public AuthorizationType AuthorizationType { get; init; }
+                public DateOnly ValidFrom { get; init; }
+                public DateOnly? ValidUntil { get; init; }
+                public string? PhotoFilePath { get; init; }
 
-                /// <summary>
-                /// Unique certificate Authorizationnumber.
-                /// </summary>
-                public string CertificateId { get; private set; }
+                /// <param name="name">Official title of the accreditation.</param>
+                /// <param name="certificateId">Unique certificate authorization number.</param>
+                /// <param name="authorizationType">Acquired professional level or role.</param>
+                /// <param name="validFrom">Effective start date.</param>
+                /// <param name="validUntil">Optional expiration date.</param>
+                /// <param name="photoFilePath">Storage path for digital credential scan.</param>
+                public Certificate(
+                    string name,
+                    CertificateId certificateId,
+                    AuthorizationType authorizationType,
+                    DateOnly validFrom,
+                    DateOnly? validUntil = null,
+                    string? photoFilePath = null)
+                {
+                        // --- Guard Clauses ---
+                        if (string.IsNullOrWhiteSpace(name))
+                                throw new ArgumentException("Name is required.", nameof(name));
 
-                /// <summary>
-                /// Aquired professional level or role.
-                /// </summary>
-                public AuthorizationType AuthorizationType { get; private set; }
+                        if (validUntil.HasValue && validUntil < validFrom)
+                                throw new ArgumentOutOfRangeException(nameof(validUntil), "Expiry date cannot be before start date.");
 
-                /// <summary>
-                /// Effective start date.
-                /// </summary>
-                public DateOnly ValidFrom { get; private set; }
-
-                /// <summary>
-                /// Expiration date.
-                /// </summary>
-                public DateOnly? ValidUntil { get; private set; }
-
-                /// <summary>
-                /// Storage path for digital credential scan.
-                /// </summary>
-                public string? PhotoFilePath { get; private set; }
+                        // --- Assignments ---
+                        this.Name = name;
+                        this.CertificateId = certificateId;
+                        this.AuthorizationType = authorizationType;
+                        this.ValidFrom = validFrom;
+                        this.ValidUntil = validUntil;
+                        this.PhotoFilePath = photoFilePath;
+                }
         }
 }

@@ -1,19 +1,5 @@
 namespace Domain.Value_Objects.Ids
 {
-        public record CustomerId
-        {
-                public Guid Id { get; init; }
-
-                public CustomerId(Guid id)
-                {
-                        if (id == Guid.Empty)
-                        {
-                                throw new ArgumentException(
-                                        message: "ID must not be empty",
-                                        paramName: nameof(id));
-                        }
-                        this.Id = id;
-
-                }
-        }
+        /// <summary>Unique identifier for a Customer.</summary>
+        public record CustomerId(Guid Value) : StronglyTypedId<Guid>(Value);
 }

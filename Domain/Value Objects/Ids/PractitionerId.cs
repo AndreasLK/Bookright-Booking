@@ -1,4 +1,5 @@
 namespace Domain.Value_Objects.Ids
 {
-        public record PractitionerId(Guid Id);
+        /// <summary>Unique identifier for a Practitioner.</summary>
+        public record PractitionerId(Guid Value) : StronglyTypedId<Guid>(Value);
 }

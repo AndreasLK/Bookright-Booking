@@ -1,4 +1,5 @@
 namespace Domain.Value_Objects.Ids
 {
-        public record ClinicId(Guid Id);
+        /// <summary>Unique identifier for a Clinic.</summary>
+        public record ClinicId(Guid Value) : StronglyTypedId<Guid>(Value);
 }

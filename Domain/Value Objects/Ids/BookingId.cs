@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Domain.Value_Objects.Ids;
 
 namespace Domain.Value_Objects
 {
-        public record BookingId(Guid Id);
+        /// <summary>Unique identifier for a Booking.</summary>
+        public record BookingId(Guid Value) : StronglyTypedId<Guid>(Value);
 }

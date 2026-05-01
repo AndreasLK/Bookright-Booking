@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
+using Domain.Value_Objects.Ids;
 
 namespace Domain.Value_Objects
 {
-        public record RoomId(Guid Id);
+        /// <summary>Unique identifier for a Room.</summary>
+        public record RoomId(Guid Value) : StronglyTypedId<Guid>(Value);
 }

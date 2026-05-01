@@ -1,9 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Domain.Entities.People;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Domain.Entities
 {
@@ -45,28 +45,17 @@ namespace Domain.Entities
 
                 {
                         if (id == null)
-                                throw new ArgumentNullException(nameof(id));
+                        {
+                                throw new ArgumentException(
+                                message: "ID kan ikke være tomt")
+                                {
 
-                        if (clinic == null)
-                                throw new ArgumentNullException(nameof(clinic));
-
-                        if (practitioner == null)
-                                throw new ArgumentNullException(nameof(practitioner));
-
-                        if (treatment == null)
-                                throw new ArgumentNullException(nameof(treatment));
-
-                        if (timeslot == null)
-                                throw new ArgumentNullException(nameof(timeslot));
-
-                        this.Id = id;
-                        this.ClinicId = clinic.Id;
-                        this.PractitionerId = practitioner.Id;
-                        this.TreatmentId = treatment.Id;
-                        this.Timeslot = timeslot;
+                                };
+                                this.Id = id;
+                                this.Clinic = clinic;
+                                this.Practitioner = practitioner;
+                                this.Treatment = treatment;
+                                this.Timeslot = timeslot;
+                        }
                 }
         }
-}
-
-
-

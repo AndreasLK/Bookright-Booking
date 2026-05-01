@@ -1,4 +1,5 @@
 namespace Domain.Value_Objects.Ids
 {
-        public record ReceptionistId(Guid Id);
+        /// <summary>Unique identifier for a Receptionist.</summary>
+        public record ReceptionistId(Guid Value) : StronglyTypedId<Guid>(Value);
 }
