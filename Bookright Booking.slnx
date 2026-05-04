@@ -1,7 +1,7 @@
 <Solution>
-  <Project Path="../Facade/Facade.csproj" Id="536a4ef9-fef3-47ff-ad61-52c54278ec7b" />
   <Project Path="../Use Case/Use Case.csproj" Id="4ea31b65-182b-4041-a15c-343a8b50da61" />
   <Project Path="Domain/Domain.csproj" Id="1b42e4f8-0ac6-4920-b72d-143f54cefe16" />
+  <Project Path="Facade/Facade.csproj" />
   <Project Path="Infrastructure/Infrastructure.csproj" Id="f9414b13-7389-475b-ae27-d965b3614357" />
   <Project Path="UI/UI.Client/UI.Client.csproj" Id="5799763f-24cc-4ea9-9fc9-e6ffd6c5a70c" />
   <Project Path="UI/UI/UI.csproj" Id="273fb1fd-72e8-4a1b-878e-1724cb829319" />
