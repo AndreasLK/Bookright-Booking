@@ -10,17 +10,14 @@ namespace Domain
                 //Discounts:
                 //Bronze Discount:
                 public const decimal BRONZE_LOYALTY_MINIMUM_AMOUNT_PURCHASED = 3000m;
-                public const decimal BRONZE_LOYALTY_MAXIMUM_AMOUNT_PURCHASED = 10000m;
                 public const decimal BRONZE_LOYALTY_DISCOUNT_MULTIPLIER = 0.95m;
 
                 //Silver Discount:
                 public const decimal SILVER_LOYALTY_MINIMUM_AMOUNT_PURCHASED = 10001m;
-                public const decimal SILVER_LOYALTY_MAXIMUM_AMOUNT_PURCHASED = 25000m;
                 public const decimal SILVER_LOYALTY_DISCOUNT_MULTIPLIER = 0.90m;
 
                 //Gold Discount:
                 public const decimal GOLD_LOYALTY_MINIMUM_AMOUNT_PURCHASED = 25001m;
-                public const decimal GOLD_LOYALTY_MAXIMUM_AMOUNT_PURCHASED = decimal.MaxValue;
                 public const decimal GOLD_LOYALTY_DISCOUNT_MULTIPLIER = 0.85m;
 
                 //Birthmonth Discount:
