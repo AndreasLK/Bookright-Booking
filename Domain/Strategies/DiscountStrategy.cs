@@ -1,8 +1,9 @@
+using Domain.Interfaces;
 using Domain.Value_Objects;
 
 namespace Domain.Strategies
 {
-        public abstract class DiscountStrategy
+        public abstract class DiscountStrategy : IDiscountStrategy
         {
                 public Money GetFinalPrice(Money totalPurchase, Money currentPurchasePrice)
                 {
@@ -16,7 +17,8 @@ namespace Domain.Strategies
                         return this.CalculatePrice(totalPurchase: totalPurchase, currentPurchasePrice: currentPurchasePrice);
 
                 }
-                public abstract Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice);
+                protected abstract Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice);
+
 
         }
 }

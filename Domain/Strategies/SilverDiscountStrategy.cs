@@ -2,17 +2,12 @@ using Domain.Value_Objects;
 
 namespace Domain.Strategies
 {
-        public class SilverDiscountStrategy : DiscountStrategy
-        {
-                public override Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice)
-                {
-                        decimal currentPurchasePriceWithDiscount = currentPurchasePrice.Amount * Config.SILVER_LOYALTY_DISCOUNT_MULTIPLIER;
-                        if (totalPurchase.Amount + currentPurchasePriceWithDiscount < Config.SILVER_LOYALTY_MINIMUM_AMOUNT_PURCHASED)
-                        {
-                                return currentPurchasePrice;
-                        }
+        public class SilverDiscountStrategy : ProcentageDiscountStrategy
 
-                        return new Money(amount: currentPurchasePriceWithDiscount, currency: currentPurchasePrice.Currency);
-                }
+
+        {
+                public override decimal DiscountMultiplier => Config.SILVER_LOYALTY_DISCOUNT_MULTIPLIER;
+
+                public override decimal MinimumPurchasedAmount => Config.SILVER_LOYALTY_DISCOUNT_MULTIPLIER;
         }
 }

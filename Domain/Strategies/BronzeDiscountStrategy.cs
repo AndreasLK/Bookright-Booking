@@ -2,18 +2,12 @@ using Domain.Value_Objects;
 
 namespace Domain.Strategies
 {
-        public class BronzeDiscountStrategy : DiscountStrategy
+        public class BronzeDiscountStrategy : ProcentageDiscountStrategy
+
+
         {
-                public override Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice)
-                {
-                        decimal currentPurchasePriceWithDiscount = currentPurchasePrice.Amount * Config.BRONZE_LOYALTY_DISCOUNT_MULTIPLIER;
+                public override decimal DiscountMultiplier => Config.BRONZE_LOYALTY_DISCOUNT_MULTIPLIER;
 
-                        if (totalPurchase.Amount + currentPurchasePriceWithDiscount < Config.BRONZE_LOYALTY_MINIMUM_AMOUNT_PURCHASED)
-                        {
-                                return currentPurchasePrice;
-                        }
-
-                        return new Money(amount: currentPurchasePriceWithDiscount, currency: currentPurchasePrice.Currency);
-                }
+                public override decimal MinimumPurchasedAmount => Config.BRONZE_LOYALTY_DISCOUNT_MULTIPLIER;
         }
 }
