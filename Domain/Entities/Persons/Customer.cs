@@ -7,7 +7,7 @@ using Domain.Value_Objects.Ids;
 namespace Domain.Entities.People
 {
         /// <inheritdoc />
-        public abstract class Customer : Person
+        public class Customer : Person
         {
                 /// <summary>
                 /// Unique customer identifier.
