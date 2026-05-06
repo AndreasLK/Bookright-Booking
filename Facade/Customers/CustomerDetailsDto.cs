@@ -1,3 +1,4 @@
+using Domain.Enums;
 using Facade.Common.Dtos;
 
 namespace Facade.Customers
@@ -56,7 +57,7 @@ namespace Facade.Customers
                 /// <summary>
                 /// Gender identity, represented as a string.
                 /// </summary>
-                public string Gender { get; set; } = string.Empty;
+                public GenderDto Gender { get; set; } = GenderDto.PreferNotToSay;
 
                 /// <summary>
                 /// Loyalty tier determined by purchase history.
@@ -81,12 +82,12 @@ namespace Facade.Customers
                 /// <summary>
                 /// Preferred gender of the treating practitioner.
                 /// </summary>
-                public string? PreferredGender { get; set; }
+                public GenderDto? PreferredGender { get; set; }
 
                 /// <summary>
                 /// Genders the customer explicitly excludes for treatments.
                 /// </summary>
-                public List<string> UnwantedGenders { get; set; } = new List<string>();
+                public List<GenderDto> UnwantedGenders { get; set; } = new List<GenderDto>();
 
                 /// <summary>
                 /// Membership status in 'Sygeforsikringen "danmark"'.
