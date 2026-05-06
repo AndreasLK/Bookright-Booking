@@ -1,37 +1,51 @@
 using Domain.Enums;
 using Facade.Common.Dtos;
-using System.Reflection;
+using Xunit;
+using System.Linq;
 
 namespace Tests.Domain
 {
+        /// <summary>
+        /// Validates that the Domain and Facade layers maintain identical Gender definitions.
+        /// This is a safeguard for the 'Clean Architecture' boundary between layers.
+        /// </summary>
         public class EnumSyncTests
         {
                 [Fact]
                 public void GenderEnum_And_GenderDto_MustMatchExactly()
                 {
-                        // 1. Get all the string names from both Enums
-                        var domainNames = Enum.GetNames(typeof(Gender)).OrderBy(n => n).ToArray();
-                        var dtoNames = Enum.GetNames(typeof(GenderDto)).OrderBy(n => n).ToArray();
+                        // 1. Extract and sort names to ensure order-independent comparison
+                        var domainNames = Enum.GetNames(enumType: typeof(Gender))
+                            .OrderBy(keySelector: name => name)
+                            .ToArray();
 
-                        // 2. Get all the underlying integer values from both Enums
-                        var domainValues = (int[])Enum.GetValues(typeof(Gender));
-                        var dtoValues = (int[])Enum.GetValues(typeof(GenderDto));
+                        var dtoNames = Enum.GetNames(enumType: typeof(GenderDto))
+                            .OrderBy(keySelector: name => name)
+                            .ToArray();
 
-                        // ASSERTION 1: Do they have the exact same number of items?
-                        Assert.True(domainNames.Length == dtoNames.Length,
-                            $"Count mismatch! Domain has {domainNames.Length}, DTO has {dtoNames.Length}");
+                        // ASSERTION 1: Verify counts match
+                        Assert.Equal(
+                            expected: domainNames.Length,
+                            actual: dtoNames.Length);
 
-                        // ASSERTION 2: Are the names identical?
-                        for (int i = 0; i < domainNames.Length; i++)
+                        // 2. Pairwise comparison of names and underlying values
+                        for (int index = 0; index < domainNames.Length; index++)
                         {
-                                Assert.Equal(domainNames[i], dtoNames[i]);
-                        }
+                                var currentName = domainNames[index];
 
-                        // ASSERTION 3: Do the underlying integer values match perfectly?
-                        // (Crucial if you cast them by number later)
-                        for (int i = 0; i < domainValues.Length; i++)
-                        {
-                                Assert.Equal(domainValues[i], dtoValues[i]);
+                                // ASSERTION 2: Names must be identical
+                                Assert.Equal(
+                                    expected: currentName,
+                                    actual: dtoNames[index]);
+
+                                // 3. Resolve underlying integer values
+                                var domainValue = (int)Enum.Parse(enumType: typeof(Gender), value: currentName);
+                                var dtoValue = (int)Enum.Parse(enumType: typeof(GenderDto), value: currentName);
+
+                                // ASSERTION 3: Integer values must match to ensure safe casting
+                                Assert.Equal(
+                                    expected: domainValue,
+                                    actual: dtoValue);
                         }
                 }
         }
