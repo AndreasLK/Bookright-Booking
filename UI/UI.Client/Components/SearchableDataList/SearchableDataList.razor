@@ -18,7 +18,7 @@
                 {
                         @foreach (TItem item in FilteredItems)
                         {
-                                <div @ondblclick="() => HandleDoubleClick(item)" style="cursor: pointer;">
+                                <div @ondblclick="() => HandleDoubleClickAsync(item)" style="cursor: pointer;">
                                         @ItemTemplate(item)
                                 </div>
                                 
