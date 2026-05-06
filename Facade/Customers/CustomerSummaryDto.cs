@@ -1,3 +1,4 @@
+using Facade.Common.Attributes;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Facade.Customers
@@ -9,12 +10,24 @@ namespace Facade.Customers
         public class CustomerSummaryDto
         {
                 public Guid Id { get; set; }
+
+                [Searchable]
                 public string LegalFirstName { get; set; }
+
+                [Searchable]
                 public string LegalLastName { get; set; }
+
+                [Searchable]
                 public string? PreferredFirstName { get; set; }
+
+                [Searchable]
                 public string? PreferredLastName { get; set; }
                 public string Pronouns { get; set; }
+
+                [Searchable]
                 public string PhoneNumber { get; set; }
+
+                [Searchable]
                 public string Email { get; set; }
                 public string LoyaltyLevel { get; set; }
 
