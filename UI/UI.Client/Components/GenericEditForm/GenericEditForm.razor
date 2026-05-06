@@ -6,7 +6,7 @@
     </div>
     <div class="card-body">
         
-        <EditForm Model="Model" OnValidSubmit="HandleValidSubmit">
+        <EditForm Model="Model" OnValidSubmit="HandleValidSubmitAsync">
             <DataAnnotationsValidator />
 
             <div class="mb-4">
@@ -14,7 +14,7 @@
             </div>
 
             <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-secondary" @onclick="HandleCancel">
+                <button type="button" class="btn btn-secondary" @onclick="HandleCancelAsync">
                     Cancel
                 </button>
                 <button type="submit" class="btn btn-success">
