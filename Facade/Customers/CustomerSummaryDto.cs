@@ -1,5 +1,4 @@
 using Facade.Common.Attributes;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Facade.Customers
 {
@@ -9,26 +8,55 @@ namespace Facade.Customers
         /// </summary>
         public class CustomerSummaryDto
         {
+                /// <summary>
+                /// Unique customer identifier.
+                /// </summary>
                 public Guid Id { get; set; }
 
+                /// <summary>
+                /// Official legal first name.
+                /// </summary>
                 [Searchable]
                 public string LegalFirstName { get; set; }
 
+                /// <summary>
+                /// Official legal last name.
+                /// </summary>
                 [Searchable]
                 public string LegalLastName { get; set; }
 
+                /// <summary>
+                /// Optional preferred first name.
+                /// </summary>
                 [Searchable]
                 public string? PreferredFirstName { get; set; }
 
+                /// <summary>
+                /// Optional preferred last name.
+                /// </summary>
                 [Searchable]
                 public string? PreferredLastName { get; set; }
+
+                /// <summary>
+                /// Customer's personal pronouns.
+                /// </summary>
                 public string Pronouns { get; set; }
 
+                /// <summary>
+                /// Primary phone number.
+                /// </summary>
                 [Searchable]
                 public string PhoneNumber { get; set; }
 
+                /// <summary>
+                /// Primary email address.
+                /// </summary>
                 [Searchable]
                 public string Email { get; set; }
+
+                /// <summary>
+                /// Dynamically calculated loyalty tier.
+                /// </summary>
                 public string LoyaltyLevel { get; set; }
 
                 /// <summary>
