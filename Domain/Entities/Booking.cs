@@ -38,9 +38,9 @@ namespace Domain.Entities
                 public TimeSlot Timeslot { get; private set; }
 
                 public Booking(BookingId id,
-                                Clinic clinic,
-                                Practitioner practitioner,
-                                Treatment treatment,
+                                ClinicId clinic,
+                                PractitionerId practitioner,
+                                TreatmentId treatment,
                                 TimeSlot timeslot)
 
                 {
@@ -52,10 +52,11 @@ namespace Domain.Entities
 
                                 };
                                 this.Id = id;
-                                this.Clinic = clinic;
-                                this.Practitioner = practitioner;
-                                this.Treatment = treatment;
+                                this.ClinicId = clinic;
+                                this.PractitionerId = practitioner;
+                                this.TreatmentId = treatment;
                                 this.Timeslot = timeslot;
                         }
                 }
         }
+}
