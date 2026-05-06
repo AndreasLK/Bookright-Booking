@@ -1,0 +1,34 @@
+@typeparam TItem
+@using UI.Client.Extensions
+
+
+<div class="searchable-list">
+        @*Search Bar*@
+        <div class="mb-3">
+                <input type="text"
+                       class="form-control"
+                       placeholder="Search..."
+                       @bind="SearchTerm"
+                       @bind:event="oninput"/>
+        </div>
+
+        @*Data List*@
+        <div class="item-container">
+                @if (FilteredItems.Any())
+                {
+                        @foreach (TItem item in FilteredItems)
+                        {
+                                <div @ondblclick="() => HandleDoubleClickAsync(item)" style="cursor: pointer;">
+                                        @ItemTemplate(item)
+                                </div>
+                                
+                        }
+                }
+                else
+                {
+                        <div class="alert alert-info">
+                                No results found.
+                        </div>
+                }
+        </div>
+</div>

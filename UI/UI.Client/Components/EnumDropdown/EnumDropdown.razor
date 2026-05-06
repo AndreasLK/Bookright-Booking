@@ -1,0 +1,20 @@
+@typeparam TEnum where TEnum : struct, Enum
+
+@using Facade.Common.Extensions
+
+<InputSelect ValueExpression="ValueExpression"
+             Value="Value"
+             ValueChanged="ValueChanged"
+             class="@CssClass">
+             
+    @if (ShowDefaultOption)
+    {
+        <option value="">@DefaultOptionText</option>
+    }
+
+    @foreach (Enum enumValue in Enum.GetValues(typeof(TEnum)))
+    {
+        <option value="@enumValue.ToString()">@enumValue.GetDisplayName()</option>
+    }
+
+</InputSelect>

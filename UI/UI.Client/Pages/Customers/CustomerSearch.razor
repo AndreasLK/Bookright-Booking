@@ -1,0 +1,54 @@
+@page "/customers"
+@rendermode InteractiveWebAssembly
+
+@using Facade.Customers
+@using UI.Client.Components.SearchableDataList
+
+<h3>Receptionist Customer Search</h3>
+
+<SearchableDataList TItem="CustomerSummaryDto"
+                    Items="CustomerSummaries"
+                    OnItemDoubleClick="GoToCustomerDetails">
+        <ItemTemplate Context="customer">
+                <div class="card mb-3 shadow-sm border-start border-4 border-primary">
+                        <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start"
+                                     @onclick="() => GoToCustomerDetails(customer)"
+                                     style="cursor: pointer; transition: transform 0.2s;">
+                                        
+                                        <div class="ps-2">
+                                                <h5 class="card-title mb-1">
+                                                        @customer.GreetingName @(customer.PreferredLastName ?? customer.LegalLastName)
+                                                        <span class="badge bg-light text-dark ms-2 border">@customer.Pronouns</span>
+                                                </h5>
+
+                                                @if (!string.IsNullOrWhiteSpace(customer.PreferredFirstName))
+                                                {
+                                                        <small class="text-muted d-block mb-2">
+                                                                Legal: @customer.LegalFirstName @customer.LegalLastName
+                                                        </small>
+                                                }
+                                                else
+                                                {
+                                                        <div class="mb-2"></div>
+                                                }
+
+                                                <h6 class="card-subtitle text-muted">
+                                                        <i class="bi bi-envelope"></i> @customer.Email &nbsp;|&nbsp;
+                                                        <i class="bi bi-telephone"></i> @customer.PhoneNumber
+                                                </h6>
+                                        </div>
+
+                                        <div class="text-end">
+                                                <span class="badge bg-success mb-2">@customer.LoyaltyLevel</span><br />
+                                                <button class="btn btn-primary btn-sm" 
+                                                        @onclick:stopPropagation="true" 
+                                                        @onclick="() => GoToCustomerDetails(customer)">
+                                                        Book Appt
+                                                </button>
+                                        </div>
+                                </div>
+                        </div>
+                </div>
+        </ItemTemplate>
+</SearchableDataList>
