@@ -42,7 +42,7 @@ namespace Domain.Entities.People
                 /// <summary>
                 /// Genders the customer explicitly excludes for treatments.
                 /// </summary>
-                public List<Gender> UnwantedGenders = new List<Gender>();
+                public List<Gender> UnwantedGenders { get; init; } = new List<Gender>();
 
                 /// <summary>
                 /// Membership status in 'Sygeforsikringen "danmark"'.
@@ -59,6 +59,7 @@ namespace Domain.Entities.People
                         bool sygsikringDanmarkMember,
                         PersonDetails details) : base(details: details)
                 {
+                        ArgumentNullException.ThrowIfNull(argument: id, paramName: nameof(id));
                         this.Id = id;
                         this.PersonalNote = personalNote;
                         this.ImportantNote = importantNote;
