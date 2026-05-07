@@ -1,0 +1,120 @@
+@page "/customers/{Id:guid}"
+@rendermode InteractiveWebAssembly
+
+@using Facade.Customers
+@using UI.Client.Components
+@using Facade.Common.Dtos
+@using UI.Client.Components.EnumDropdown
+
+
+@if (Model == null) 
+{
+    <div class="d-flex justify-content-center mt-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container mt-4 mb-5">
+        <GenericEditForm TItem="CustomerDetailsDto"
+                         Model="Model"
+                         Title="@($"Edit Customer: {Model.GreetingName}")"
+                         OnSave="SaveChangesAsync"
+                         OnCancel="GoBack">
+            <FormFields Context="editModel">
+                <div class="row g-3">
+                    
+                    @* --- SECTION 1: IDENTITY --- *@
+                    <div class="col-12 border-bottom pb-2 mt-4">
+                        <h5 class="text-primary mb-0">Identity & Personal Info</h5>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Juridisk Fornavn<span class="text-danger">*</span></label>
+                        <InputText @bind-Value="editModel.LegalFirstName" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Juridisk Efternavn <span class="text-danger">*</span></label>
+                        <InputText @bind-Value="editModel.LegalLastName" class="form-control" />
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <label class="form-label">Kaldenavn</label>
+                        <InputText @bind-Value="editModel.PreferredFirstName" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Foretrukket Efternavn</label>
+                        <InputText @bind-Value="editModel.PreferredLastName" class="form-control" />
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Pronouns</label>
+                        <InputText @bind-Value="editModel.Pronouns" class="form-control" placeholder="e.g., She/Her" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Gender</label>
+                        @* Using our generic EnumDropdown *@
+                        <EnumDropdown TEnum="GenderDto" @bind-Value="editModel.Gender" />
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Date of Birth</label>
+                        <InputDate @bind-Value="editModel.DateOfBirth" class="form-control" />
+                    </div>
+
+
+                    @* --- SECTION 2: CONTACT & STATUS --- *@
+                    <div class="col-12 border-bottom pb-2 mt-4">
+                        <h5 class="text-primary mb-0">Contact & Status</h5>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Phone Number</label>
+                        <InputText @bind-Value="editModel.PhoneNumber" class="form-control" />
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Email Address</label>
+                        <InputText @bind-Value="editModel.Email" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Loyalty Level</label>
+                        @* Read-only because the system calculates this automatically based on history *@
+                        <input type="text" class="form-control bg-light" value="@editModel.LoyaltyLevel" readonly disabled />
+                        <small class="text-muted">Calculated based on 12-month purchase history.</small>
+                    </div>
+                    
+                    <div class="col-md-6 d-flex align-items-center mt-4">
+                        <div class="form-check form-switch fs-5">
+                            <InputCheckbox @bind-Value="editModel.SygsikringDanmarkMember" class="form-check-input" id="danmarkCheck" />
+                            <label class="form-check-label fs-6 ms-2" for="danmarkCheck">
+                                Member of Sygeforsikringen "danmark"
+                            </label>
+                        </div>
+                    </div>
+
+
+                    @* --- SECTION 3: NOTES & PREFERENCES --- *@
+                    <div class="col-12 border-bottom pb-2 mt-4">
+                        <h5 class="text-primary mb-0">Notes & Preferences</h5>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label text-danger fw-bold">
+                            <i class="bi bi-exclamation-triangle-fill"></i> Important Medical Notes (Allergies, alerts)
+                        </label>
+                        <InputTextArea @bind-Value="editModel.ImportantNote" class="form-control border-danger" rows="2" />
+                    </div>
+                    
+                    <div class="col-md-12">
+                        <label class="form-label">General / Personal Notes</label>
+                        <InputTextArea @bind-Value="editModel.PersonalNote" class="form-control" rows="3" />
+                    </div>
+
+                </div>
+            </FormFields>
+            
+        </GenericEditForm>
+    </div>
+}

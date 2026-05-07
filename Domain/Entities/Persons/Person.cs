@@ -56,7 +56,7 @@ namespace Domain.Entities.Persons
                 protected Person(PersonDetails details)
                 {
                         //Guard clauses
-                        if (details is null) throw new ArgumentNullException(nameof(details));
+                        ArgumentNullException.ThrowIfNull(argument: details, paramName: nameof(details));
 
                         if (string.IsNullOrWhiteSpace(details.LegalFirstName))
                         {
