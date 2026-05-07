@@ -1,3 +1,5 @@
+using Domain.Value_Objects;
+
 namespace Domain
 {
         public static class Config
@@ -9,15 +11,15 @@ namespace Domain
 
                 //Discounts:
                 //Bronze Discount:
-                public const decimal BRONZE_LOYALTY_MINIMUM_AMOUNT_PURCHASED = 3000m;
+                public static readonly Money BRONZE_LOYALTY_MINIMUM_AMOUNT_PURCHASED = new Money(value: 3000m, currency: Enums.Currency.DKK);
                 public const decimal BRONZE_LOYALTY_DISCOUNT_MULTIPLIER = 0.95m;
 
                 //Silver Discount:
-                public const decimal SILVER_LOYALTY_MINIMUM_AMOUNT_PURCHASED = 10001m;
+                public static readonly Money SILVER_LOYALTY_MINIMUM_AMOUNT_PURCHASED = new Money(value: 10001m, currency: Enums.Currency.DKK);
                 public const decimal SILVER_LOYALTY_DISCOUNT_MULTIPLIER = 0.90m;
 
                 //Gold Discount:
-                public const decimal GOLD_LOYALTY_MINIMUM_AMOUNT_PURCHASED = 25001m;
+                public static readonly Money GOLD_LOYALTY_MINIMUM_AMOUNT_PURCHASED = new Money(value: 25001m, currency: Enums.Currency.DKK);
                 public const decimal GOLD_LOYALTY_DISCOUNT_MULTIPLIER = 0.85m;
 
                 //Birthmonth Discount:
