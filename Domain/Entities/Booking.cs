@@ -42,13 +42,16 @@ namespace Domain.Entities
 
                 public DateTime CreatedAt { get; private set; }
 
+                public Money? Paid { get; private set; }
+
                 public Booking(BookingId id,
                                 ClinicId clinic,
                                 PractitionerId practitioner,
                                 TreatmentId treatment,
                                 RoomId room,
                                 TimeSlot timeslot,
-                                DateTime? createdAt = null)
+                                DateTime? createdAt = null,
+                                Money? paid = null)
 
                 {
                         ArgumentNullException.ThrowIfNull(argument: id, paramName: nameof(id));
@@ -71,6 +74,7 @@ namespace Domain.Entities
                         this.RoomId = room;
                         this.Timeslot = timeslot;
                         this.CreatedAt = createdAt.Value;
+                        this.Paid = paid;
 
                 }
         }
