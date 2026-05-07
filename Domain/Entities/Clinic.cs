@@ -55,7 +55,7 @@ namespace Domain.Entities
                         PhoneNumber phoneNumber,
                         EmailAddress email)
                 {
-                        if (name is null) throw new ArgumentNullException(paramName: nameof(name));
+                        ArgumentNullException.ThrowIfNull(argument: name, paramName: nameof(name));
 
                         if (string.IsNullOrWhiteSpace(value: name))
                                 throw new ArgumentException(message: "Name cannot be empty or whitespace.", paramName: nameof(name));
@@ -65,6 +65,7 @@ namespace Domain.Entities
                         ArgumentNullException.ThrowIfNull(argument: name, paramName: nameof(name));
                         ArgumentNullException.ThrowIfNull(argument: address, paramName: nameof(address));
                         ArgumentNullException.ThrowIfNull(argument: phoneNumber, paramName: nameof(phoneNumber));
+                        ArgumentNullException.ThrowIfNull(argument: email, paramName: nameof(email));
 
                         this.Id = id;
                         this.Name = name;
