@@ -15,13 +15,6 @@ namespace Facade.Customers
                         this._customerRepository = customerRepository;
                 }
 
-                public async Task<IReadOnlyList<CustomerSummaryDto>> SearchCustomerAsync(string searchTherm)
-                {
-                        if (string.IsNullOrWhiteSpace(value: searchTherm))
-                        {
-                                throw new ArgumentException(message: "Search term cannot be null or whitespace.", paramName: nameof(searchTherm));
-                        }
-                }
 
         }
 }
