@@ -7,7 +7,7 @@ using Domain.Value_Objects.Ids;
 namespace Domain.Entities.People
 {
         /// <inheritdoc />
-        public abstract class Customer : Person
+        public class Customer : Person
         {
                 /// <summary>
                 /// Unique customer identifier.
@@ -52,6 +52,7 @@ namespace Domain.Entities.People
 
                 public Customer(
                         CustomerId id,
+                        LoyalityLevel loyal,
                         string? personalNote,
                         string? importantNote,
                         Guid? preferredPratitionerId,
@@ -60,6 +61,7 @@ namespace Domain.Entities.People
                         PersonDetails details) : base(details: details)
                 {
                         this.Id = id;
+                        this.Loyality = LoyalityLevel.None;
                         this.PersonalNote = personalNote;
                         this.ImportantNote = importantNote;
                         this.PreferredPratitionerId = preferredPratitionerId;

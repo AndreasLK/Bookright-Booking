@@ -5,4 +5,5 @@
   <Project Path="Infrastructure/Infrastructure.csproj" Id="f9414b13-7389-475b-ae27-d965b3614357" />
   <Project Path="UI/UI.Client/UI.Client.csproj" Id="5799763f-24cc-4ea9-9fc9-e6ffd6c5a70c" />
   <Project Path="UI/UI/UI.csproj" Id="273fb1fd-72e8-4a1b-878e-1724cb829319" />
+  <Project Path="UseCase/UseCase.csproj" Id="44aa8bb0-13c1-40af-894f-30c4336d5324" />
 </Solution>

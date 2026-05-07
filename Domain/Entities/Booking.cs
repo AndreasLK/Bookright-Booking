@@ -59,3 +59,4 @@ namespace Domain.Entities
                         }
                 }
         }
+}
