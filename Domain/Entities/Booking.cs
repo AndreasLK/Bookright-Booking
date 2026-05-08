@@ -1,4 +1,4 @@
-using Domain.Entities.People;
+
 using Domain.Entities.Persons;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
@@ -17,6 +17,8 @@ namespace Domain.Entities
                 /// Unique booking identifier.
                 /// </summary>
                 public BookingId Id { get; private set; }
+
+                public CustomerId CustomerId { get; private set; }
 
                 public RoomId RoomId { get; private set; }
 
@@ -49,6 +51,7 @@ namespace Domain.Entities
                                 PractitionerId practitioner,
                                 TreatmentId treatment,
                                 RoomId room,
+                                CustomerId customer,
                                 TimeSlot timeslot,
                                 DateTime? createdAt = null,
                                 Money? paid = null)
