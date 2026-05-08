@@ -11,6 +11,7 @@ namespace Domain.Enums
                 Thursday,
                 Friday,
                 Saturday,
-                Sunday
+                Sunday,
+                Holiday
         }
 }

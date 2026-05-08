@@ -1,4 +1,5 @@
 using Domain.Entities.People;
+using Domain.Entities.Persons;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 using System;
@@ -16,6 +17,8 @@ namespace Domain.Entities
                 /// Unique booking identifier.
                 /// </summary>
                 public BookingId Id { get; private set; }
+
+                public RoomId RoomId { get; private set; }
 
                 /// <summary>
                 /// Associated clinic identifier.
@@ -37,26 +40,42 @@ namespace Domain.Entities
                 /// </summary>
                 public TimeSlot Timeslot { get; private set; }
 
+                public DateTime CreatedAt { get; private set; }
+
+                public Money? Paid { get; private set; }
+
                 public Booking(BookingId id,
                                 ClinicId clinic,
                                 PractitionerId practitioner,
                                 TreatmentId treatment,
-                                TimeSlot timeslot)
+                                RoomId room,
+                                TimeSlot timeslot,
+                                DateTime? createdAt = null,
+                                Money? paid = null)
 
                 {
-                        if (id == null)
-                        {
-                                throw new ArgumentException(
-                                message: "ID kan ikke være tomt")
-                                {
+                        ArgumentNullException.ThrowIfNull(argument: id, paramName: nameof(id));
+                        ArgumentNullException.ThrowIfNull(argument: clinic, paramName: nameof(clinic));
+                        ArgumentNullException.ThrowIfNull(argument: practitioner, paramName: nameof(practitioner));
+                        ArgumentNullException.ThrowIfNull(argument: treatment, paramName: nameof(treatment));
+                        ArgumentNullException.ThrowIfNull(argument: room, paramName: nameof(room));
+                        ArgumentNullException.ThrowIfNull(argument: timeslot, paramName: nameof(timeslot));
 
-                                };
-                                this.Id = id;
-                                this.ClinicId = clinic;
-                                this.PractitionerId = practitioner;
-                                this.TreatmentId = treatment;
-                                this.Timeslot = timeslot;
+
+                        if (createdAt is null)
+                        {
+                                createdAt = DateTime.Now;
                         }
+
+                        this.Id = id;
+                        this.PractitionerId = practitioner;
+                        this.TreatmentId = treatment;
+                        this.ClinicId = clinic;
+                        this.RoomId = room;
+                        this.Timeslot = timeslot;
+                        this.CreatedAt = createdAt.Value;
+                        this.Paid = paid;
+
                 }
         }
 }
