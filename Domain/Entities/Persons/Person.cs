@@ -79,6 +79,28 @@ namespace Domain.Entities.Persons
                                         paramName: nameof(details.Pronouns)
                                         );
                         }
+                        if (details.DateOfBirth > DateOnly.FromDateTime(DateTime.UtcNow))
+                        {
+                                throw new ArgumentException(
+                                        message: "Date of birth can't be in the future",
+                                        paramName: nameof(details.DateOfBirth));
+                        }
+
+                        if (details.DateOfBirth < new DateOnly(1990, 1, 1))
+                        {
+                                throw new ArgumentException(
+                                message: "Date of Birth is unrealistic",
+                                paramName: nameof(details.DateOfBirth));
+                        }
+                        if (string.IsNullOrWhiteSpace(details.PhoneNumber))
+                        {
+                                throw new ArgumentException(
+                                message: "PhoneNumber can't be empty",
+                                paramName: nameof(details.PhoneNumber));
+                        }
+
+
+
 
                         this.LegalFirstName = details.LegalFirstName;
                         this.LegalLastName = details.LegalLastName;

@@ -52,6 +52,7 @@ namespace Domain.Entities.People
 
                 public Customer(
                         CustomerId id,
+                        LoyalityLevel loyal,
                         string? personalNote,
                         string? importantNote,
                         Guid? preferredPratitionerId,
@@ -61,6 +62,7 @@ namespace Domain.Entities.People
                 {
                         ArgumentNullException.ThrowIfNull(argument: id, paramName: nameof(id));
                         this.Id = id;
+                        this.Loyality = LoyalityLevel.None;
                         this.PersonalNote = personalNote;
                         this.ImportantNote = importantNote;
                         this.PreferredPratitionerId = preferredPratitionerId;
