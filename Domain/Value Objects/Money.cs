@@ -8,19 +8,19 @@ namespace Domain.Value_Objects
         public record Money
         {
                 /// <summary>The numerical value of the money. Must be zero or positive.</summary>
-                public decimal Amount { get; init; }
+                public decimal Value { get; init; }
 
-                /// <summary>The Currency associated with the Amount.</summary>
+                /// <summary>The Currency associated with the Value.</summary>
                 public Currency Currency { get; init; }
 
-                public Money(decimal amount, Currency currency)
+                public Money(decimal value, Currency currency)
                 {
-                        if (amount < 0)
+                        if (value < 0)
                         {
-                                throw new ArgumentException("Monetary amounts cannot be negative", nameof(amount));
+                                throw new ArgumentException("Monetary amounts cannot be negative", nameof(value));
                         }
 
-                        this.Amount = amount;
+                        this.Value = value;
                         this.Currency = currency;
                 }
         }
