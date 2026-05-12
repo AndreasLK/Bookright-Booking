@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Value_Objects;
+using Domain.Value_Objects.Ids;
 
 namespace Domain.Strategies
 {
@@ -16,9 +18,11 @@ namespace Domain.Strategies
                         Money fixedDiscount,
                         Money minimumPurchasedAmount,
                         ICurrencyConverter currencyConverter,
-                        string displayName) : base(
+                        string displayName,
+                        ManualResetEvent doneEvent) : base(
                                 currencyConverter: currencyConverter,
-                                displayName: displayName)
+                                displayName: displayName,
+                                doneEvent: doneEvent)
                 {
                         ArgumentNullException.ThrowIfNull(argument: fixedDiscount, paramName: nameof(fixedDiscount));
                         ArgumentNullException.ThrowIfNull(argument: minimumPurchasedAmount, paramName: nameof(minimumPurchasedAmount));
@@ -29,7 +33,7 @@ namespace Domain.Strategies
 
 
 
-                protected override Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice)
+                protected override Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice, TreatmentId treatmentId, Month customerBirthMonth, List<DateTime> timesUsedCampaign)
 
                 {
                         Money[] currencyConversionResult = this.CurrencyConverter.ConvertToSame( //NOT DRY, FIX LATER TODO: Refactor to avoid code duplication
