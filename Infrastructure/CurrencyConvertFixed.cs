@@ -28,7 +28,11 @@ namespace Infrastructure
 
                 public Money[] ConvertToSame(Money[] values, Currency targetCurrency)
                 {
-                        throw new NotImplementedException();
+                        if (values is null || values.Length == 0) return Array.Empty<Money>();
+
+                        return values
+                                .Select(money => this.Convert(money.Value, money.Currency, targetCurrency))
+                                .ToArray();
                 }
         }
 }
