@@ -8,12 +8,14 @@ namespace Domain.Specifications
         {
                 private readonly CustomerId _customerId;
                 private readonly DateTime _sinceDate;
+                private readonly DateTime _untilDate;
 
-                public PaidBookingsByCustomerSpecification(CustomerId customerId, DateTime sinceDate)
+                public PaidBookingsByCustomerSpecification(CustomerId customerId, DateTime bookingsAfter, DateTime bookingsBefore)
                 {
                         ArgumentNullException.ThrowIfNull(argument: customerId, nameof(customerId));
                         this._customerId = customerId;
-                        this._sinceDate = sinceDate;
+                        this._untilDate = bookingsBefore;
+                        this._sinceDate = bookingsAfter;
                 }
 
                 public override Expression<Func<Booking, bool>> ToExpression()
@@ -21,7 +23,8 @@ namespace Domain.Specifications
                         return booking =>
                         booking.CustomerId == this._customerId &&
                         booking.Paid != null &&
-                        booking.Timeslot.StartDateTime >= this._sinceDate;
+                        booking.Timeslot.StartDateTime >= this._sinceDate &&
+                        booking.Timeslot.EndDateTime <= this._untilDate;
                 }
 
 
