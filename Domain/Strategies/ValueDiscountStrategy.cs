@@ -18,11 +18,9 @@ namespace Domain.Strategies
                         Money fixedDiscount,
                         Money minimumPurchasedAmount,
                         ICurrencyConverter currencyConverter,
-                        string displayName,
-                        ManualResetEvent doneEvent) : base(
+                        string displayName) : base(
                                 currencyConverter: currencyConverter,
-                                displayName: displayName,
-                                doneEvent: doneEvent)
+                                displayName: displayName)
                 {
                         ArgumentNullException.ThrowIfNull(argument: fixedDiscount, paramName: nameof(fixedDiscount));
                         ArgumentNullException.ThrowIfNull(argument: minimumPurchasedAmount, paramName: nameof(minimumPurchasedAmount));
@@ -33,7 +31,7 @@ namespace Domain.Strategies
 
 
 
-                protected override Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice, TreatmentId treatmentId, Month customerBirthMonth, List<DateTime> timesUsedCampaign)
+                protected override Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice, TreatmentId treatmentId, Month? customerBirthMonth, List<DateTime> timesUsedCampaign)
 
                 {
                         Money[] currencyConversionResult = this.CurrencyConverter.ConvertToSame( //NOT DRY, FIX LATER TODO: Refactor to avoid code duplication

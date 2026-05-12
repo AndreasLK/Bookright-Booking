@@ -12,7 +12,7 @@ namespace Domain.Strategies
         {
                 public decimal DiscountMultiplier { get; private set; }
                 public Money MinimumPurchasedAmount { get; private set; }
-                protected ProcentageDiscountStrategy(decimal discountMultiplier, Money minimumPurchasedAmount, ICurrencyConverter currencyConverter, string displayName, ManualResetEvent doneEvent) : base(currencyConverter, displayName, doneEvent: doneEvent)
+                protected ProcentageDiscountStrategy(decimal discountMultiplier, Money minimumPurchasedAmount, ICurrencyConverter currencyConverter, string displayName) : base(currencyConverter, displayName)
                 {
                         ArgumentNullException.ThrowIfNull(argument: minimumPurchasedAmount, paramName: nameof(minimumPurchasedAmount));
 
@@ -20,7 +20,7 @@ namespace Domain.Strategies
                         this.MinimumPurchasedAmount = minimumPurchasedAmount;
                 }
 
-                protected override Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice, TreatmentId treatmentId, Month customerBirthMonth, List<DateTime> timesUsedCampaign)
+                protected override Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice, TreatmentId treatmentId, Month? customerBirthMonth, List<DateTime> timesUsedCampaign)
                 {
                         //Converting both totalPurchase and currentPurchasePrice to the same currency as MinimumPurchasedAmount for comparison
 

@@ -11,18 +11,14 @@ namespace Domain.Strategies
         {
                 protected ICurrencyConverter CurrencyConverter { get; private set; }
                 public string DisplayName { get; private set; }
-
-                private ManualResetEvent _doneEvent;
-                public DiscountStrategy(ICurrencyConverter currencyConverter, string displayName, ManualResetEvent doneEvent)
+                public DiscountStrategy(ICurrencyConverter currencyConverter, string displayName)
                 {
                         ArgumentNullException.ThrowIfNull(argument: currencyConverter, paramName: nameof(currencyConverter));
                         ArgumentNullException.ThrowIfNull(argument: displayName, paramName: nameof(displayName));
-                        ArgumentNullException.ThrowIfNull(argument: doneEvent, nameof(doneEvent));
                         this.CurrencyConverter = currencyConverter;
                         this.DisplayName = displayName;
-                        this._doneEvent = doneEvent;
                 }
-                public Money GetFinalPrice(Money totalPurchase, Money currentPurchasePrice, TreatmentId treatmentId, Month customerBirthMonth, List<DateTime> timesUsedCampaign)
+                public Money GetFinalPrice(Money totalPurchase, Money currentPurchasePrice, TreatmentId treatmentId, Month? customerBirthMonth, List<DateTime> timesUsedCampaign)
                 {
                         ArgumentNullException.ThrowIfNull(argument: totalPurchase, paramName: nameof(totalPurchase));
                         ArgumentNullException.ThrowIfNull(argument: currentPurchasePrice, paramName: nameof(currentPurchasePrice));
@@ -36,18 +32,15 @@ namespace Domain.Strategies
                         totalPurchase = currencyConversionResult[0];
                         currentPurchasePrice = currencyConversionResult[1];
 
-                        Money result = this.CalculatePrice(
+                        return this.CalculatePrice(
                                 totalPurchase: totalPurchase,
                                 currentPurchasePrice: currentPurchasePrice,
                                 treatmentId: treatmentId,
                                 customerBirthMonth: customerBirthMonth,
                                 timesUsedCampaign: timesUsedCampaign);
 
-                        this._doneEvent.Set();
-                        return result;
-
                 }
-                protected abstract Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice, TreatmentId treatmentId, Month customerBirthMonth, List<DateTime> timesUsedCampaign);
+                protected abstract Money CalculatePrice(Money totalPurchase, Money currentPurchasePrice, TreatmentId treatmentId, Month? customerBirthMonth, List<DateTime> timesUsedCampaign);
 
 
 
