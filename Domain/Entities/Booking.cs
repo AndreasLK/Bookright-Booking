@@ -46,6 +46,8 @@ namespace Domain.Entities
 
                 public Money? Paid { get; private set; }
 
+                public CampaignId? AppliedCampaign { get; private set; }
+
                 public Booking(BookingId id,
                                 ClinicId clinic,
                                 PractitionerId practitioner,
@@ -54,7 +56,8 @@ namespace Domain.Entities
                                 CustomerId customer,
                                 TimeSlot timeslot,
                                 DateTime? createdAt = null,
-                                Money? paid = null)
+                                Money? paid = null,
+                                CampaignId? appliedCampaign = null)
 
                 {
                         ArgumentNullException.ThrowIfNull(argument: id, paramName: nameof(id));
@@ -78,6 +81,7 @@ namespace Domain.Entities
                         this.Timeslot = timeslot;
                         this.CreatedAt = createdAt.Value;
                         this.Paid = paid;
+                        this.AppliedCampaign = appliedCampaign;
 
                 }
         }
