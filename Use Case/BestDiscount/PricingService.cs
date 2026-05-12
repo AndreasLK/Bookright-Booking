@@ -21,7 +21,7 @@ namespace Use_Case.BestDiscount
                 public async Task<Money> GetBestPriceAsync(CustomerId customerId, BookingId bookingId)
                 {
                         DiscountContext context = await this._discountContextFactory.CreateAsync(customerId, bookingId);
-                        Money discountedPrice = this._discountService.CalculateBestDiscount(context);
+                        Money discountedPrice = this._discountService.GetBestDiscount(context: context);
 
 
                         return discountedPrice;
