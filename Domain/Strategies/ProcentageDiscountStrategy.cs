@@ -10,7 +10,7 @@ namespace Domain.Strategies
         {
                 public decimal DiscountMultiplier { get; private set; }
                 public Money MinimumPurchasedAmount { get; private set; }
-                protected ProcentageDiscountStrategy(decimal discountMultiplier, Money minimumPurchasedAmount, ICurrencyConverter currencyConverter) : base(currencyConverter)
+                protected ProcentageDiscountStrategy(decimal discountMultiplier, Money minimumPurchasedAmount, ICurrencyConverter currencyConverter, string displayName) : base(currencyConverter, displayName)
                 {
                         ArgumentNullException.ThrowIfNull(argument: minimumPurchasedAmount, paramName: nameof(minimumPurchasedAmount));
 

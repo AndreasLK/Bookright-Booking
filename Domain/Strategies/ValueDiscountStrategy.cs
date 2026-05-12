@@ -12,7 +12,13 @@ namespace Domain.Strategies
 
                 public Money MinimumPurchasedAmount { get; private set; }
 
-                protected ValueDiscountStrategy(Money fixedDiscount, Money minimumPurchasedAmount, ICurrencyConverter currencyConverter) : base(currencyConverter)
+                protected ValueDiscountStrategy(
+                        Money fixedDiscount,
+                        Money minimumPurchasedAmount,
+                        ICurrencyConverter currencyConverter,
+                        string displayName) : base(
+                                currencyConverter: currencyConverter,
+                                displayName: displayName)
                 {
                         ArgumentNullException.ThrowIfNull(argument: fixedDiscount, paramName: nameof(fixedDiscount));
                         ArgumentNullException.ThrowIfNull(argument: minimumPurchasedAmount, paramName: nameof(minimumPurchasedAmount));
