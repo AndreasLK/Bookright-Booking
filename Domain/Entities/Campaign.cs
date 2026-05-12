@@ -67,11 +67,5 @@ namespace Domain.Entities
                         this.Strategy = strategy;
                         this.Cooldown = cooldown;
                 }
-
-                public bool IsEligible(CampaignUsage )
-
-
-
-
         }
 }
