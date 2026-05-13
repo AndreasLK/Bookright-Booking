@@ -10,6 +10,7 @@ namespace Domain.Interfaces
         {
                 public abstract Money Convert(decimal amount, Currency fromCurrency, Currency toCurrency);
 
+                public abstract Money Convert(Money money, Currency toCurrency);
 
                 public abstract Money[] ConvertToSame(Money[] values, Currency targetCurrency);
         }
