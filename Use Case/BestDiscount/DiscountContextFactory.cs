@@ -9,7 +9,6 @@ using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
-using Use_Case.DiscountCalculator;
 
 namespace Use_Case.BestDiscount
 {
@@ -72,12 +71,12 @@ namespace Use_Case.BestDiscount
                         Dictionary<CampaignId, List<DateTime>> campaignUsage = result.Item2;
 
                         return new DiscountContext(
-                                BasePrice: currentBookingPrice,
-                                TreatmentId: currentBooking.TreatmentId,
-                                TotalHistoricalSpend: totalHistoricalSpend,
-                                ActiveCampaigns: activeCampaigns.ToList(),
-                                TimeUsedEligbleCampaigns: campaignUsage,
-                                CustomerBirthMonth: customerBirthMonth
+                                basePrice: currentBookingPrice,
+                                treatmentId: currentBooking.TreatmentId,
+                                totalHistoricalSpend: totalHistoricalSpend,
+                                activeCampaigns: activeCampaigns.ToList(),
+                                timeUsedEligbleCampaigns: campaignUsage,
+                                customerBirthMonth: customerBirthMonth
                                 );
                 }
 
