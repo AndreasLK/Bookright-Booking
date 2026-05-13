@@ -62,6 +62,15 @@ dotnet_naming_symbols.static_readonly_symbols.required_modifiers = static, reado
 dotnet_naming_style.screaming_snake_style.capitalization = all_upper
 dotnet_naming_style.screaming_snake_style.word_separator = _
 
+# 6.5 Private Constants Explicit Override
+dotnet_naming_rule.private_constants_rule.severity = error
+dotnet_naming_rule.private_constants_rule.symbols = private_const_symbols
+dotnet_naming_rule.private_constants_rule.style = screaming_snake_style
+
+dotnet_naming_symbols.private_const_symbols.applicable_kinds = field
+dotnet_naming_symbols.private_const_symbols.applicable_accessibilities = private
+dotnet_naming_symbols.private_const_symbols.required_modifiers = const
+
 # 7. Async Methods (Suffix with Async)
 dotnet_naming_rule.async_methods_rule.severity = error
 dotnet_naming_rule.async_methods_rule.symbols = async_method_symbols
