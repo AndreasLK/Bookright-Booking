@@ -26,6 +26,11 @@ namespace Infrastructure
                         }
                 }
 
+                public Money Convert(Money money, Currency toCurrency)
+                {
+                        return this.Convert(money.Value, money.Currency, toCurrency);
+                }
+
                 public Money[] ConvertToSame(Money[] values, Currency targetCurrency)
                 {
                         if (values is null || values.Length == 0) return Array.Empty<Money>();
