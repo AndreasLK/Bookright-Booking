@@ -52,7 +52,6 @@ namespace Domain.Entities.People
 
                 public Customer(
                         CustomerId id,
-                        LoyalityLevel loyal,
                         string? personalNote,
                         string? importantNote,
                         Guid? preferredPratitionerId,
