@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Moq;
 using Moq.Protected;
 using Xunit;
@@ -26,10 +27,11 @@ namespace Tests.UseCase.BestDiscount
                         // Arrange
                         IBookingRepository? nullBookingRepository = null;
                         var mockTreatmentRepository = new Mock<ITreatmentRepository>();
+                        var mockCurrencyConverter = new Mock<ICurrencyConverter>();
 
                         // Act & Assert
                         var exception = Assert.Throws<ArgumentNullException>(() =>
-                            new DiscountService(nullBookingRepository!, mockTreatmentRepository.Object));
+                            new DiscountService(nullBookingRepository!, mockTreatmentRepository.Object, mockCurrencyConverter.Object));
 
                         Assert.Equal("bookingRepository", exception.ParamName);
                 }
@@ -44,12 +46,32 @@ namespace Tests.UseCase.BestDiscount
                         // Arrange
                         var mockBookingRepository = new Mock<IBookingRepository>();
                         ITreatmentRepository? nullTreatmentRepository = null;
+                        var mockCurrencyConverter = new Mock<ICurrencyConverter>();
 
                         // Act & Assert
                         var exception = Assert.Throws<ArgumentNullException>(() =>
-                            new DiscountService(mockBookingRepository.Object, nullTreatmentRepository!));
+                            new DiscountService(mockBookingRepository.Object, nullTreatmentRepository!, mockCurrencyConverter.Object));
 
                         Assert.Equal("treatmentRepository", exception.ParamName);
+                }
+
+                /// <summary>
+                /// Verifies that instantiating the DiscountService without a valid currency converter
+                /// correctly throws an ArgumentNullException to prevent invalid state.
+                /// </summary>
+                [Fact]
+                public void Constructor_WithNullCurrencyConverter_ThrowsArgumentNullException()
+                {
+                        // Arrange
+                        var mockBookingRepository = new Mock<IBookingRepository>();
+                        var mockTreatmentRepository = new Mock<ITreatmentRepository>();
+                        ICurrencyConverter? nullCurrencyConverter = null;
+
+                        // Act & Assert
+                        var exception = Assert.Throws<ArgumentNullException>(() =>
+                            new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object, nullCurrencyConverter!));
+
+                        Assert.Equal("currencyConverter", exception.ParamName);
                 }
 
                 /// <summary>
@@ -62,7 +84,8 @@ namespace Tests.UseCase.BestDiscount
                         // Arrange
                         var mockBookingRepository = new Mock<IBookingRepository>();
                         var mockTreatmentRepository = new Mock<ITreatmentRepository>();
-                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object);
+                        var mockCurrencyConverter = new Mock<ICurrencyConverter>();
+                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object, mockCurrencyConverter.Object);
 
                         DiscountContext? nullDiscountContext = null;
 
@@ -83,17 +106,18 @@ namespace Tests.UseCase.BestDiscount
                         // Arrange
                         var mockBookingRepository = new Mock<IBookingRepository>();
                         var mockTreatmentRepository = new Mock<ITreatmentRepository>();
-                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object);
+                        var mockCurrencyConverter = SetupMockCurrencyConverter();
+                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object, mockCurrencyConverter.Object);
 
                         var basePrice = new Money(100m, Currency.DKK);
 
                         var discountContext = new DiscountContext(
-                            BasePrice: basePrice,
-                            TreatmentId: new TreatmentId(Guid.NewGuid()),
-                            TotalHistoricalSpend: new Money(0m, Currency.DKK),
-                            ActiveCampaigns: new List<Campaign>(),
-                            TimeUsedEligbleCampaigns: new Dictionary<CampaignId, List<DateTime>>(),
-                            CustomerBirthMonth: Month.January
+                            basePrice,
+                            new TreatmentId(Guid.NewGuid()),
+                            new Money(0m, Currency.DKK),
+                            new List<Campaign>(),
+                            new Dictionary<CampaignId, List<DateTime>>(),
+                            Month.January
                         );
 
                         // Act
@@ -114,9 +138,8 @@ namespace Tests.UseCase.BestDiscount
                         // Arrange
                         var mockBookingRepository = new Mock<IBookingRepository>();
                         var mockTreatmentRepository = new Mock<ITreatmentRepository>();
-                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object);
-
                         var mockCurrencyConverter = SetupMockCurrencyConverter();
+                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object, mockCurrencyConverter.Object);
 
                         var basePrice = new Money(200m, Currency.DKK);
                         var expectedLowestPrice = new Money(150m, Currency.DKK);
@@ -128,12 +151,12 @@ namespace Tests.UseCase.BestDiscount
                         var campaignTwo = CreateTestCampaign(mockStrategyTwo.Object);
 
                         var discountContext = new DiscountContext(
-                            BasePrice: basePrice,
-                            TreatmentId: new TreatmentId(Guid.NewGuid()),
-                            TotalHistoricalSpend: new Money(500m, Currency.DKK),
-                            ActiveCampaigns: new List<Campaign> { campaignOne, campaignTwo },
-                            TimeUsedEligbleCampaigns: new Dictionary<CampaignId, List<DateTime>>(),
-                            CustomerBirthMonth: Month.June
+                            basePrice,
+                            new TreatmentId(Guid.NewGuid()),
+                            new Money(500m, Currency.DKK),
+                            new List<Campaign> { campaignOne, campaignTwo },
+                            new Dictionary<CampaignId, List<DateTime>>(),
+                            Month.June
                         );
 
                         // Act
@@ -154,9 +177,8 @@ namespace Tests.UseCase.BestDiscount
                         // Arrange
                         var mockBookingRepository = new Mock<IBookingRepository>();
                         var mockTreatmentRepository = new Mock<ITreatmentRepository>();
-                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object);
-
                         var mockCurrencyConverter = SetupMockCurrencyConverter();
+                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object, mockCurrencyConverter.Object);
 
                         var basePrice = new Money(100m, Currency.DKK);
                         var worseDiscountPrice = new Money(150m, Currency.DKK);
@@ -165,12 +187,12 @@ namespace Tests.UseCase.BestDiscount
                         var activeCampaign = CreateTestCampaign(mockStrategy.Object);
 
                         var discountContext = new DiscountContext(
-                            BasePrice: basePrice,
-                            TreatmentId: new TreatmentId(Guid.NewGuid()),
-                            TotalHistoricalSpend: new Money(200m, Currency.DKK),
-                            ActiveCampaigns: new List<Campaign> { activeCampaign },
-                            TimeUsedEligbleCampaigns: new Dictionary<CampaignId, List<DateTime>>(),
-                            CustomerBirthMonth: Month.August
+                            basePrice,
+                            new TreatmentId(Guid.NewGuid()),
+                            new Money(200m, Currency.DKK),
+                            new List<Campaign> { activeCampaign },
+                            new Dictionary<CampaignId, List<DateTime>>(),
+                            Month.August
                         );
 
                         // Act
@@ -191,9 +213,9 @@ namespace Tests.UseCase.BestDiscount
                         // Arrange
                         var mockBookingRepository = new Mock<IBookingRepository>();
                         var mockTreatmentRepository = new Mock<ITreatmentRepository>();
-                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object);
-
                         var mockCurrencyConverter = SetupMockCurrencyConverter();
+                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object, mockCurrencyConverter.Object);
+
                         var mockStrategy = SetupMockDiscountStrategy(mockCurrencyConverter, new Money(80m, Currency.DKK));
 
                         var targetCampaignId = new CampaignId(Guid.NewGuid());
@@ -202,17 +224,17 @@ namespace Tests.UseCase.BestDiscount
                         var activeCampaign = CreateTestCampaign(mockStrategy.Object, targetCampaignId);
 
                         var usageDictionary = new Dictionary<CampaignId, List<DateTime>>
-            {
-                { targetCampaignId, expectedUsageHistory }
-            };
+                        {
+                            { targetCampaignId, expectedUsageHistory }
+                        };
 
                         var discountContext = new DiscountContext(
-                            BasePrice: new Money(100m, Currency.DKK),
-                            TreatmentId: new TreatmentId(Guid.NewGuid()),
-                            TotalHistoricalSpend: new Money(1000m, Currency.DKK),
-                            ActiveCampaigns: new List<Campaign> { activeCampaign },
-                            TimeUsedEligbleCampaigns: usageDictionary,
-                            CustomerBirthMonth: Month.December
+                            new Money(100m, Currency.DKK),
+                            new TreatmentId(Guid.NewGuid()),
+                            new Money(1000m, Currency.DKK),
+                            new List<Campaign> { activeCampaign },
+                            usageDictionary,
+                            Month.December
                         );
 
                         // Act
@@ -226,7 +248,7 @@ namespace Tests.UseCase.BestDiscount
                             ItExpr.IsAny<Money>(),
                             ItExpr.IsAny<TreatmentId>(),
                             ItExpr.IsAny<Month?>(),
-                            ItExpr.Is<List<DateTime>>(list => list == expectedUsageHistory) // Validates the exact usage list was passed
+                            ItExpr.Is<List<DateTime>>(list => list == expectedUsageHistory)
                         );
                 }
 
@@ -240,20 +262,20 @@ namespace Tests.UseCase.BestDiscount
                         // Arrange
                         var mockBookingRepository = new Mock<IBookingRepository>();
                         var mockTreatmentRepository = new Mock<ITreatmentRepository>();
-                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object);
-
                         var mockCurrencyConverter = SetupMockCurrencyConverter();
+                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object, mockCurrencyConverter.Object);
+
                         var mockStrategy = SetupMockDiscountStrategy(mockCurrencyConverter, new Money(50m, Currency.DKK));
 
                         var activeCampaign = CreateTestCampaign(mockStrategy.Object);
 
                         var discountContext = new DiscountContext(
-                            BasePrice: new Money(100m, Currency.DKK),
-                            TreatmentId: new TreatmentId(Guid.NewGuid()),
-                            TotalHistoricalSpend: new Money(0m, Currency.DKK),
-                            ActiveCampaigns: new List<Campaign> { activeCampaign },
-                            TimeUsedEligbleCampaigns: new Dictionary<CampaignId, List<DateTime>>(), // Empty dictionary
-                            CustomerBirthMonth: null
+                            new Money(100m, Currency.DKK),
+                            new TreatmentId(Guid.NewGuid()),
+                            new Money(0m, Currency.DKK),
+                            new List<Campaign> { activeCampaign },
+                            new Dictionary<CampaignId, List<DateTime>>(), // Empty dictionary
+                            null
                         );
 
                         // Act
@@ -267,10 +289,9 @@ namespace Tests.UseCase.BestDiscount
                             ItExpr.IsAny<Money>(),
                             ItExpr.IsAny<TreatmentId>(),
                             ItExpr.IsAny<Month?>(),
-                            ItExpr.Is<List<DateTime>>(list => list != null && list.Count == 0) // Validates an empty list was passed
+                            ItExpr.Is<List<DateTime>>(list => list != null && list.Count == 0)
                         );
                 }
-
 
                 /// <summary>
                 /// EXPOSES A BUG: Verifies that if different campaigns return different currencies, 
@@ -283,8 +304,8 @@ namespace Tests.UseCase.BestDiscount
                         // Arrange
                         var mockBookingRepository = new Mock<IBookingRepository>();
                         var mockTreatmentRepository = new Mock<ITreatmentRepository>();
-                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object);
                         var mockCurrencyConverter = SetupMockCurrencyConverter();
+                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object, mockCurrencyConverter.Object);
 
                         var basePrice = new Money(200m, Currency.DKK);
 
@@ -300,20 +321,18 @@ namespace Tests.UseCase.BestDiscount
                         var campaignDkk = CreateTestCampaign(mockStrategyDkk.Object);
 
                         var discountContext = new DiscountContext(
-                            BasePrice: basePrice,
-                            TreatmentId: new TreatmentId(Guid.NewGuid()),
-                            TotalHistoricalSpend: new Money(0m, Currency.DKK),
-                            ActiveCampaigns: new List<Campaign> { campaignEur, campaignDkk },
-                            TimeUsedEligbleCampaigns: new Dictionary<CampaignId, List<DateTime>>(),
-                            CustomerBirthMonth: null
+                            basePrice,
+                            new TreatmentId(Guid.NewGuid()),
+                            new Money(0m, Currency.DKK),
+                            new List<Campaign> { campaignEur, campaignDkk },
+                            new Dictionary<CampaignId, List<DateTime>>(),
+                            null
                         );
 
                         // Act
                         var resultPrice = systemUnderTest.GetBestDiscount(discountContext);
 
                         // Assert
-                        // THIS WILL FAIL. The code does OrderBy(money => money.Value). 
-                        // It will see 10 < 50 and return 10 EUR, even though 50 DKK is cheaper!
                         Assert.Equal(dkkPrice.Value, resultPrice.Value);
                         Assert.Equal(dkkPrice.Currency, resultPrice.Currency);
                 }
@@ -328,8 +347,8 @@ namespace Tests.UseCase.BestDiscount
                         // Arrange
                         var mockBookingRepository = new Mock<IBookingRepository>();
                         var mockTreatmentRepository = new Mock<ITreatmentRepository>();
-                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object);
                         var mockCurrencyConverter = SetupMockCurrencyConverter();
+                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object, mockCurrencyConverter.Object);
 
                         // Base price is 50 DKK
                         var basePrice = new Money(50m, Currency.DKK);
@@ -341,59 +360,48 @@ namespace Tests.UseCase.BestDiscount
                         var activeCampaign = CreateTestCampaign(mockStrategyEur.Object);
 
                         var discountContext = new DiscountContext(
-                            BasePrice: basePrice,
-                            TreatmentId: new TreatmentId(Guid.NewGuid()),
-                            TotalHistoricalSpend: new Money(0m, Currency.DKK),
-                            ActiveCampaigns: new List<Campaign> { activeCampaign },
-                            TimeUsedEligbleCampaigns: new Dictionary<CampaignId, List<DateTime>>(),
-                            CustomerBirthMonth: null
+                            basePrice,
+                            new TreatmentId(Guid.NewGuid()),
+                            new Money(0m, Currency.DKK),
+                            new List<Campaign> { activeCampaign },
+                            new Dictionary<CampaignId, List<DateTime>>(),
+                            null
                         );
 
                         // Act
                         var resultPrice = systemUnderTest.GetBestDiscount(discountContext);
 
                         // Assert
-                        // THIS WILL FAIL. The code compares "10 > 50" (false).
-                        // Because 10 is technically smaller than 50, it gives the customer the 10 EUR price, overcharging them!
                         Assert.Equal(basePrice.Value, resultPrice.Value);
                         Assert.Equal(basePrice.Currency, resultPrice.Currency);
                 }
 
                 /// <summary>
-                /// EXPOSES A BUG: Verifies that if the ActiveCampaigns list in the context is null,
-                /// the service handles it gracefully rather than crashing the Parallel.ForEach loop.
+                /// Proves that the DiscountContext strictly guards its borders. It is mathematically 
+                /// impossible to create a DiscountContext if the ActiveCampaigns list is null.
                 /// </summary>
                 [Fact]
-                public void GetBestDiscount_WithNullActiveCampaignsList_ThrowsExpectedExceptionOrHandlesGracefully()
+                public void DiscountContext_WithNullActiveCampaignsList_ThrowsArgumentNullException()
                 {
-                        // Arrange
-                        var mockBookingRepository = new Mock<IBookingRepository>();
-                        var mockTreatmentRepository = new Mock<ITreatmentRepository>();
-                        var systemUnderTest = new DiscountService(mockBookingRepository.Object, mockTreatmentRepository.Object);
-
-                        var discountContext = new DiscountContext(
-                            BasePrice: new Money(100m, Currency.DKK),
-                            TreatmentId: new TreatmentId(Guid.NewGuid()),
-                            TotalHistoricalSpend: new Money(0m, Currency.DKK),
-                            ActiveCampaigns: null!, // Intentionally forcing null
-                            TimeUsedEligbleCampaigns: new Dictionary<CampaignId, List<DateTime>>(),
-                            CustomerBirthMonth: null
-                        );
-
                         // Act & Assert
-                        // THIS WILL FAIL. Parallel.ForEach does not check if the source collection is null before executing.
-                        // It will throw an unhandled ArgumentNullException originating deep inside System.Threading.Tasks.
-                        var exception = Assert.Throws<ArgumentException>(() => systemUnderTest.GetBestDiscount(discountContext));
-                        Assert.Contains("ActiveCampaigns cannot be null", exception.Message);
+                        var exception = Assert.Throws<ArgumentNullException>(() =>
+                            new DiscountContext(
+                                new Money(100m, Currency.DKK),
+                                new TreatmentId(Guid.NewGuid()),
+                                new Money(0m, Currency.DKK),
+                                null!, // Forcing null to trigger the guard clause
+                                new Dictionary<CampaignId, List<DateTime>>(),
+                                null
+                            ));
+
+                        Assert.Equal("activeCampaigns", exception.ParamName);
                 }
-
-
 
                 private static Mock<ICurrencyConverter> SetupMockCurrencyConverter()
                 {
                         var mockCurrencyConverter = new Mock<ICurrencyConverter>();
 
-                        // 1. Set up the single Convert method to simulate the exact real business logic
+                        // 1. Set up the primary Convert method to simulate the exact real business logic
                         mockCurrencyConverter
                             .Setup(converter => converter.Convert(It.IsAny<decimal>(), It.IsAny<Currency>(), It.IsAny<Currency>()))
                             .Returns((decimal amount, Currency fromCurrency, Currency toCurrency) =>
@@ -416,8 +424,18 @@ namespace Tests.UseCase.BestDiscount
                                     }
                             });
 
-                        // 2. Set up the array conversion method
-                        // Note: The parameter order here matches the real CurrencyConvertFixed implementation.
+                        // 2. Set up the new overload (Money, Currency) to route to the primary method
+                        mockCurrencyConverter
+                            .Setup(converter => converter.Convert(It.IsAny<Money>(), It.IsAny<Currency>()))
+                            .Returns((Money money, Currency targetCurrency) =>
+                            {
+                                    if (money is null) throw new ArgumentNullException(nameof(money));
+
+                                    // Route the call through the primary mocked method above
+                                    return mockCurrencyConverter.Object.Convert(money.Value, money.Currency, targetCurrency);
+                            });
+
+                        // 3. Set up the array conversion method
                         mockCurrencyConverter
                             .Setup(converter => converter.ConvertToSame(It.IsAny<Money[]>(), It.IsAny<Currency>()))
                             .Returns((Money[] values, Currency targetCurrency) =>
@@ -427,11 +445,10 @@ namespace Tests.UseCase.BestDiscount
                                             return Array.Empty<Money>();
                                     }
 
-                                    // We call the mocked converter object inside the lambda to route the items 
-                                    // through the exact logic we just set up above, just like the real class does.
+                                    // Route each item through the overloaded mock method
                                     return values
-                    .Select(money => mockCurrencyConverter.Object.Convert(money.Value, money.Currency, targetCurrency))
-                    .ToArray();
+                                        .Select(money => mockCurrencyConverter.Object.Convert(money, targetCurrency))
+                                        .ToArray();
                             });
 
                         return mockCurrencyConverter;
@@ -461,13 +478,13 @@ namespace Tests.UseCase.BestDiscount
                 private static Campaign CreateTestCampaign(DiscountStrategy strategy, CampaignId? forcedId = null)
                 {
                         return new Campaign(
-                            id: forcedId ?? new CampaignId(Guid.NewGuid()),
-                            name: "Test Campaign",
-                            description: "Description for testing purposes",
-                            startDate: DateTime.UtcNow.AddDays(-10),
-                            endDate: DateTime.UtcNow.AddDays(10),
-                            strategy: strategy,
-                            cooldown: TimeSpan.FromDays(30)
+                            forcedId ?? new CampaignId(Guid.NewGuid()),
+                            "Test Campaign",
+                            "Description for testing purposes",
+                            DateTime.UtcNow.AddDays(-10),
+                            DateTime.UtcNow.AddDays(10),
+                            strategy,
+                            TimeSpan.FromDays(30)
                         );
                 }
         }
