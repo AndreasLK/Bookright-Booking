@@ -68,5 +68,20 @@ namespace Domain.Entities.People
                         this.PreferredGender = preferredGender;
                         this.SygsikringDanmarkMember = sygsikringDanmarkMember;
                 }
+
+                /// <summary>
+                /// Updates the customer's profile and core personal details.
+                /// </summary>
+                public void UpdateCustomerProfile(
+                        PersonDetails details,
+                        string? personalNote,
+                        string? importantNote,
+                        bool sygsikringDanmarkMember)
+                {
+                        this.UpdatePersonDetails(details: details);
+                        this.PersonalNote = personalNote;
+                        this.ImportantNote = importantNote;
+                        this.SygsikringDanmarkMember = sygsikringDanmarkMember;
+                }
         }
 }
