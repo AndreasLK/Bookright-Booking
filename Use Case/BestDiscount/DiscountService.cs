@@ -8,6 +8,10 @@ using Domain.Interfaces;
 
 namespace Use_Case.BestDiscount
 {
+        /// <summary>
+        /// Evaluates all active promotional campaigns concurrently to determine the 
+        /// lowest possible price for a booking.
+        /// </summary>
         public class DiscountService
         {
 
@@ -15,6 +19,13 @@ namespace Use_Case.BestDiscount
                 private readonly ITreatmentRepository _treatmentRepository;
                 private readonly ICurrencyConverter _currencyConverter;
 
+                /// <summary>
+                /// Initializes a new instance of the <see cref="DiscountService"/> class.
+                /// </summary>
+                /// <param name="bookingRepository">Repository for booking records.</param>
+                /// <param name="treatmentRepository">Repository for treatment pricing details.</param>
+                /// <param name="currencyConverter">Service to normalize diverse currencies for accurate price comparisons.</param>
+                /// <exception cref="ArgumentNullException">Thrown if any dependency is null.</exception>
                 public DiscountService(IBookingRepository bookingRepository, ITreatmentRepository treatmentRepository, ICurrencyConverter currencyConverter)
                 {
                         ArgumentNullException.ThrowIfNull(bookingRepository);
@@ -26,6 +37,12 @@ namespace Use_Case.BestDiscount
                         this._currencyConverter = currencyConverter;
                 }
 
+                /// <summary>
+                /// Calculates the absolute lowest price available by evaluating all active campaigns in parallel.
+                /// </summary>
+                /// <param name="context">Aggregated booking and customer data required for calculations.</param>
+                /// <returns>The most advantageous price, defaulting to the base price if no better discount exists.</returns>
+                /// <exception cref="ArgumentNullException">Thrown when <paramref name="context"/> is null.</exception>
                 public Money GetBestDiscount(DiscountContext context)
                 {
                         ArgumentNullException.ThrowIfNull(context);
