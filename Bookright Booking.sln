@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.6.11806.211 stable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bookright Booking", "Bookright Booking.csproj", "{8A06AB63-4A37-AAA9-62DC-F451CA96F5C7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8A06AB63-4A37-AAA9-62DC-F451CA96F5C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A06AB63-4A37-AAA9-62DC-F451CA96F5C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A06AB63-4A37-AAA9-62DC-F451CA96F5C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A06AB63-4A37-AAA9-62DC-F451CA96F5C7}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0C4A416F-791A-4AFD-9211-CB624F7C2AD9}
+	EndGlobalSection
+EndGlobal
