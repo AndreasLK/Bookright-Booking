@@ -1,10 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using Domain.Entities.People;
+using Domain.Entities.Persons;
 using Domain.Interfaces.Repositories;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
+using Domain.Specifications.Customers;
 
 namespace UseCase.Customers
 {
@@ -22,6 +23,16 @@ namespace UseCase.Customers
 
                         try
                         {
+                                var emailSpec = new CustomerByEmailSpecification(cmd.Email);
+                                var existing = await this._customers.FindAsync(emailSpec);
+                                if (existing.Any())
+                                {
+                                        return new RegisterCustomerResult(
+                                                Success: false,
+                                                CustomerId: null,
+                                                ErrorMessage: "En kunde med denne email findes allerede.");
+                                }
+
                                 var details = new PersonDetails(LegalFirstName: cmd.LegalFirstName,
                                                                 LegalLastName: cmd.LegalLastName,
                                                                 Pronouns: cmd.Pronouns,
