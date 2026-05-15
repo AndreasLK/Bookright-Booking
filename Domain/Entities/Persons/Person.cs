@@ -86,7 +86,7 @@ namespace Domain.Entities.Persons
                                         paramName: nameof(details.DateOfBirth));
                         }
 
-                        if (details.DateOfBirth < new DateOnly(1990, 1, 1))
+                        if (details.DateOfBirth < new DateOnly(1890, 1, 1))
                         {
                                 throw new ArgumentException(
                                 message: "Date of Birth is unrealistic",
