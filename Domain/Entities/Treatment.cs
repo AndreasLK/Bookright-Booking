@@ -6,7 +6,7 @@ namespace Domain.Entities
         /// <summary>
         /// Specific variation of a treatment (e.g., 30 min vs 60 min) with unique pricing and duration data
         /// </summary>
-        public abstract class Treatment
+        public class Treatment
         {
                 /// <summary>
                 /// Unique identifier for this specific variation.
