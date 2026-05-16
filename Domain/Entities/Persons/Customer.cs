@@ -52,7 +52,6 @@ namespace Domain.Entities.People
 
                 public Customer(
                         CustomerId id,
-                        LoyalityLevel loyal,
                         string? personalNote,
                         string? importantNote,
                         Guid? preferredPratitionerId,
@@ -67,6 +66,21 @@ namespace Domain.Entities.People
                         this.ImportantNote = importantNote;
                         this.PreferredPratitionerId = preferredPratitionerId;
                         this.PreferredGender = preferredGender;
+                        this.SygsikringDanmarkMember = sygsikringDanmarkMember;
+                }
+
+                /// <summary>
+                /// Updates the customer's profile and core personal details.
+                /// </summary>
+                public void UpdateCustomerProfile(
+                        PersonDetails details,
+                        string? personalNote,
+                        string? importantNote,
+                        bool sygsikringDanmarkMember)
+                {
+                        this.UpdatePersonDetails(details: details);
+                        this.PersonalNote = personalNote;
+                        this.ImportantNote = importantNote;
                         this.SygsikringDanmarkMember = sygsikringDanmarkMember;
                 }
         }
