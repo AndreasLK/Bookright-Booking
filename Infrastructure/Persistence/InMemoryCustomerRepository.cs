@@ -1,3 +1,5 @@
+using Domain.Entities.Persons;
+using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Specifications;
 using Domain.Value_Objects;
@@ -6,9 +8,7 @@ using Domain.Value_Objects.Ids;
 namespace Infrastructure.Persistence
 {
         {
-                {
-                        }
-                }
+                
 
                 {
                         return Task.CompletedTask;
