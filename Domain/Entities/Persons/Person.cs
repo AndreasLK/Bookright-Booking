@@ -86,13 +86,13 @@ namespace Domain.Entities.Persons
                                         paramName: nameof(details.DateOfBirth));
                         }
 
-                        if (details.DateOfBirth < new DateOnly(1990, 1, 1))
+                        if (details.DateOfBirth < new DateOnly(1890, 1, 1))
                         {
                                 throw new ArgumentException(
                                 message: "Date of Birth is unrealistic",
                                 paramName: nameof(details.DateOfBirth));
                         }
-                        if (string.IsNullOrWhiteSpace(details.PhoneNumber))
+                        if (string.IsNullOrWhiteSpace(details.PhoneNumber.Value))
                         {
                                 throw new ArgumentException(
                                 message: "PhoneNumber can't be empty",
@@ -101,6 +101,31 @@ namespace Domain.Entities.Persons
 
 
 
+
+                        this.LegalFirstName = details.LegalFirstName;
+                        this.LegalLastName = details.LegalLastName;
+                        this.PreferredFirstName = details.PreferredFirstName;
+                        this.PreferredLastName = details.PreferredLastName;
+                        this.Pronouns = details.Pronouns;
+                        this.DateOfBirth = details.DateOfBirth;
+                        this.PhoneNumber = details.PhoneNumber;
+                        this.Email = details.Email;
+                        this.Gender = details.Gender;
+                }
+
+                /// <summary>
+                /// Safely updates the core personal details of the individual.
+                /// </summary>
+                /// <param name="details">The new details to apply.</param>
+                protected void UpdatePersonDetails(PersonDetails details)
+                {
+                        ArgumentNullException.ThrowIfNull(argument: details, paramName: nameof(details));
+
+                        if (string.IsNullOrWhiteSpace(value: details.LegalFirstName))
+                                throw new ArgumentException(message: "Legal first name cannot be blank");
+
+                        if (string.IsNullOrWhiteSpace(value: details.LegalLastName))
+                                throw new ArgumentException(message: "Legal last name cannot be blank");
 
                         this.LegalFirstName = details.LegalFirstName;
                         this.LegalLastName = details.LegalLastName;

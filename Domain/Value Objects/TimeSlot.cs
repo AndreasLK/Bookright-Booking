@@ -9,11 +9,11 @@ namespace Domain.Value_Objects
         public record TimeSlot
         {
                 /// <summary>The beginning of the reserved time slot.</summary>
-                public DateTimeOffset StartDateTime { get; init; }
+                public DateTime StartDateTime { get; init; }
 
 
                 /// <summary>The end of the reserved time slot.</summary>
-                public DateTimeOffset EndDateTime { get; init; }
+                public DateTime EndDateTime { get; init; }
 
 
                 /// <summary>
@@ -22,7 +22,7 @@ namespace Domain.Value_Objects
                 /// </summary>
                 /// <param name="startDateTime">The start of the interval.</param>
                 /// <param name="endDateTime">The end of the interval.</param>
-                public TimeSlot(DateTimeOffset startDateTime, DateTimeOffset endDateTime)
+                public TimeSlot(DateTime startDateTime, DateTime endDateTime)
                 {
                         if (startDateTime >= endDateTime)
                         {

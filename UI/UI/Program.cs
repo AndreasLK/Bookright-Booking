@@ -14,6 +14,13 @@ namespace UI
                             .AddInteractiveServerComponents()
                             .AddInteractiveWebAssemblyComponents();
 
+                        builder.Services.AddSingleton<
+                                Domain.Interfaces.Repositories.ICustomerRepository,
+                                Infrastructure.Persistence.InMemoryCustomerRepository
+                                >();
+
+                        builder.Services.AddScoped<Facade.Customers.CustomerService>();
+
                         var app = builder.Build();
 
                         // Configure the HTTP request pipeline.
