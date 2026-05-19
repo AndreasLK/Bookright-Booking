@@ -1,0 +1,32 @@
+@page "/bookings"
+@rendermode InteractiveServer
+
+@using Facade.Bookings
+@inject BookingService BookingService
+@inject NavigationManager NavigationManager
+
+<h3>Booking Overview</h3>
+
+@if (Bookings == null)
+{
+    <p><em>Loading bookings...</em></p>
+}
+else
+{
+    <BookingList Bookings="Bookings" OnBookingSelected="GoToBookingDetails" />
+}
+
+@code {
+    private IEnumerable<BookingSummaryDto> Bookings;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Bookings = await BookingService.GetAllBookingsAsync();
+    }
+
+    private void GoToBookingDetails(BookingSummaryDto booking)
+    {
+        // Example navigation
+        NavigationManager.NavigateTo($"/bookings/{booking.Id}");
+    }
+}
