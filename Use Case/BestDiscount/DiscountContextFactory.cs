@@ -1,6 +1,6 @@
 using Domain;
 using Domain.Entities;
-using Domain.Entities.People;
+using Domain.Entities.Persons;
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Interfaces.Repositories;
@@ -9,6 +9,7 @@ using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
+using Domain.Entities.Persons;
 
 namespace Use_Case.BestDiscount
 {
