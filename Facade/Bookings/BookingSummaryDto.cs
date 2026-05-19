@@ -12,16 +12,16 @@ namespace Facade.Bookings
                 public Guid CustomerId { get; set; }
 
                 [Searchable]
-                public string TreatmentName { get; set; }
+                public string TreatmentName { get; set; } = string.Empty;
 
                 [Searchable]
-                public string PractitionerName { get; set; }
+                public string PractitionerName { get; set; } = string.Empty;
 
                 [Searchable]
-                public string ClinicName { get; set; }
+                public string ClinicName { get; set; } = string.Empty;
 
                 [Searchable]
-                public string CustomerName { get; set; }
+                public string CustomerName { get; set; } = string.Empty;
 
                 public DateTime StartTime { get; set; }
                 public DateTime EndTime { get; set; }
