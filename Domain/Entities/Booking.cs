@@ -142,5 +142,22 @@ namespace Domain.Entities
 
                         this.Paid = payment;
                 }
+
+                /// <summary>
+                /// Reassigns the booking to a different practitioner.
+                /// </summary>
+                /// <param name="newPractitionerId">The new practitioner identifier.</param>
+                /// <exception cref="InvalidOperationException">Thrown when attempting to change a past booking.</exception>
+                public void ReassignPractitioner(PractitionerId newPractitionerId)
+                {
+                        ArgumentNullException.ThrowIfNull(argument: newPractitionerId, paramName: nameof(newPractitionerId));
+
+                        if (this.Timeslot.StartDateTime < DateTime.Now)
+                        {
+                                throw new InvalidOperationException(message: "Cannot reassign a practitioner for a booking in the past.");
+                        }
+
+                        this.PractitionerId = newPractitionerId;
+                }
         }
 }
