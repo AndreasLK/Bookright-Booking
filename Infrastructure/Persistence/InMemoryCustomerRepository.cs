@@ -1,4 +1,4 @@
-using Domain.Entities.People;
+using Domain.Entities.Persons;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Specifications;
@@ -13,7 +13,7 @@ namespace Infrastructure.Persistence
         /// </summary>
         public class InMemoryCustomerRepository : ICustomerRepository
         {
-                private static readonly List<Customer> _customers = new List<Customer>();
+                private static readonly List<Customer> CUSTOMERS = new List<Customer>();
 
                 /// <summary>
                 /// Initializes a new instance of the <see cref="InMemoryCustomerRepository"/> class.
@@ -21,7 +21,7 @@ namespace Infrastructure.Persistence
                 /// </summary>
                 public InMemoryCustomerRepository()
                 {
-                        if (_customers.Count == 0)
+                        if (CUSTOMERS.Count == 0)
                         {
                                 this.SeedData();
                         }
@@ -30,14 +30,14 @@ namespace Infrastructure.Persistence
                 /// <inheritdoc/>
                 public Task<Customer?> GetByIdAsync(Guid id)
                 {
-                        Customer? customer = _customers.FirstOrDefault(predicate: c => c.Id.Value == id);
+                        Customer? customer = CUSTOMERS.FirstOrDefault(predicate: c => c.Id.Value == id);
                         return Task.FromResult(result: customer);
                 }
 
                 /// <inheritdoc/>
                 public Task<IReadOnlyList<Customer>> GetAllAsync()
                 {
-                        IReadOnlyList<Customer> readOnlyList = _customers.AsReadOnly();
+                        IReadOnlyList<Customer> readOnlyList = CUSTOMERS.AsReadOnly();
                         return Task.FromResult(result: readOnlyList);
                 }
 
@@ -47,7 +47,7 @@ namespace Infrastructure.Persistence
                         ArgumentNullException.ThrowIfNull(argument: specification, paramName: nameof(specification));
 
                         // Convert the list to an IQueryable so we can dynamically chain the specification's expression trees
-                        IQueryable<Customer> query = _customers.AsQueryable();
+                        IQueryable<Customer> query = CUSTOMERS.AsQueryable();
 
                         // 1. Apply the Filtering Rule
                         query = query.Where(predicate: specification.ToExpression());
@@ -77,7 +77,7 @@ namespace Infrastructure.Persistence
                 {
                         ArgumentNullException.ThrowIfNull(argument: entity, paramName: nameof(entity));
 
-                        _customers.Add(item: entity);
+                        CUSTOMERS.Add(item: entity);
                         return Task.FromResult(result: entity);
                 }
 
@@ -86,11 +86,11 @@ namespace Infrastructure.Persistence
                 {
                         ArgumentNullException.ThrowIfNull(argument: entity, paramName: nameof(entity));
 
-                        int index = _customers.FindIndex(match: c => c.Id.Value == entity.Id.Value);
+                        int index = CUSTOMERS.FindIndex(match: c => c.Id.Value == entity.Id.Value);
 
                         if (index != -1)
                         {
-                                _customers[index] = entity;
+                                CUSTOMERS[index] = entity;
                         }
 
                         return Task.CompletedTask;
@@ -99,7 +99,7 @@ namespace Infrastructure.Persistence
                 /// <inheritdoc/>
                 public Task<bool> DeleteAsync(Guid id)
                 {
-                        int removedCount = _customers.RemoveAll(match: c => c.Id.Value == id);
+                        int removedCount = CUSTOMERS.RemoveAll(match: c => c.Id.Value == id);
                         bool wasRemoved = removedCount > 0;
 
                         return Task.FromResult(result: wasRemoved);
@@ -134,7 +134,7 @@ namespace Infrastructure.Persistence
                                 details: jonathanDetails
                         );
 
-                        _customers.Add(item: jonathan);
+                        CUSTOMERS.Add(item: jonathan);
 
                         // 2. Migrate Elizabeth Windsor (From CustomerSearch UI)
                         PersonDetails elizabethDetails = new PersonDetails(
@@ -159,7 +159,7 @@ namespace Infrastructure.Persistence
                                 details: elizabethDetails
                         );
 
-                        _customers.Add(item: elizabeth);
+                        CUSTOMERS.Add(item: elizabeth);
                 }
         }
 }

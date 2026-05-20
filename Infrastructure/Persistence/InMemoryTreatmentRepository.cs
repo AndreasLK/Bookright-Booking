@@ -41,7 +41,7 @@ namespace Infrastructure.Persistence
                 private void SeedData()
                 {
                         this._treatments.Add(new Treatment(
-                            id: new TreatmentId(Guid.Parse("T1111111-1111-1111-1111-111111111111")),
+                            id: new TreatmentId(Guid.Parse("F1111111-1111-1111-1111-111111111111")),
                             name: "Deep Tissue Massage",
                             categoryId: new TreatmentCategoryId(Guid.NewGuid()),
                             price: new Money(600, Currency.DKK),
@@ -49,7 +49,7 @@ namespace Infrastructure.Persistence
                         ));
 
                         this._treatments.Add(new Treatment(
-                            id: new TreatmentId(Guid.Parse("T2222222-2222-2222-2222-222222222222")),
+                            id: new TreatmentId(Guid.Parse("F2222222-2222-2222-2222-222222222222")),
                             name: "Standard Physiotherapy",
                             categoryId: new TreatmentCategoryId(Guid.NewGuid()),
                             price: new Money(450, Currency.DKK),
