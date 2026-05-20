@@ -18,7 +18,7 @@ namespace Infrastructure.Persistence
 
                 // --- IRepository Methods ---
                 public Task<Treatment?> GetByIdAsync(Guid id) => Task.FromResult(this._treatments.FirstOrDefault(t => t.Id.Value == id));
-                public Task<IReadOnlyList<Treatment>> GetAllAsync() => Task.FromResult<IReadOnlyList<Treatment>>(_treatments.AsReadOnly());
+                public Task<IReadOnlyList<Treatment>> GetAllAsync() => Task.FromResult<IReadOnlyList<Treatment>>(this._treatments.AsReadOnly());
                 public Task<Treatment> AddAsync(Treatment entity) { this._treatments.Add(entity); return Task.FromResult(entity); }
                 public Task UpdateAsync(Treatment entity)
                 {
