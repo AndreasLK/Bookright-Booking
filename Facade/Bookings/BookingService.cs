@@ -2,9 +2,11 @@ using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Specifications;
 using Facade.Common.Extensions;
+using Domain.Entities;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Facade.Bookings
 {
@@ -16,7 +18,8 @@ namespace Facade.Bookings
                 private readonly IPractitionerRepository _practitionerRepository;
                 private readonly IClinicRepository _clinicRepository;
 
-                public BookingService(IBookingRepository bookingRepository,
+                public BookingService(
+                        IBookingRepository bookingRepository,
                         ICustomerRepository customerRepository,
                         ITreatmentRepository treatmentRepository,
                         IPractitionerRepository practitionerRepository,
@@ -29,6 +32,9 @@ namespace Facade.Bookings
                         this._clinicRepository = clinicRepository;
                 }
 
+                /// <summary>
+                /// Retrieves a paginated, filtered, and sorted list of bookings and maps them for the UI.
+                /// </summary>
                 public async Task<IEnumerable<BookingSummaryDto>> GetBookingsAsync(
                         Guid? customerId = null,
                         Guid? clinicId = null,
@@ -52,9 +58,9 @@ namespace Facade.Bookings
                             );
 
                         var bookings = await this._bookingRepository.FindAsync(specification);
-                        if (bookings is null)
+                        if (bookings is null || !bookings.Any())
                         {
-                                return new List<BookingSummaryDto>();
+                                return Enumerable.Empty<BookingSummaryDto>();
                         }
 
                         var result = new List<BookingSummaryDto>();
@@ -62,26 +68,36 @@ namespace Facade.Bookings
 
                         foreach (var booking in bookings)
                         {
+                                if (booking.Timeslot is null)
+                                {
+                                        continue;
+                                }
+
                                 var customer = await this._customerRepository.GetByIdAsync(booking.CustomerId.Value);
                                 var treatment = await this._treatmentRepository.GetByIdAsync(booking.TreatmentId.Value);
-                                var clinic = await this._clinicRepository.GetByIdAsync(booking.ClinicId.Value);
                                 var practitioner = await this._practitionerRepository.GetByIdAsync(booking.PractitionerId.Value);
+                                var clinic = await this._clinicRepository.GetByIdAsync(booking.ClinicId.Value);
+
+
+                                string mappedCustomerName = customer != null ? customer.ToDisplayFullName() : "Unknown Customer";
+                                string mappedPractitionerName = practitioner != null ? practitioner.ToDisplayFullName() : "Unknown Practitioner";
+                                string mappedTreatmentName = treatment != null ? treatment.Name : "Unknown Treatment";
+                                string mappedClinicName = clinic != null ? clinic.Name : "Unknown Clinic";
+
 
                                 result.Add(new BookingSummaryDto
                                 {
                                         Id = booking.Id.Value,
                                         CustomerId = booking.CustomerId.Value,
-
-                                        CustomerName = customer?.ToDisplayFullName() ?? "unknown customer",
-                                        PractitionerName = practitioner?.ToDisplayFullName() ?? "unknown practitioner",
-
-                                        TreatmentName = treatment?.Name ?? "unknown treatment",
-                                        ClinicName = clinic?.Name ?? "unknown clinic",
-
+                                        CustomerName = mappedCustomerName,
+                                        PractitionerName = mappedPractitionerName,
+                                        TreatmentName = mappedTreatmentName,
+                                        ClinicName = mappedClinicName,
                                         StartTime = booking.Timeslot.StartDateTime,
                                         EndTime = booking.Timeslot.EndDateTime,
-                                        AmountPaid = booking.Paid?.Value
+                                        AmountPaid = booking.Paid?.Value,
                                 });
+
                         }
 
                         return result;
