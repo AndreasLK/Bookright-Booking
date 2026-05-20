@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Moq;
 using Xunit;
 using Domain.Entities;
-using Domain.Entities.People;
 using Domain.Entities.Persons;
 using Domain.Enums;
 using Domain.Interfaces;
