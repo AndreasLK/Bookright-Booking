@@ -16,7 +16,7 @@ namespace Infrastructure.Persistence
                         this.SeedData();
                 }
 
-                // --- IRepository Methods ---
+
                 public Task<Treatment?> GetByIdAsync(Guid id) => Task.FromResult(this._treatments.FirstOrDefault(t => t.Id.Value == id));
                 public Task<IReadOnlyList<Treatment>> GetAllAsync() => Task.FromResult<IReadOnlyList<Treatment>>(this._treatments.AsReadOnly());
                 public Task<Treatment> AddAsync(Treatment entity) { this._treatments.Add(entity); return Task.FromResult(entity); }
@@ -40,7 +40,6 @@ namespace Infrastructure.Persistence
 
                 private void SeedData()
                 {
-                        // Assuming you add a constructor to the Treatment class matching these parameters
                         this._treatments.Add(new Treatment(
                             id: new TreatmentId(Guid.Parse("T1111111-1111-1111-1111-111111111111")),
                             name: "Deep Tissue Massage",

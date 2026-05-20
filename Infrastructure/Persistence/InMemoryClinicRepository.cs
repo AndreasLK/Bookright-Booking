@@ -15,7 +15,6 @@ namespace Infrastructure.Persistence
                         this.SeedData();
                 }
 
-                // --- IRepository Methods ---
                 public Task<Clinic?> GetByIdAsync(Guid id) => Task.FromResult(this._clinics.FirstOrDefault(c => c.Id.Value == id));
                 public Task<IReadOnlyList<Clinic>> GetAllAsync() => Task.FromResult<IReadOnlyList<Clinic>>(this._clinics.AsReadOnly());
                 public Task<Clinic> AddAsync(Clinic entity) { this._clinics.Add(entity); return Task.FromResult(entity); }
