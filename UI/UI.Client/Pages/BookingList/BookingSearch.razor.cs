@@ -6,126 +6,130 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace UI.Client.Pages.Bookings
+namespace UI.Client.Pages.BookingList
 {
-        public partial class BookingsSearch
+        /// <summary>
+        /// Page component for searching, sorting, and viewing a paginated list of bookings.
+        /// </summary>
+        public partial class BookingSearch : ComponentBase
         {
                 [Inject] private BookingService BookingService { get; set; } = default!;
                 [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
-                private List<BookingSummaryDto>? _bookings;
+                protected List<BookingSummaryDto>? _bookings;
 
-                // Paging configurations
+                protected bool _isLoading = false;
+                protected bool _hasMoreData = true;
+
+                protected BookingSortOption _currentSortOption = BookingSortOption.StartTime;
+                protected SortDirection _currentSortDirection = SortDirection.Ascending;
+
                 private int _currentSkip = 0;
                 private readonly int _takeAmount = 100;
 
-                // State trackers
-                private bool _isLoading = false;
-                private bool _hasMoreData = true;
-
-                // Sorting filters
-                private BookingSortField _currentSortField = BookingSortField.CreatedAt;
-                private SortDirection _currentSortDirection = SortDirection.Descending;
-
+                /// <inheritdoc/>
                 protected override async Task OnInitializedAsync()
                 {
-                        _bookings = new List<BookingSummaryDto>();
+                        this._bookings = new List<BookingSummaryDto>();
                         await this.LoadNextBatchAsync();
                 }
 
-                private async Task LoadNextBatchAsync()
+                /// <summary>
+                /// Fetches the next paginated chunk of bookings from the backend service.
+                /// </summary>
+                protected async Task LoadNextBatchAsync()
                 {
-                        // Unhappy Path First: Block extra execution requests if already busy or out of data
-                        if (_isLoading || !_hasMoreData)
+                        if (this._isLoading || !this._hasMoreData)
                         {
                                 return;
                         }
 
-                        _isLoading = true;
+                        this._isLoading = true;
 
-                        var nextBatch = await BookingService.GetBookingsAsync(
-                            skip: _currentSkip,
-                            take: _takeAmount,
-                            sortField: _currentSortField,
-                            sortDirection: _currentSortDirection
+                        IEnumerable<BookingSummaryDto> nextBatch = await this.BookingService.GetBookingsAsync(
+                                sortOption: this._currentSortOption,
+                                sortDirection: this._currentSortDirection,
+                                skip: this._currentSkip,
+                                take: this._takeAmount
                         );
 
-                        // Unhappy Path First: If the chunk returned nothing, flag end of records and exit early
                         if (nextBatch == null || !nextBatch.Any())
                         {
-                                _hasMoreData = false;
-                                _isLoading = false;
+                                this._hasMoreData = false;
+                                this._isLoading = false;
                                 return;
                         }
 
-                        // Happy Path execution
-                        var nextBatchList = nextBatch.ToList();
-                        _bookings ??= new List<BookingSummaryDto>();
-                        _bookings.AddRange(nextBatchList);
-                        _currentSkip += _takeAmount;
+                        List<BookingSummaryDto> nextBatchList = nextBatch.ToList();
 
-                        // If we fetched less than requested, we reached the end of the data store
-                        if (nextBatchList.Count < _takeAmount)
+                        this._bookings ??= new List<BookingSummaryDto>();
+                        this._bookings.AddRange(collection: nextBatchList);
+
+                        this._currentSkip += this._takeAmount;
+
+                        if (nextBatchList.Count < this._takeAmount)
                         {
-                                _hasMoreData = false;
+                                this._hasMoreData = false;
                         }
 
-                        _isLoading = false;
+                        this._isLoading = false;
                 }
 
-                private async Task ToggleSortAsync(BookingSortField field)
+                /// <summary>
+                /// Invoked when the user selects a new sorting field from the dropdown.
+                /// </summary>
+                /// <param name="newOption">The newly selected sort option.</param>
+                protected async Task OnSortOptionChangedAsync(BookingSortOption newOption)
                 {
-                        // Unhappy Path First: Prevent sorting manipulation while a page batch is loading
-                        if (_isLoading)
+                        if (this._currentSortOption == newOption)
                         {
                                 return;
                         }
 
-                        // Determine direction toggles
-                        if (_currentSortField == field)
-                        {
-                                _currentSortDirection = _currentSortDirection == SortDirection.Ascending
-                                    ? SortDirection.Descending
-                                    : SortDirection.Ascending;
-                        }
-                        else
-                        {
-                                _currentSortField = field;
-                                _currentSortDirection = SortDirection.Descending;
-                        }
-
-                        // Reset pagination state variables to clear out history lists
-                        _currentSkip = 0;
-                        _hasMoreData = true;
-
-                        if (_bookings is not null)
-                        {
-                                _bookings.Clear();
-                        }
-
-                        await this.LoadNextBatchAsync();
+                        this._currentSortOption = newOption;
+                        await this.ResetAndReloadAsync();
                 }
 
-                private string GetSortIcon(BookingSortField field)
+                /// <summary>
+                /// Invoked when the user selects a new sorting direction from the dropdown.
+                /// </summary>
+                /// <param name="newDirection">The newly selected sort direction.</param>
+                protected async Task OnSortDirectionChangedAsync(SortDirection newDirection)
                 {
-                        // Unhappy Path First: Return an empty indicator if this is not the active column field
-                        if (_currentSortField != field)
+                        if (this._currentSortDirection == newDirection)
                         {
-                                return "↕";
+                                return;
                         }
 
-                        return _currentSortDirection == SortDirection.Ascending ? "▲" : "▼";
+                        this._currentSortDirection = newDirection;
+                        await this.ResetAndReloadAsync();
                 }
 
-                private void HandleBookingSelected(BookingSummaryDto booking)
+                /// <summary>
+                /// Navigates to the details/edit page for the selected booking.
+                /// </summary>
+                /// <param name="booking">The booking DTO selected by the user.</param>
+                protected void HandleBookingSelected(BookingSummaryDto booking)
                 {
-                        // Unhappy Path First: Guard against malicious click events missing valid contextual items
                         if (booking == null || booking.Id == Guid.Empty)
                         {
                                 return;
                         }
 
-                        NavigationManager.NavigateTo($"/bookings/{booking.Id}");
+                        this.NavigationManager.NavigateTo(uri: $"/bookings/{booking.Id}");
+                }
+
+                /// <summary>
+                /// Clears the current list and fetches data from the beginning with the new sorting rules.
+                /// </summary>
+                private async Task ResetAndReloadAsync()
+                {
+                        this._currentSkip = 0;
+                        this._hasMoreData = true;
+
+                        this._bookings?.Clear();
+
+                        await this.LoadNextBatchAsync();
                 }
         }
 }
