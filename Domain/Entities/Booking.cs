@@ -115,5 +115,32 @@ namespace Domain.Entities
                         this.AppliedCampaign = appliedCampaign;
 
                 }
+
+                /// <summary>
+                /// Updates the timeslot for the booking, ensuring domain rules are met.
+                /// </summary>
+                public void Reschedule(TimeSlot newTimeslot)
+                {
+                        // Example of a Domain Rule: Cannot reschedule to a past date
+                        if (newTimeslot.StartDateTime < DateTime.Now)
+                        {
+                                throw new InvalidOperationException("Cannot reschedule a booking to the past.");
+                        }
+
+                        this.Timeslot = newTimeslot;
+                }
+
+                /// <summary>
+                /// Registers a payment for the booking.
+                /// </summary>
+                public void RegisterPayment(Money payment)
+                {
+                        if (payment.Value < 0)
+                        {
+                                throw new ArgumentException("Payment amount cannot be negative.");
+                        }
+
+                        this.Paid = payment;
+                }
         }
 }
