@@ -41,10 +41,14 @@ namespace UseCase.Customers
                                                                 Email: new EmailAddress(cmd.Email),
                                                                 Gender: cmd.Gender);
 
-                                var customer = new Customer(id: new CustomerId(Guid.NewGuid()),
-                                                            details: details,
-                                                            personalNote: cmd.PersonalNote,
-                                                            importantNote: cmd.ImportantNote);
+                                var customer = new Customer(
+                                                                id: new CustomerId(Guid.NewGuid()),
+                                                                personalNote: cmd.PersonalNote,
+                                                                importantNote: cmd.ImportantNote,
+                                                                preferredPratitionerId: null,
+                                                                preferredGender: null,
+                                                                sygsikringDanmarkMember: false,
+                                                                details: details);
 
                                 await this._customers.AddAsync(customer);
 
