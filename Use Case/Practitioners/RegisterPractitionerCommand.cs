@@ -1,26 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Domain.Entities;
 using Domain.Enums;
-using Domain.Value_Objects;
-using Domain.Value_Objects.Ids;
 
-namespace Use_Case.Practitioner
+namespace UseCase.Practitioners
 {
         public record RegisterPractitionerCommand(
                 string LegalFirstName,
                 string LegalLastName,
+                string Pronouns,
                 string Alias,
                 DateOnly DateOfBirth,
-                String Email,
-                String PhoneNumber,
+                string Email,
+                string PhoneNumber,
                 Gender Gender,
-                Certificate Certificate);
+                IReadOnlyList<Certificate> Certificates);
 
         public record RegisterPractitionerResult(
                 bool Success,
-                Guid? CustomerId,
+                Guid? PractitionerId,
                 string? ErrorMessage);
-       
 }
