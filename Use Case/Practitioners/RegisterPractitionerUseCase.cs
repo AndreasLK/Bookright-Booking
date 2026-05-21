@@ -32,10 +32,19 @@ namespace UseCase.Practitioners
                                         Gender: cmd.Gender);
 
 
+                        
+
 
                                 var practitioner = new Practitioner(id: new PractitionerId(Guid.NewGuid()),
                                                                   alias: cmd.Alias,
                                                                   details: details);
+
+                                foreach (var certificate in cmd.Certificates)
+                                {
+                                        practitioner.AddCertificate(certificate);
+                                }
+
+                                await this._practitioner.AddAsync(practitioner);
 
 
                                 return new RegisterPractitionerResult(
