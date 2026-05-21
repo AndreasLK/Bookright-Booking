@@ -29,6 +29,8 @@ namespace UI
 
                         builder.Services.AddScoped<Facade.Bookings.BookingService>();
 
+                        builder.Services.AddScoped<Facade.Practitioners.PractitionerService>();
+
                         var app = builder.Build();
 
                         // Configure the HTTP request pipeline.

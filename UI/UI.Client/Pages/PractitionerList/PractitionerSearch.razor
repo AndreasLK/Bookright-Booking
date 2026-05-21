@@ -1,0 +1,53 @@
+@page "/practitioners"
+@rendermode InteractiveAuto
+@using Facade.Practitioners
+@using UI.Client.Components.SearchableDataList
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Behandlere</h1>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-content-center my-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Indlæser...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <SearchableDataList TItem="PractitionerSummaryDto"
+                            Items="_practitioners"
+                            OnItemDoubleClick="HandlePractitionerSelected">
+            <ItemTemplate Context="practitioner">
+                <div class="card mb-2 shadow-sm border-start border-4 border-info">
+                    <div class="card-body py-3">
+                        <div class="row align-items-center">
+
+                            <div class="col-md-3 mb-2 mb-md-0">
+                                <div class="font-weight-bold text-primary">@practitioner.Alias</div>
+                                <div class="text-muted small">@practitioner.FullName</div>
+                            </div>
+
+                            <div class="col-md-4 mb-2 mb-md-0">
+                                <div><i class="bi bi-envelope"></i> @practitioner.Email</div>
+                                <div class="text-muted small"><i class="bi bi-telephone"></i> @practitioner.PhoneNumber</div>
+                            </div>
+
+                            <div class="col-md-5 text-md-end">
+                                <button type="button" class="btn btn-outline-primary btn-sm px-4"
+                                        @onclick="() => HandlePractitionerSelected(practitioner)"
+                                        @onclick:stopPropagation="true">
+                                    Rediger
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </ItemTemplate>
+        </SearchableDataList>
+    }
+</div>

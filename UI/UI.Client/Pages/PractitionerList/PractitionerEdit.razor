@@ -1,0 +1,61 @@
+@page "/practitioners/{Id:guid}"
+@rendermode InteractiveAuto
+@using Facade.Practitioners
+@using UI.Client.Components.GenericEditForm
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Rediger Behandler</h1>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Indlæser...</span>
+        </div>
+    }
+    else if (_practitioner == null)
+    {
+        <div class="alert alert-warning">Behandler blev ikke fundet.</div>
+    }
+    else
+    {
+        <div class="col-md-8 col-lg-6">
+            <GenericEditForm TItem="PractitionerSummaryDto"
+                             Title="Opdater Behandler Information"
+                             Model="_practitioner"
+                             OnSave="HandleValidSubmitAsync"
+                             OnCancel="GoBack">
+
+                <FormFields Context="practitioner">
+                    <div class="mb-3">
+                        <label class="form-label">Alias (Vises til kunder)</label>
+                        <InputText class="form-control" @bind-Value="practitioner.Alias" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Fornavn</label>
+                            <InputText class="form-control" @bind-Value="practitioner.FirstName" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Efternavn</label>
+                            <InputText class="form-control" @bind-Value="practitioner.LastName" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <InputText type="email" class="form-control" @bind-Value="practitioner.Email" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Telefonnummer</label>
+                        <InputText class="form-control" @bind-Value="practitioner.PhoneNumber" />
+                    </div>
+                </FormFields>
+
+            </GenericEditForm>
+        </div>
+    }
+</div>
