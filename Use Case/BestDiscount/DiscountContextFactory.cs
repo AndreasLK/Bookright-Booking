@@ -1,6 +1,6 @@
 using Domain;
 using Domain.Entities;
-using Domain.Entities.People;
+using Domain.Entities.Persons;
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Interfaces.Repositories;

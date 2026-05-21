@@ -4,7 +4,7 @@ using Domain.Enums;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 
-namespace Domain.Entities.People
+namespace Domain.Entities.Persons
 {
         /// <inheritdoc />
         public class Customer : Person

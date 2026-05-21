@@ -1,4 +1,4 @@
-using Domain.Entities.People;
+using Domain.Entities.Persons;
 using Domain.Interfaces.Repositories;
 using Domain.Value_Objects;
 using Facade.Common.Dtos;

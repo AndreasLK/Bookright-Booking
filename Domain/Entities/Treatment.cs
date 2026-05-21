@@ -33,5 +33,30 @@ namespace Domain.Entities
                 /// </summary>
                 public Duration Duration { get; private set; }
 
+                public Treatment(
+                    TreatmentId id,
+                    string name,
+                    TreatmentCategoryId categoryId,
+                    Money price,
+                    Duration duration)
+                {
+                        ArgumentNullException.ThrowIfNull(id, nameof(id));
+                        ArgumentNullException.ThrowIfNull(name, nameof(name));
+
+                        if (string.IsNullOrWhiteSpace(name))
+                        {
+                                throw new ArgumentException("Name cannot be empty or whitespace.", nameof(name));
+                        }
+
+                        ArgumentNullException.ThrowIfNull(categoryId, nameof(categoryId));
+                        ArgumentNullException.ThrowIfNull(price, nameof(price));
+                        ArgumentNullException.ThrowIfNull(duration, nameof(duration));
+
+                        this.Id = id;
+                        this.Name = name;
+                        this.CategoryId = categoryId;
+                        this.Price = price;
+                        this.Duration = duration;
+                }
         }
 }

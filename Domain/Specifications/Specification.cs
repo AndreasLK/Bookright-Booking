@@ -53,5 +53,19 @@ namespace Domain.Specifications
                 /// Restricts result set to specified count.
                 /// </summary>
                 protected void ApplyTake(int count) => this.Take = count;
+
+                /// <summary>
+                /// Records to skip before taking.
+                /// </summary>
+                public int? Skip { get; private set; }
+
+                /// <summary>
+                /// Applies both skip and take for pagination.
+                /// </summary>
+                protected void ApplyPaging(int skip, int take)
+                {
+                        this.Skip = skip;
+                        this.Take = take;
+                }
         }
 }

@@ -19,12 +19,15 @@ dotnet_diagnostic.IDE0055.severity = error
 dotnet_naming_rule.types_and_namespaces_rule.severity = error
 dotnet_naming_rule.types_and_namespaces_rule.symbols = types_and_namespaces_symbols
 dotnet_naming_rule.types_and_namespaces_rule.style = pascal_case_style
+
 dotnet_naming_symbols.types_and_namespaces_symbols.applicable_kinds = namespace, class, struct, enum, record, type_parameter
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
 
 # 2. Interfaces (IPascalCase)
 dotnet_naming_rule.interface_rule.severity = error
 dotnet_naming_rule.interface_rule.symbols = interface_symbols
 dotnet_naming_rule.interface_rule.style = prefix_i_style
+
 dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
 dotnet_naming_style.prefix_i_style.required_prefix = I
 dotnet_naming_style.prefix_i_style.capitalization = pascal_case
@@ -33,12 +36,14 @@ dotnet_naming_style.prefix_i_style.capitalization = pascal_case
 dotnet_naming_rule.members_rule.severity = error
 dotnet_naming_rule.members_rule.symbols = members_symbols
 dotnet_naming_rule.members_rule.style = pascal_case_style
+
 dotnet_naming_symbols.members_symbols.applicable_kinds = property, method, event
 
 # 4. Parameters and Local Variables (camelCase)
 dotnet_naming_rule.locals_rule.severity = error
 dotnet_naming_rule.locals_rule.symbols = locals_symbols
 dotnet_naming_rule.locals_rule.style = camel_case_style
+
 dotnet_naming_symbols.locals_symbols.applicable_kinds = parameter, local
 dotnet_naming_style.camel_case_style.capitalization = camel_case
 
@@ -46,41 +51,38 @@ dotnet_naming_style.camel_case_style.capitalization = camel_case
 dotnet_naming_rule.private_fields_rule.severity = error
 dotnet_naming_rule.private_fields_rule.symbols = private_field_symbols
 dotnet_naming_rule.private_fields_rule.style = private_field_style
+
 dotnet_naming_symbols.private_field_symbols.applicable_kinds = field
 dotnet_naming_symbols.private_field_symbols.applicable_accessibilities = private
 dotnet_naming_style.private_field_style.required_prefix = _
 dotnet_naming_style.private_field_style.capitalization = camel_case
 
-# 6. Constants & Static Readonly (SCREAMING_SNAKE_CASE)
+# 6. Constants (SCREAMING_SNAKE_CASE)
 dotnet_naming_rule.constants_rule.severity = error
-dotnet_naming_rule.constants_rule.symbols = const_symbols, static_readonly_symbols
+dotnet_naming_rule.constants_rule.symbols = const_symbols
 dotnet_naming_rule.constants_rule.style = screaming_snake_style
+
 dotnet_naming_symbols.const_symbols.applicable_kinds = field, local
 dotnet_naming_symbols.const_symbols.required_modifiers = const
-dotnet_naming_symbols.static_readonly_symbols.applicable_kinds = field
-dotnet_naming_symbols.static_readonly_symbols.required_modifiers = static, readonly
 dotnet_naming_style.screaming_snake_style.capitalization = all_upper
 dotnet_naming_style.screaming_snake_style.word_separator = _
 
-# 6.5 Private Constants Explicit Override
-dotnet_naming_rule.private_constants_rule.severity = error
-dotnet_naming_rule.private_constants_rule.symbols = private_const_symbols
-dotnet_naming_rule.private_constants_rule.style = screaming_snake_style
+# 7. Static Readonly (SCREAMING_SNAKE_CASE)
+dotnet_naming_rule.static_readonly_rule.severity = error
+dotnet_naming_rule.static_readonly_rule.symbols = static_readonly_symbols
+dotnet_naming_rule.static_readonly_rule.style = screaming_snake_style
 
-dotnet_naming_symbols.private_const_symbols.applicable_kinds = field
-dotnet_naming_symbols.private_const_symbols.applicable_accessibilities = private
-dotnet_naming_symbols.private_const_symbols.required_modifiers = const
+dotnet_naming_symbols.static_readonly_symbols.applicable_kinds = field
+dotnet_naming_symbols.static_readonly_symbols.required_modifiers = static, readonly
 
-# 7. Async Methods (Suffix with Async)
+# 8. Async Methods (Suffix with Async)
 dotnet_naming_rule.async_methods_rule.severity = error
 dotnet_naming_rule.async_methods_rule.symbols = async_method_symbols
 dotnet_naming_rule.async_methods_rule.style = async_suffix_style
+
 dotnet_naming_symbols.async_method_symbols.applicable_kinds = method
 dotnet_naming_symbols.async_method_symbols.required_modifiers = async
 dotnet_naming_style.async_suffix_style.required_suffix = Async
-
-# --- Reusable Styles ---
-dotnet_naming_style.pascal_case_style.capitalization = pascal_case
 
 
 #### EXPLICIT READABILITY ####
@@ -93,7 +95,6 @@ dotnet_style_qualification_for_event = true:error
 
 # Named Arguments (Requires Posseth.NamedArguments NuGet)
 dotnet_diagnostic.PNA1000.severity = error
-
 
 #### LOGIC & FLOW ####
 
@@ -111,9 +112,9 @@ dotnet_style_prefer_is_null_check_over_reference_equality_method = true:error
 
 # CS1591: Missing XML comment for public members
 dotnet_diagnostic.CS1591.severity = error
+
 # CS1573: Parameter has no matching param tag
 dotnet_diagnostic.CS1573.severity = error
 
 # Accessibility modifier enforcement
-dotnet_style_require_accessibility_modifiers = always:suggestion
-csharp_style_default_access_modifier = public:suggestion
+dotnet_style_require_accessibility_modifiers = always:error
