@@ -17,6 +17,8 @@ namespace Facade.Bookings
                 [Searchable]
                 public string PractitionerName { get; set; } = string.Empty;
 
+                public Guid PractitionerId { get; set; }
+
                 [Searchable]
                 public string ClinicName { get; set; } = string.Empty;
 
