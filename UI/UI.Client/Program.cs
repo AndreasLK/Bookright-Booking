@@ -1,6 +1,7 @@
 using Domain.Interfaces.Repositories;
 using Facade.Bookings;
 using Facade.Customers;
+using Facade.Practitioners;
 using Infrastructure.Persistence;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -19,9 +20,9 @@ namespace UI.Client
                         builder.Services.AddSingleton<ITreatmentRepository, InMemoryTreatmentRepository>();
                         builder.Services.AddSingleton<IPractitionerRepository, InMemoryPractitionerRepository>();
 
-                        // Register Facade Services for the Browser
                         builder.Services.AddScoped<CustomerService>();
                         builder.Services.AddScoped<BookingService>();
+                        builder.Services.AddScoped<PractitionerService>();
 
                         await builder.Build().RunAsync();
                 }

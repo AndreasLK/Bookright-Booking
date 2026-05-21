@@ -137,5 +137,20 @@ namespace Domain.Entities.Persons
                         this.Email = details.Email;
                         this.Gender = details.Gender;
                 }
+
+                /// <summary>
+                /// Current snapshot of personal details.
+                /// </summary>
+                public PersonDetails Details => new PersonDetails(
+                        LegalFirstName: this.LegalFirstName,
+                        LegalLastName: this.LegalLastName,
+                        PreferredFirstName: this.PreferredFirstName,
+                        PreferredLastName: this.PreferredLastName,
+                        Pronouns: this.Pronouns,
+                        DateOfBirth: this.DateOfBirth,
+                        PhoneNumber: this.PhoneNumber,
+                        Email: this.Email,
+                        Gender: this.Gender
+                );
         }
 }
