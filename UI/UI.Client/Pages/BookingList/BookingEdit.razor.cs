@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Components;
 using Facade.Bookings;
+using Facade.Common.Dtos;
+using Microsoft.AspNetCore.Components;
 using System;
 using System.Threading.Tasks;
 
@@ -14,18 +15,24 @@ namespace UI.Client.Pages.BookingList
                 public Guid Id { get; set; }
 
                 protected BookingSummaryDto? _booking;
+                protected IEnumerable<PractitionerLookupDto> _practitioners = Array.Empty<PractitionerLookupDto>();
+
                 protected bool _isLoading = true;
+                protected bool _isPastBooking = false;
 
                 protected override async Task OnInitializedAsync()
                 {
                         this._booking = await this.BookingService.GetBookingByIdAsync(id: this.Id);
+                        this._practitioners = await this.BookingService.GetAvailablePractitionersAsync();
+
+                        if (this._booking != null)
+                        {
+                                this._isPastBooking = this._booking.StartTime < DateTime.Now;
+                        }
+
                         this._isLoading = false;
                 }
 
-                /// <summary>
-                /// Triggered by the GenericEditForm when validation passes.
-                /// </summary>
-                /// <param name="model">The mutated BookingSummaryDto from the form.</param>
                 protected async Task HandleValidSubmitAsync(BookingSummaryDto model)
                 {
                         if (model != null)
@@ -35,6 +42,15 @@ namespace UI.Client.Pages.BookingList
                                     newStartTime: model.StartTime,
                                     newEndTime: model.EndTime
                                 );
+
+
+                                if (!this._isPastBooking)
+                                {
+                                        await this.BookingService.ReassignPractitionerAsync(
+                                            bookingId: this.Id,
+                                            newPractitionerId: model.PractitionerId
+                                        );
+                                }
 
                                 if (model.AmountPaid.HasValue)
                                 {
@@ -48,9 +64,6 @@ namespace UI.Client.Pages.BookingList
                         }
                 }
 
-                /// <summary>
-                /// Triggered by the GenericEditForm cancel button.
-                /// </summary>
                 protected void GoBack()
                 {
                         this.NavigationManager.NavigateTo(uri: "/bookings");
