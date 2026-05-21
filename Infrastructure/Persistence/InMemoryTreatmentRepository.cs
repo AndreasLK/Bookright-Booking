@@ -42,7 +42,7 @@ namespace Infrastructure.Persistence
                 {
                         this._treatments.Add(new Treatment(
                             id: new TreatmentId(Guid.Parse("F1111111-1111-1111-1111-111111111111")),
-                            name: "Deep Tissue Massage",
+                            name: "Sportsmassage",
                             categoryId: new TreatmentCategoryId(Guid.NewGuid()),
                             price: new Money(600, Currency.DKK),
                             duration: new Duration(value: TimeSpan.FromMinutes(60))
@@ -50,7 +50,7 @@ namespace Infrastructure.Persistence
 
                         this._treatments.Add(new Treatment(
                             id: new TreatmentId(Guid.Parse("F2222222-2222-2222-2222-222222222222")),
-                            name: "Standard Physiotherapy",
+                            name: "Akupunktur",
                             categoryId: new TreatmentCategoryId(Guid.NewGuid()),
                             price: new Money(450, Currency.DKK),
                             duration: new Duration(value: TimeSpan.FromMinutes(45))

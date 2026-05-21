@@ -40,18 +40,18 @@ namespace Infrastructure.Persistence
                 {
                         this._clinics.Add(new Clinic(
                             id: new ClinicId(Guid.Parse("C1111111-1111-1111-1111-111111111111")),
-                            name: "Downtown Wellness Center",
+                            name: "Vejle Wellness Center",
                             address: new Address("Main Street 1", "1000", "Country"),
                             phoneNumber: new PhoneNumber("555-0100"),
-                            email: new EmailAddress("contact@downtownwellness.com")
+                            email: new EmailAddress("contact@VejlenWellness.com")
                         ));
 
                         this._clinics.Add(new Clinic(
                             id: new ClinicId(Guid.Parse("C2222222-2222-2222-2222-222222222222")),
-                            name: "Uptown Physiotherapy",
+                            name: "Egtved Afdeling",
                             address: new Address("North Avenue 42", "2000", "Country"),
                             phoneNumber: new PhoneNumber("555-0200"),
-                            email: new EmailAddress("hello@uptownphysio.com")
+                            email: new EmailAddress("hello@EgtvedWellness.com")
                         ));
                 }
         }
