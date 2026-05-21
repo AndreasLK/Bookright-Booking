@@ -3,6 +3,8 @@ using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Specifications;
 using Domain.Value_Objects;
+using Domain.Value_Objects.Ids;
+using Facade.Common.Dtos;
 using Facade.Common.Extensions;
 using System;
 using System.Collections.Generic;
@@ -152,12 +154,41 @@ namespace Facade.Bookings
                                 CustomerId = booking.CustomerId.Value,
                                 CustomerName = customer?.ToDisplayFullName() ?? "Unknown Customer",
                                 PractitionerName = practitioner?.ToDisplayFullName() ?? "Unknown Practitioner",
+                                PractitionerId = booking.PractitionerId.Value,
                                 TreatmentName = treatment?.Name ?? "Unknown Treatment",
                                 ClinicName = clinic?.Name ?? "Unknown Clinic",
                                 StartTime = booking.Timeslot?.StartDateTime ?? DateTime.MinValue,
                                 EndTime = booking.Timeslot?.EndDateTime ?? DateTime.MinValue,
                                 AmountPaid = booking.Paid?.Value
                         };
+                }
+
+                /// <summary>
+                /// Fetches a list of all practitioners for dropdown selection.
+                /// </summary>
+                public async Task<IEnumerable<PractitionerLookupDto>> GetAvailablePractitionersAsync(CancellationToken cancellationToken = default)
+                {
+                        var practitioners = await this._practitionerRepository.GetAllAsync();
+
+                        return practitioners.Select(selector: p => new PractitionerLookupDto
+                        {
+                                Id = p.Id.Value,
+                                DisplayName = p.ToDisplayFullName() ?? "Ukendt Behandler"
+                        }).ToList();
+                }
+
+                /// <summary>
+                /// Reassigns an existing booking to a new practitioner.
+                /// </summary>
+                public async Task ReassignPractitionerAsync(Guid bookingId, Guid newPractitionerId, CancellationToken cancellationToken = default)
+                {
+                        Booking booking = await this.GetExistingBookingAsync(bookingId: bookingId);
+
+                        // Execute Domain Behavior
+                        PractitionerId newId = new PractitionerId(Value: newPractitionerId);
+                        booking.ReassignPractitioner(newPractitionerId: newId);
+
+                        await this._bookingRepository.UpdateAsync(entity: booking);
                 }
         }
 }
