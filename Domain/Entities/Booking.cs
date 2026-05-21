@@ -117,8 +117,9 @@ namespace Domain.Entities
                 }
 
                 /// <summary>
-                /// Updates the timeslot for the booking, ensuring domain rules are met.
+                /// Updates the timeslot, ensuring domain rules are met.
                 /// </summary>
+                /// <param name="newTimeslot">The newly requested time window.</param>
                 public void Reschedule(TimeSlot newTimeslot)
                 {
                         // Example of a Domain Rule: Cannot reschedule to a past date
@@ -131,8 +132,9 @@ namespace Domain.Entities
                 }
 
                 /// <summary>
-                /// Registers a payment for the booking.
+                /// Registers a payment amount.
                 /// </summary>
+                /// <param name="payment">The monetary amount provided.</param>
                 public void RegisterPayment(Money payment)
                 {
                         if (payment.Value < 0)
@@ -144,7 +146,7 @@ namespace Domain.Entities
                 }
 
                 /// <summary>
-                /// Reassigns the booking to a different practitioner.
+                /// Reassigns the appointment to a different practitioner.
                 /// </summary>
                 /// <param name="newPractitionerId">The new practitioner identifier.</param>
                 /// <exception cref="InvalidOperationException">Thrown when attempting to change a past booking.</exception>

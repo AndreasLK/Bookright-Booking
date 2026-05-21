@@ -13,6 +13,9 @@ using System.Threading.Tasks;
 
 namespace Facade.Bookings
 {
+        /// <summary>
+        /// Orchestrates booking operations between the UI and domain layers.
+        /// </summary>
         public class BookingService
         {
                 private readonly IBookingRepository _bookingRepository;
@@ -21,6 +24,14 @@ namespace Facade.Bookings
                 private readonly IPractitionerRepository _practitionerRepository;
                 private readonly IClinicRepository _clinicRepository;
 
+                /// <summary>
+                /// Initializes a new instance of the <see cref="BookingService"/> class.
+                /// </summary>
+                /// <param name="bookingRepository">Data store for bookings.</param>
+                /// <param name="customerRepository">Data store for customers.</param>
+                /// <param name="treatmentRepository">Data store for treatments.</param>
+                /// <param name="practitionerRepository">Data store for practitioners.</param>
+                /// <param name="clinicRepository">Data store for clinics.</param>
                 public BookingService(
                     IBookingRepository bookingRepository,
                     ICustomerRepository customerRepository,
@@ -42,8 +53,17 @@ namespace Facade.Bookings
                 }
 
                 /// <summary>
-                /// Retrieves a paginated, filtered, and sorted list of bookings and maps them for the UI.
+                /// Retrieves a paginated, filtered, and sorted list of bookings.
                 /// </summary>
+                /// <param name="customerId">Optional customer identifier filter.</param>
+                /// <param name="clinicId">Optional clinic identifier filter.</param>
+                /// <param name="roomId">Optional room identifier filter.</param>
+                /// <param name="practitionerId">Optional practitioner identifier filter.</param>
+                /// <param name="sortOption">Selected sorting field.</param>
+                /// <param name="sortDirection">Direction of the sorting.</param>
+                /// <param name="skip">Number of records to bypass.</param>
+                /// <param name="take">Maximum number of records to return.</param>
+                /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
                 public async Task<IEnumerable<BookingSummaryDto>> GetBookingsAsync(
                     Guid? customerId = null,
                     Guid? clinicId = null,
@@ -74,8 +94,10 @@ namespace Facade.Bookings
                 }
 
                 /// <summary>
-                /// Retrieves a single booking by its ID and maps it to a summary Data Transfer Object.
+                /// Retrieves a single record by its identifier.
                 /// </summary>
+                /// <param name="id">The unique identifier.</param>
+                /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
                 public async Task<BookingSummaryDto?> GetBookingByIdAsync(Guid id, CancellationToken cancellationToken = default)
                 {
                         var booking = await this._bookingRepository.GetByIdAsync(id);
@@ -88,8 +110,12 @@ namespace Facade.Bookings
                 }
 
                 /// <summary>
-                /// Reschedules an existing booking to a new timeslot.
+                /// Reschedules an existing record to a new timeslot.
                 /// </summary>
+                /// <param name="bookingId">The unique identifier.</param>
+                /// <param name="newStartTime">The requested start time.</param>
+                /// <param name="newEndTime">The requested end time.</param>
+                /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
                 public async Task RescheduleBookingAsync(Guid bookingId, DateTime newStartTime, DateTime newEndTime, CancellationToken cancellationToken = default)
                 {
                         var booking = await this.GetExistingBookingAsync(bookingId);
@@ -103,8 +129,11 @@ namespace Facade.Bookings
                 }
 
                 /// <summary>
-                /// Registers a payment against an existing booking.
+                /// Registers a payment.
                 /// </summary>
+                /// <param name="bookingId">The unique identifier.</param>
+                /// <param name="amountPaid">The monetary amount provided.</param>
+                /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
                 public async Task RegisterPaymentAsync(Guid bookingId, decimal amountPaid, CancellationToken cancellationToken = default)
                 {
                         var booking = await this.GetExistingBookingAsync(bookingId);
@@ -117,8 +146,9 @@ namespace Facade.Bookings
                 }
 
                 /// <summary>
-                /// Private helper to fetch an entity and throw a standardized exception if it does not exist.
+                /// Private helper to fetch an entity and throw an exception if it does not exist.
                 /// </summary>
+                /// <param name="bookingId">The unique identifier.</param>
                 private async Task<Booking> GetExistingBookingAsync(Guid bookingId)
                 {
                         var booking = await this._bookingRepository.GetByIdAsync(bookingId);
@@ -130,8 +160,9 @@ namespace Facade.Bookings
                 }
 
                 /// <summary>
-                /// Private helper to map a Booking Entity to a Summary DTO, fetching relationships concurrently.
+                /// Private helper to map the domain entity to a summary object, fetching relationships concurrently.
                 /// </summary>
+                /// <param name="booking">The domain entity.</param>
                 private async Task<BookingSummaryDto> MapToSummaryDtoAsync(Booking booking)
                 {
                         // Note: If migrating to Entity Framework Core later, configure the repository 
@@ -166,6 +197,7 @@ namespace Facade.Bookings
                 /// <summary>
                 /// Fetches a list of all practitioners for dropdown selection.
                 /// </summary>
+                /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
                 public async Task<IEnumerable<PractitionerLookupDto>> GetAvailablePractitionersAsync(CancellationToken cancellationToken = default)
                 {
                         var practitioners = await this._practitionerRepository.GetAllAsync();
@@ -178,8 +210,11 @@ namespace Facade.Bookings
                 }
 
                 /// <summary>
-                /// Reassigns an existing booking to a new practitioner.
+                /// Reassigns an existing record to a new practitioner.
                 /// </summary>
+                /// <param name="bookingId">The unique identifier.</param>
+                /// <param name="newPractitionerId">The new practitioner identifier.</param>
+                /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
                 public async Task ReassignPractitionerAsync(Guid bookingId, Guid newPractitionerId, CancellationToken cancellationToken = default)
                 {
                         Booking booking = await this.GetExistingBookingAsync(bookingId: bookingId);
