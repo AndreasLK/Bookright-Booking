@@ -5,7 +5,5 @@
   <Project Path="Tests/Tests.csproj" Id="1ca84cbb-4dca-4888-a78d-c01938e8121a" />
   <Project Path="UI/UI.Client/UI.Client.csproj" Id="5799763f-24cc-4ea9-9fc9-e6ffd6c5a70c" />
   <Project Path="UI/UI/UI.csproj" Id="273fb1fd-72e8-4a1b-878e-1724cb829319" />
-  <Project Path="Use Case/Use Case.csproj" Id="510cdac1-49ef-4cf2-a0eb-af7830af5cb0">
-    <Build Solution="Debug|*" Project="false" />
-  </Project>
+  <Project Path="Use Case/Use Case.csproj" Id="510cdac1-49ef-4cf2-a0eb-af7830af5cb0" />
 </Solution>

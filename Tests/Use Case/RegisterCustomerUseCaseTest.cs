@@ -8,154 +8,155 @@ using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 using Xunit;
 
-namespace Tests.UseCase.Customer
-
-public class RegisterCustomerUseCaseTests
+namespace Tests.UseCase.Customers
 {
-        // -----------------------------------------------------------------
-        // Helper methods - build valid objects for the tests.
-        // We place them here so each test can start from a "known good"
-        // baseline and only change the one thing it actually wants to test.
-        // -----------------------------------------------------------------
-
-        private static RegisterCustomerCommand BuildValidCommand(string email = "test@test.dk")
+        public class RegisterCustomerUseCaseTests
         {
-                return new RegisterCustomerCommand(
-                    LegalFirstName: "Test",
-                    LegalLastName: "Person",
-                    Pronouns: "he/him",
-                    DateOfBirth: new DateOnly(1990, 1, 1),
-                    PhoneNumber: "12345678",
-                    Email: email,
-                    Gender: Gender.Abinary,
-                    PersonalNote: "note",
-                    ImportantNote: "important");
-        }
+                // -----------------------------------------------------------------
+                // Helper methods - build valid objects for the tests.
+                // We place them here so each test can start from a "known good"
+                // baseline and only change the one thing it actually wants to test.
+                // -----------------------------------------------------------------
 
-        private static Customer BuildExistingCustomer(string email = "test@test.dk")
-        {
-                // We build a REAL Customer instance. This is much simpler than
-                // trying to mock the entity - and it's exactly how an entity
-                // would look if it came back from the repository.
-                var details = new PersonDetails(
-                    LegalFirstName: "Existing",
-                    LegalLastName: "Customer",
-                    Pronouns: "they/them",
-                    DateOfBirth: new DateOnly(1985, 5, 5),
-                    PhoneNumber: new PhoneNumber("87654321"),
-                    Email: new EmailAddress(email),
-                    Gender: Gender.Abinary);
+                private static RegisterCustomerCommand BuildValidCommand(string email = "test@test.dk")
+                {
+                        return new RegisterCustomerCommand(
+                                LegalFirstName: "Test",
+                                LegalLastName: "Person",
+                                Pronouns: "he/him",
+                                DateOfBirth: new DateOnly(1990, 1, 1),
+                                PhoneNumber: "12345678",
+                                Email: email,
+                                Gender: Gender.Abinary,
+                                PersonalNote: "note",
+                                ImportantNote: "important");
+                }
 
-                return new Customer(
-                    id: new CustomerId(Guid.NewGuid()),
-                    personalNote: null,
-                    importantNote: null,
-                    preferredPratitionerId: null,
-                    preferredGender: null,
-                    sygsikringDanmarkMember: false,
-                    details: details);
-        }
+                private static Customer BuildExistingCustomer(string email = "test@test.dk")
+                {
+                        // We build a REAL Customer instance. This is much simpler than
+                        // trying to mock the entity - and it's exactly how an entity
+                        // would look if it came back from the repository.
+                        var details = new PersonDetails(
+                                LegalFirstName: "Existing",
+                                LegalLastName: "Customer",
+                                Pronouns: "they/them",
+                                DateOfBirth: new DateOnly(1985, 5, 5),
+                                PhoneNumber: new PhoneNumber("87654321"),
+                                Email: new EmailAddress(email),
+                                Gender: Gender.Abinary);
 
-        // -----------------------------------------------------------------
-        // Test 1: When a customer with the same email already exists,
-        // the use case must return an error AND must not call AddAsync.
-        // -----------------------------------------------------------------
+                        return new Customer(
+                                id: new CustomerId(Guid.NewGuid()),
+                                personalNote: null,
+                                importantNote: null,
+                                preferredPratitionerId: null,
+                                preferredGender: null,
+                                sygsikringDanmarkMember: false,
+                                details: details);
+                }
 
-        [Fact]
-        public async Task ExecuteAsync_ShouldReturnError_WhenEmailAlreadyExists()
-        {
-                // Arrange
-                var repo = new Mock<ICustomerRepository>();
+                // -----------------------------------------------------------------
+                // Test 1: When a customer with the same email already exists,
+                // the use case must return an error AND must not call AddAsync.
+                // -----------------------------------------------------------------
 
-                // Set FindAsync up to return a list containing one existing customer.
-                // Note: the return type on the interface is IReadOnlyList<Customer>, so we cast.
-                IReadOnlyList<Customer> existing = new List<Customer> { BuildExistingCustomer() };
-                repo.Setup(r => r.FindAsync(It.IsAny<CustomerByEmailSpecification>()))
-                    .ReturnsAsync(existing);
+                [Fact]
+                public async Task ExecuteAsync_ShouldReturnError_WhenEmailAlreadyExists()
+                {
+                        // Arrange
+                        var repo = new Mock<ICustomerRepository>();
 
-                var useCase = new RegisterCustomerUseCase(repo.Object);
-                var cmd = BuildValidCommand();
+                        // Set FindAsync up to return a list containing one existing customer.
+                        // Note: the return type on the interface is IReadOnlyList<Customer>, so we cast.
+                        IReadOnlyList<Customer> existing = new List<Customer> { BuildExistingCustomer() };
+                        repo.Setup(r => r.FindAsync(It.IsAny<CustomerByEmailSpecification>()))
+                                .ReturnsAsync(existing);
 
-                // Act
-                var result = await useCase.ExecuteAsync(cmd);
+                        var useCase = new RegisterCustomerUseCase(repo.Object);
+                        var cmd = BuildValidCommand();
 
-                // Assert
-                Assert.False(result.Success);
-                Assert.Null(result.CustomerId);
-                Assert.Equal("En kunde med denne email findes allerede.", result.ErrorMessage);
-                // Important: we must NOT have attempted to persist a new customer.
-                repo.Verify(r => r.AddAsync(It.IsAny<Customer>()), Times.Never);
-        }
+                        // Act
+                        var result = await useCase.ExecuteAsync(cmd);
 
-        // -----------------------------------------------------------------
-        // Test 2: When NO customer with the same email exists,
-        // the use case must create the customer and call AddAsync once.
-        // -----------------------------------------------------------------
+                        // Assert
+                        Assert.False(result.Success);
+                        Assert.Null(result.CustomerId);
+                        Assert.Equal("En kunde med denne email findes allerede.", result.ErrorMessage);
+                        // Important: we must NOT have attempted to persist a new customer.
+                        repo.Verify(r => r.AddAsync(It.IsAny<Customer>()), Times.Never);
+                }
 
-        [Fact]
-        public async Task ExecuteAsync_ShouldCreateCustomer_WhenEmailIsUnique()
-        {
-                // Arrange
-                var repo = new Mock<ICustomerRepository>();
+                // -----------------------------------------------------------------
+                // Test 2: When NO customer with the same email exists,
+                // the use case must create the customer and call AddAsync once.
+                // -----------------------------------------------------------------
 
-                // Empty list = no existing customer with that email
-                IReadOnlyList<Customer> empty = new List<Customer>();
-                repo.Setup(r => r.FindAsync(It.IsAny<CustomerByEmailSpecification>()))
-                    .ReturnsAsync(empty);
+                [Fact]
+                public async Task ExecuteAsync_ShouldCreateCustomer_WhenEmailIsUnique()
+                {
+                        // Arrange
+                        var repo = new Mock<ICustomerRepository>();
 
-                // AddAsync must return the incoming customer (per the interface contract)
-                repo.Setup(r => r.AddAsync(It.IsAny<Customer>()))
-                    .ReturnsAsync((Customer c) => c);
+                        // Empty list = no existing customer with that email
+                        IReadOnlyList<Customer> empty = new List<Customer>();
+                        repo.Setup(r => r.FindAsync(It.IsAny<CustomerByEmailSpecification>()))
+                                .ReturnsAsync(empty);
 
-                var useCase = new RegisterCustomerUseCase(repo.Object);
-                var cmd = BuildValidCommand(email: "new@test.dk");
+                        // AddAsync must return the incoming customer (per the interface contract)
+                        repo.Setup(r => r.AddAsync(It.IsAny<Customer>()))
+                                .ReturnsAsync((Customer c) => c);
 
-                // Act
-                var result = await useCase.ExecuteAsync(cmd);
+                        var useCase = new RegisterCustomerUseCase(repo.Object);
+                        var cmd = BuildValidCommand(email: "new@test.dk");
 
-                // Assert
-                Assert.True(result.Success);
-                Assert.NotNull(result.CustomerId);
-                Assert.Null(result.ErrorMessage);
-                repo.Verify(r => r.AddAsync(It.Is<Customer>(c => c.Email.Value == "new@test.dk")),
-                            Times.Once);
-        }
+                        // Act
+                        var result = await useCase.ExecuteAsync(cmd);
 
-        // -----------------------------------------------------------------
-        // Test 3: If the command contains invalid data (here: empty first name),
-        // the exception must be caught by the use case and returned as an error.
-        // -----------------------------------------------------------------
+                        // Assert
+                        Assert.True(result.Success);
+                        Assert.NotNull(result.CustomerId);
+                        Assert.Null(result.ErrorMessage);
+                        repo.Verify(r => r.AddAsync(It.Is<Customer>(c => c.Email.Value == "new@test.dk")),
+                                Times.Once);
+                }
 
-        [Fact]
-        public async Task ExecuteAsync_ShouldReturnError_WhenDomainValidationFails()
-        {
-                // Arrange
-                var repo = new Mock<ICustomerRepository>();
-                IReadOnlyList<Customer> empty = new List<Customer>();
-                repo.Setup(r => r.FindAsync(It.IsAny<CustomerByEmailSpecification>()))
-                    .ReturnsAsync(empty);
+                // -----------------------------------------------------------------
+                // Test 3: If the command contains invalid data (here: empty first name),
+                // the exception must be caught by the use case and returned as an error.
+                // -----------------------------------------------------------------
 
-                var useCase = new RegisterCustomerUseCase(repo.Object);
+                [Fact]
+                public async Task ExecuteAsync_ShouldReturnError_WhenDomainValidationFails()
+                {
+                        // Arrange
+                        var repo = new Mock<ICustomerRepository>();
+                        IReadOnlyList<Customer> empty = new List<Customer>();
+                        repo.Setup(r => r.FindAsync(It.IsAny<CustomerByEmailSpecification>()))
+                                .ReturnsAsync(empty);
 
-                // Empty first name => Person ctor throws ArgumentException
-                var invalidCmd = new RegisterCustomerCommand(
-                    LegalFirstName: "",
-                    LegalLastName: "Person",
-                    Pronouns: "he/him",
-                    DateOfBirth: new DateOnly(1990, 1, 1),
-                    PhoneNumber: "12345678",
-                    Email: "test@test.dk",
-                    Gender: Gender.Abinary,
-                    PersonalNote: null,
-                    ImportantNote: null);
+                        var useCase = new RegisterCustomerUseCase(repo.Object);
 
-                // Act
-                var result = await useCase.ExecuteAsync(invalidCmd);
+                        // Empty first name => Person ctor throws ArgumentException
+                        var invalidCmd = new RegisterCustomerCommand(
+                                LegalFirstName: "",
+                                LegalLastName: "Person",
+                                Pronouns: "he/him",
+                                DateOfBirth: new DateOnly(1990, 1, 1),
+                                PhoneNumber: "12345678",
+                                Email: "test@test.dk",
+                                Gender: Gender.Abinary,
+                                PersonalNote: null,
+                                ImportantNote: null);
 
-                // Assert
-                Assert.False(result.Success);
-                Assert.Null(result.CustomerId);
-                Assert.NotNull(result.ErrorMessage);
-                repo.Verify(r => r.AddAsync(It.IsAny<Customer>()), Times.Never);
+                        // Act
+                        var result = await useCase.ExecuteAsync(invalidCmd);
+
+                        // Assert
+                        Assert.False(result.Success);
+                        Assert.Null(result.CustomerId);
+                        Assert.NotNull(result.ErrorMessage);
+                        repo.Verify(r => r.AddAsync(It.IsAny<Customer>()), Times.Never);
+                }
         }
 }
