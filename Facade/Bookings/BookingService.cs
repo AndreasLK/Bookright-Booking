@@ -84,7 +84,6 @@ namespace Facade.Bookings
                                 return Enumerable.Empty<BookingSummaryDto>();
                         }
 
-                        // Optimization: Process the mapping tasks concurrently instead of awaiting sequentially in a loop
                         var mappingTasks = bookings
                             .Where(b => b.Timeslot != null)
                             .Select(b => this.MapToSummaryDtoAsync(b));
@@ -121,8 +120,6 @@ namespace Facade.Bookings
                         var booking = await this.GetExistingBookingAsync(bookingId);
 
                         var newTimeslot = new TimeSlot(newStartTime, newEndTime);
-
-                        // Execute Domain Behavior on the Entity
                         booking.Reschedule(newTimeslot);
 
                         await this._bookingRepository.UpdateAsync(booking);
@@ -154,7 +151,7 @@ namespace Facade.Bookings
                         var booking = await this._bookingRepository.GetByIdAsync(bookingId);
                         if (booking == null)
                         {
-                                throw new InvalidOperationException($"Booking with ID '{bookingId}' was not found.");
+                                throw new InvalidOperationException($"Booking m,ed ID '{bookingId}' kunne ikke findes.");
                         }
                         return booking;
                 }
@@ -165,8 +162,6 @@ namespace Facade.Bookings
                 /// <param name="booking">The domain entity.</param>
                 private async Task<BookingSummaryDto> MapToSummaryDtoAsync(Booking booking)
                 {
-                        // Note: If migrating to Entity Framework Core later, configure the repository 
-                        // to use .Include() to avoid manual fetching. For now, we fetch concurrently to avoid N+1 bottlenecks.
                         var customerTask = this._customerRepository.GetByIdAsync(booking.CustomerId.Value);
                         var treatmentTask = this._treatmentRepository.GetByIdAsync(booking.TreatmentId.Value);
                         var practitionerTask = this._practitionerRepository.GetByIdAsync(booking.PractitionerId.Value);
@@ -183,11 +178,11 @@ namespace Facade.Bookings
                         {
                                 Id = booking.Id.Value,
                                 CustomerId = booking.CustomerId.Value,
-                                CustomerName = customer?.ToDisplayFullName() ?? "Unknown Customer",
-                                PractitionerName = practitioner?.ToDisplayFullName() ?? "Unknown Practitioner",
+                                CustomerName = customer?.ToDisplayFullName() ?? "Ukendt Kunde",
+                                PractitionerName = practitioner?.ToDisplayFullName() ?? "Ukendt Behandler",
                                 PractitionerId = booking.PractitionerId.Value,
-                                TreatmentName = treatment?.Name ?? "Unknown Treatment",
-                                ClinicName = clinic?.Name ?? "Unknown Clinic",
+                                TreatmentName = treatment?.Name ?? "Ukendt Behandling",
+                                ClinicName = clinic?.Name ?? "Ukendt Klinik",
                                 StartTime = booking.Timeslot?.StartDateTime ?? DateTime.MinValue,
                                 EndTime = booking.Timeslot?.EndDateTime ?? DateTime.MinValue,
                                 AmountPaid = booking.Paid?.Value
@@ -218,8 +213,6 @@ namespace Facade.Bookings
                 public async Task ReassignPractitionerAsync(Guid bookingId, Guid newPractitionerId, CancellationToken cancellationToken = default)
                 {
                         Booking booking = await this.GetExistingBookingAsync(bookingId: bookingId);
-
-                        // Execute Domain Behavior
                         PractitionerId newId = new PractitionerId(Value: newPractitionerId);
                         booking.ReassignPractitioner(newPractitionerId: newId);
 
