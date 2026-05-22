@@ -12,6 +12,6 @@ namespace Domain.Interfaces.Repositories
         /// Handles specialized queries not covered by the generic repository.
         /// </summary>
         public interface ICustomerRepository : IRepository<Customer>
-        {       
+        {
         }
 }

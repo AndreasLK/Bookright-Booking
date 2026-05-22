@@ -13,33 +13,37 @@ namespace Infrastructure.Persistence
         /// </summary>
         public class InMemoryCustomerRepository : ICustomerRepository
         {
-                private readonly List<Customer> _customers = new();
+                private static readonly List<Customer> CUSTOMERS = new List<Customer>();
 
                 public InMemoryCustomerRepository()
                 {
-                        this.SeedData();
+                        if (CUSTOMERS.Count == 0)
+                        {
+                                this.SeedData();
+                        }
                 }
 
                 /// <inheritdoc/>
                 public Task<Customer?> GetByIdAsync(Guid id)
                 {
-                        Customer? found = this._customers.FirstOrDefault(predicate: c => c.Id.Value == id);
-                        return Task.FromResult(result: found);
+                        Customer? customer = CUSTOMERS.FirstOrDefault(predicate: c => c.Id.Value == id);
+                        return Task.FromResult(result: customer);
                 }
 
                 /// <inheritdoc/>
                 public Task<IReadOnlyList<Customer>> GetAllAsync()
                 {
-                        IReadOnlyList<Customer> all = this._customers.ToList();
-                        return Task.FromResult(result: all);
+                        IReadOnlyList<Customer> readOnlyList = CUSTOMERS.AsReadOnly();
+                        return Task.FromResult(result: readOnlyList);
                 }
 
                 /// <inheritdoc/>
                 public Task<IReadOnlyList<Customer>> FindAsync(Specification<Customer> specification)
                 {
-                        // Compile expression tree into executable predicate (in-memory only;
-                        // EF Core would translate expression directly to SQL)
-                        var predicate = specification.ToExpression().Compile();
+                        ArgumentNullException.ThrowIfNull(argument: specification, paramName: nameof(specification));
+
+                        // Convert the list to an IQueryable so we can dynamically chain the specification's expression trees
+                        IQueryable<Customer> query = CUSTOMERS.AsQueryable();
 
                         IEnumerable<Customer> query = this._customers.Where(predicate: predicate);
 
@@ -64,17 +68,22 @@ namespace Infrastructure.Persistence
                 /// <inheritdoc/>
                 public Task<Customer> AddAsync(Customer entity)
                 {
-                        this._customers.Add(item: entity);
+                        ArgumentNullException.ThrowIfNull(argument: entity, paramName: nameof(entity));
+
+                        CUSTOMERS.Add(item: entity);
                         return Task.FromResult(result: entity);
                 }
 
                 /// <inheritdoc/>
                 public Task UpdateAsync(Customer entity)
                 {
-                        int index = this._customers.FindIndex(match: c => c.Id.Value == entity.Id.Value);
-                        if (index >= 0)
+                        ArgumentNullException.ThrowIfNull(argument: entity, paramName: nameof(entity));
+
+                        int index = CUSTOMERS.FindIndex(match: c => c.Id.Value == entity.Id.Value);
+
+                        if (index != -1)
                         {
-                                this._customers[index] = entity;
+                                CUSTOMERS[index] = entity;
                         }
                         return Task.CompletedTask;
                 }
@@ -82,7 +91,7 @@ namespace Infrastructure.Persistence
                 /// <inheritdoc/>
                 public Task<bool> DeleteAsync(Guid id)
                 {
-                        int removedCount = this._customers.RemoveAll(match: c => c.Id.Value == id);
+                        int removedCount = CUSTOMERS.RemoveAll(match: c => c.Id.Value == id);
                         bool wasRemoved = removedCount > 0;
 
                         return Task.FromResult(result: wasRemoved);
@@ -115,7 +124,7 @@ namespace Infrastructure.Persistence
                             details: jonathanDetails
                         );
 
-                        this._customers.Add(item: jonathan);
+                        CUSTOMERS.Add(item: jonathan);
 
                         PersonDetails elizabethDetails = new PersonDetails(
                             LegalFirstName: "Elizabeth",
@@ -139,7 +148,7 @@ namespace Infrastructure.Persistence
                             details: elizabethDetails
                         );
 
-                        this._customers.Add(item: elizabeth);
+                        CUSTOMERS.Add(item: elizabeth);
                 }
         }
 }

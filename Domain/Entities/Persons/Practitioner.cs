@@ -23,6 +23,12 @@ namespace Domain.Entities.Persons
                 /// </summary>
                 public string? Alias { get; private set; }
 
+                /// <summary>
+                /// Initializes a new instance of the <see cref="Practitioner"/> class.
+                /// </summary>
+                /// <param name="id">Unique identifier.</param>
+                /// <param name="alias">Professional handle.</param>
+                /// <param name="details">Personal characteristics and contact data.</param>
                 public Practitioner(
                         PractitionerId id,
                         string? alias,
@@ -33,8 +39,9 @@ namespace Domain.Entities.Persons
                 }
 
                 /// <summary>
-                /// Add a new certificate to the Practitioner
+                /// Appends a professional certification.
                 /// </summary>
+                /// <param name="certificate">The certification record.</param>
                 public void AddCertificate(Certificate certificate)
                 {
 
@@ -46,8 +53,9 @@ namespace Domain.Entities.Persons
                 }
 
                 /// <summary>
-                /// Remove certificate from the Practitioner
+                /// Revokes a professional certification by its identifier.
                 /// </summary>
+                /// <param name="id">The certification identifier.</param>
                 public void RemoveCertificate(CertificateId id)
                 {
                         Certificate? certificate = this._certificates.FirstOrDefault(cert => cert.CertificateId == id);
@@ -55,6 +63,31 @@ namespace Domain.Entities.Persons
                         {
                                 this._certificates.Remove(certificate);
                         }
+                }
+
+                /// <summary>
+                /// Updates the display alias.
+                /// </summary>
+                /// <param name="newAlias">The newly requested string.</param>
+                public void UpdateAlias(string newAlias)
+                {
+                        if (string.IsNullOrWhiteSpace(value: newAlias))
+                        {
+                                throw new ArgumentException(message: "Alias cannot be empty.", paramName: nameof(newAlias));
+                        }
+
+                        this.Alias = newAlias;
+                }
+
+                /// <summary>
+                /// Updates demographic or contact fields by invoking protected base capabilities.
+                /// </summary>
+                /// <param name="newDetails">The updated data block.</param>
+                public void UpdateDetails(PersonDetails newDetails)
+                {
+                        ArgumentNullException.ThrowIfNull(argument: newDetails, paramName: nameof(newDetails));
+
+                        this.UpdatePersonDetails(details: newDetails);
                 }
         }
 

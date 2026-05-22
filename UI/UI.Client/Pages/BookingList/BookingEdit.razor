@@ -1,0 +1,75 @@
+@page "/bookings/{Id:guid}"
+@rendermode InteractiveAuto
+@using Facade.Bookings
+@using UI.Client.Components.GenericEditForm
+
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800">Rediger Booking</h1>
+    </div>
+
+    @if (_isLoading)
+    {
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Indlæser...</span>
+        </div>
+    }
+    else if (_booking == null)
+    {
+        <div class="alert alert-warning">Booking blev ikke fundet.</div>
+    }
+    else
+    {
+        <div class="col-md-8 col-lg-6">
+            <GenericEditForm TItem="BookingSummaryDto"
+                             Title="Opdater Aftale"
+                             Model="_booking"
+                             OnSave="HandleValidSubmitAsync"
+                             OnCancel="GoBack">
+
+                <FormFields Context="booking">
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Kunde</label>
+                        <input type="text" class="form-control" value="@booking.CustomerName" disabled />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Behandling</label>
+                        <input type="text" class="form-control" value="@booking.TreatmentName" disabled />
+                    </div>
+
+                    @* NEW: Practitioner Dropdown *@
+                    <div class="mb-3">
+                        <label class="form-label">Behandler</label>
+                        <InputSelect class="form-select" @bind-Value="booking.PractitionerId" disabled="@_isPastBooking">
+                            @foreach (var practitioner in _practitioners)
+                            {
+                                <option value="@practitioner.Id">@practitioner.DisplayName</option>
+                            }
+                        </InputSelect>
+                        @if (_isPastBooking)
+                        {
+                            <div class="form-text text-danger small">Behandler kan ikke ændres for afsluttede bookinger.</div>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Start Tidspunkt</label>
+                        <InputDate Type="InputDateType.DateTimeLocal" class="form-control" @bind-Value="booking.StartTime" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Slut Tidspunkt</label>
+                        <InputDate Type="InputDateType.DateTimeLocal" class="form-control" @bind-Value="booking.EndTime" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Betalt Beløb (DKK)</label>
+                        <InputNumber class="form-control" @bind-Value="booking.AmountPaid" />
+                    </div>
+                </FormFields>
+
+            </GenericEditForm>
+        </div>
+    }
+</div>

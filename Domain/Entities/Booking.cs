@@ -115,5 +115,51 @@ namespace Domain.Entities
                         this.AppliedCampaign = appliedCampaign;
 
                 }
+
+                /// <summary>
+                /// Updates the timeslot, ensuring domain rules are met.
+                /// </summary>
+                /// <param name="newTimeslot">The newly requested time window.</param>
+                public void Reschedule(TimeSlot newTimeslot)
+                {
+                        // Example of a Domain Rule: Cannot reschedule to a past date
+                        if (newTimeslot.StartDateTime < DateTime.Now)
+                        {
+                                throw new InvalidOperationException("Cannot reschedule a booking to the past.");
+                        }
+
+                        this.Timeslot = newTimeslot;
+                }
+
+                /// <summary>
+                /// Registers a payment amount.
+                /// </summary>
+                /// <param name="payment">The monetary amount provided.</param>
+                public void RegisterPayment(Money payment)
+                {
+                        if (payment.Value < 0)
+                        {
+                                throw new ArgumentException("Payment amount cannot be negative.");
+                        }
+
+                        this.Paid = payment;
+                }
+
+                /// <summary>
+                /// Reassigns the appointment to a different practitioner.
+                /// </summary>
+                /// <param name="newPractitionerId">The new practitioner identifier.</param>
+                /// <exception cref="InvalidOperationException">Thrown when attempting to change a past booking.</exception>
+                public void ReassignPractitioner(PractitionerId newPractitionerId)
+                {
+                        ArgumentNullException.ThrowIfNull(argument: newPractitionerId, paramName: nameof(newPractitionerId));
+
+                        if (this.Timeslot.StartDateTime < DateTime.Now)
+                        {
+                                throw new InvalidOperationException(message: "Cannot reassign a practitioner for a booking in the past.");
+                        }
+
+                        this.PractitionerId = newPractitionerId;
+                }
         }
 }
