@@ -43,7 +43,7 @@ Follow these steps to set up the project on your local machine.
     dotnet run
     ```
 
-## 🧪 Testing
+## Testing
 
 The solution includes a dedicated `Tests` project. To run the test suite and ensure all components are working as expected:
 
