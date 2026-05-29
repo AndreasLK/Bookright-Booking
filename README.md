@@ -24,7 +24,7 @@ Follow these steps to set up the project on your local machine.
 
 1.  **Clone the repository:**
     ```bash
-    git clone [repository-url]
+    git clone github.com/AndreasLK/Bookright-Booking
     cd bookright-booking
     ```
 
@@ -42,6 +42,8 @@ Follow these steps to set up the project on your local machine.
     ```bash
     dotnet run
     ```
+
+    Go to /customers, /practitioners or /bookings to view the UI
 
 ## Testing
 
