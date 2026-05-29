@@ -18,7 +18,7 @@ Follow these steps to set up the project on your local machine.
 ### Prerequisites
 
 * [.NET 10.0 SDK](https://dotnet.microsoft.com/download) (or higher)
-* An IDE (Visual Studio 2022, JetBrains Rider, or VS Code with C# Dev Kit)
+* An IDE (Visual Studio, JetBrains Rider, or VS Code with C# Dev Kit)
 
 ### Installation
 
