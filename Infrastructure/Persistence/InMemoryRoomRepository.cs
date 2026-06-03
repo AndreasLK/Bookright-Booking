@@ -94,14 +94,14 @@ namespace Infrastructure.Persistence
                         var massageCategoryId = new TreatmentCategoryId(Guid.NewGuid());
 
                         this._rooms.Add(new Room(
-                            id: new RoomId(Guid.Parse("R1111111-1111-1111-1111-111111111111")),
+                            id: new RoomId(Guid.Parse("CC111111-1111-1111-1111-111111111111")),
                             name: "Room 1 - Main Therapy Area",
                             primarilyUsedForId: physioCategoryId,
                             alsoUsableFor: new List<TreatmentCategoryId> { massageCategoryId }
                         ));
 
                         this._rooms.Add(new Room(
-                            id: new RoomId(Guid.Parse("R2222222-2222-2222-2222-222222222222")),
+                            id: new RoomId(Guid.Parse("CC222222-2222-2222-2222-222222222222")),
                             name: "Room 2 - Quiet Massage Room",
                             primarilyUsedForId: massageCategoryId,
                             alsoUsableFor: new List<TreatmentCategoryId>()
