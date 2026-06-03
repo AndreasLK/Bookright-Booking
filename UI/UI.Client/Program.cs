@@ -19,6 +19,7 @@ namespace UI.Client
                         builder.Services.AddSingleton<IClinicRepository, InMemoryClinicRepository>();
                         builder.Services.AddSingleton<ITreatmentRepository, InMemoryTreatmentRepository>();
                         builder.Services.AddSingleton<IPractitionerRepository, InMemoryPractitionerRepository>();
+                        builder.Services.AddSingleton<IRoomRepository, InMemoryRoomRepository>();
 
                         builder.Services.AddScoped<CustomerService>();
                         builder.Services.AddScoped<BookingService>();
