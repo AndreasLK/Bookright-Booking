@@ -2,6 +2,7 @@ using Domain.Entities;
 using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Specifications;
+using Domain.Specifications.Bookings;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 using Facade.Common.Dtos;
