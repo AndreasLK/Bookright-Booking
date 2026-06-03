@@ -8,10 +8,10 @@ using Domain.Entities.Persons;
 using Domain.Enums;
 using Domain.Interfaces;
 using Domain.Interfaces.Repositories;
-using Domain.Specifications;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 using Use_Case.BestDiscount;
+using Domain.Specifications.Bookings;
 
 namespace Tests.UseCase.BestDiscount
 {
