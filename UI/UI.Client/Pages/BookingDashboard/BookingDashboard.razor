@@ -1,0 +1,95 @@
+@page "/bookings/dashboard"
+@using Domain.Entities
+@using Domain.Entities.Persons
+@using UI.Client.Components.Calendar
+@using UI.Client.Components.PopUps
+
+<div class="dashboard-container dark-mode-dashboard">
+    <aside class="dashboard-sidebar">
+        <h2 class="sidebar-title">Filtre</h2>
+
+        <div class="filter-group">
+            <h3>Klinikker</h3>
+            @foreach (var clinic in this.AvailableClinics)
+            {
+                <label class="toggle-label">
+                    <input type="checkbox"
+                           checked="@this.SelectedClinicIds.Contains(clinic.Id)"
+                           @onchange="() => this.ToggleClinicAsync(clinicId: clinic.Id)" />
+                    @clinic.Name
+                </label>
+            }
+        </div>
+
+        <div class="filter-group">
+            <h3>Lokaler</h3>
+            @if (this.AvailableRooms.Any() == false)
+            {
+                <span class="text-muted">Vælg en klinik først.</span>
+            }
+
+            @foreach (var room in this.AvailableRooms)
+            {
+                <label class="toggle-label">
+                    <input type="checkbox"
+                           checked="@this.SelectedRoomIds.Contains(room.Id)"
+                           @onchange="() => this.ToggleRoomAsync(roomId: room.Id)" />
+                    @room.Name
+                </label>
+            }
+        </div>
+    </aside>
+
+    <main class="dashboard-main">
+        <GenericCalendar TItem="Booking"
+                         StartHour="BookingDashboard.DEFAULT_START_HOUR"
+                         EndHour="BookingDashboard.DEFAULT_END_HOUR"
+                         Items="this.ActiveBookings"
+                         Columns="this.CalendarColumns"
+                         StartTimeSelector="this.GetBookingStart"
+                         EndTimeSelector="this.GetBookingEnd"
+                         ColorSelector="this.GetBookingColor"
+                         ColumnIdSelector="this.GetBookingColumnId"
+                         PendingBookingDuration="this.DefaultBookingDuration"
+                         OnEmptySlotClicked="this.HandleEmptySlotClickedAsync">
+            <ItemTemplate Context="booking">
+                <div class="booking-card">
+                    <strong>@this.GetCustomerName(customerId: booking.CustomerId)</strong>
+                    <span>@this.GetTreatmentName(treatmentId: booking.TreatmentId)</span>
+                </div>
+            </ItemTemplate>
+        </GenericCalendar>
+    </main>
+</div>
+
+<QuickSearchPopUp TItem="Practitioner"
+                  @ref="this.PractitionerSearchPopUp"
+                  Title="Vælg Behandler"
+                  SearchProvider="this.SearchPractitionersAsync"
+                  OnItemSelected="this.HandlePractitionerSelectedAsync">
+    <ItemTemplate Context="practitioner">
+        <div>
+            <strong class="popup-item-title">
+                @(!string.IsNullOrWhiteSpace(practitioner.Alias)
+                    ? practitioner.Alias
+                    : $"{practitioner.PreferredFirstName ?? practitioner.LegalFirstName} {practitioner.PreferredLastName ?? practitioner.LegalLastName}")
+            </strong>
+            <small class="popup-item-subtitle">Behandler</small>
+        </div>
+    </ItemTemplate>
+</QuickSearchPopUp>
+
+<QuickSearchPopUp TItem="Customer"
+                  @ref="this.CustomerSearchPopUp"
+                  Title="Vælg Kunde"
+                  SearchProvider="this.SearchCustomersAsync"
+                  OnItemSelected="this.HandleCustomerSelectedAsync">
+    <ItemTemplate Context="customer">
+        <div>
+            <strong class="popup-item-title">
+                @($"{customer.PreferredFirstName ?? customer.LegalFirstName} {customer.PreferredLastName ?? customer.LegalLastName}")
+            </strong>
+            <small class="popup-item-subtitle">@customer.Email.Value</small>
+        </div>
+    </ItemTemplate>
+</QuickSearchPopUp>

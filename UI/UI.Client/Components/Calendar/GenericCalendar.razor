@@ -1,0 +1,68 @@
+@typeparam TItem
+
+<div class="calendar-container dark-mode">
+    <div class="calendar-header">
+        <div class="time-label-spacer"></div>
+        @foreach (var column in Columns)
+        {
+            <div class="column-header">
+                <strong>@column.Title</strong>
+                <span>@column.Subtitle</span>
+            </div>
+        }
+    </div>
+
+    <div class="calendar-body">
+        <div class="time-labels">
+            @for (int hour = StartHour; hour <= EndHour; hour++)
+            {
+                <div class="time-label">@($"{hour:D2}:00")</div>
+            }
+        </div>
+
+        <div class="columns-container">
+            @foreach (var column in Columns)
+            {
+                <div class="calendar-column">
+                    <div class="slot-grid">
+                        @for (int hour = StartHour; hour < EndHour; hour++)
+                        {
+                            @for (int min = 0; min < CalendarConfig.MINUTES_IN_HOUR; min += CalendarConfig.SLOT_INTERVAL_MINUTES)
+                            {
+                                var slotTime = column.Date.AddHours(hour).AddMinutes(min);
+                                <div class="time-slot"
+                                     @onmouseover="() => HandleSlotHover(time: slotTime, columnId: column.ColumnId)"
+                                     @onmouseout="() => ClearHover()"
+                                     @onclick="() => OnEmptySlotClicked.InvokeAsync((Time: slotTime, ColumnId: column.ColumnId))">
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    @foreach (var item in GetItemsForColumn(columnId: column.ColumnId))
+                    {
+                        <div class="calendar-event"
+                             style="@GetItemStyle(item: item)"
+                             @onclick:stopPropagation="true"
+                             @onclick="() => OnItemClicked.InvokeAsync(arg: item)">
+
+                            @if (ItemTemplate != null)
+                            {
+                                @ItemTemplate(item)
+                            }
+                        </div>
+                    }
+
+                    @if (_hoveredColumnId == column.ColumnId && PendingBookingDuration.HasValue && _hoveredTime.HasValue)
+                    {
+                        <div class="calendar-event ghost-event" style="@GetGhostStyle()">
+                            <div class="ghost-content">
+                                <span>Preview (@PendingBookingDuration.Value.TotalMinutes min)</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

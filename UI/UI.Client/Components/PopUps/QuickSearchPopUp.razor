@@ -1,0 +1,45 @@
+@typeparam TItem
+
+@if (this.IsOpen)
+{
+    <div class="popup-backdrop">
+        <div class="popup-content dark-mode-popup">
+            <div class="popup-header">
+                <h3>@this.Title</h3>
+                <button class="close-btn" @onclick="() => this.CloseAsync()">X</button>
+            </div>
+
+            <div class="popup-body">
+                <input type="text"
+                       class="search-input dark-mode-input"
+                       placeholder="Begynd at skrive for at søge..."
+                       @bind="this.SearchTerm"
+                       @bind:event="oninput"
+                       @onkeyup="() => this.ExecuteSearchAsync()" />
+
+                @if (this.IsSearching)
+                {
+                    <div class="loading-indicator text-muted">Søger...</div>
+                }
+                else if (this.Results != null && this.Results.Any() == false)
+                {
+                    <div class="no-results text-muted">Ingen resultater fundet.</div>
+                }
+                else if (this.Results != null)
+                {
+                    <ul class="search-results-list dark-mode-list">
+                        @foreach (var item in this.Results)
+                        {
+                            <li @onclick="() => this.SelectAndCloseAsync(item: item)">
+                                @if (this.ItemTemplate != null)
+                                {
+                                    @this.ItemTemplate(item)
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+            </div>
+        </div>
+    </div>
+}

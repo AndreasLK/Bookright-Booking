@@ -1,0 +1,122 @@
+.popup-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.8); /* Darker backdrop */
+        backdrop-filter: blur(3px); /* Makes the calendar behind it blurry */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+}
+
+.popup-content.dark-mode-popup {
+        background-color: #1e1e1e;
+        border: 1px solid #333;
+        border-radius: 8px;
+        width: 450px;
+        max-width: 90%;
+        color: #e0e0e0;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.7);
+        display: flex;
+        flex-direction: column;
+}
+
+.popup-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        border-bottom: 1px solid #333;
+        background-color: #252526; /* Slightly lighter top bar */
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+}
+
+        .popup-header h3 {
+                margin: 0;
+                font-size: 1.1rem;
+                font-weight: 600;
+                color: #ffffff;
+        }
+
+.close-btn {
+        background: none;
+        border: none;
+        color: #888888;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s;
+}
+
+        .close-btn:hover {
+                color: #ff4d4d; /* Subtle red on hover to indicate close */
+        }
+
+.popup-body {
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+}
+
+/* Dark Mode Input Box */
+.search-input.dark-mode-input {
+        width: 100%;
+        padding: 12px;
+        background-color: #121212;
+        border: 1px solid #444;
+        border-radius: 4px;
+        color: #ffffff;
+        font-size: 1rem;
+        box-sizing: border-box; /* Ensures padding doesn't break width */
+}
+
+        .search-input.dark-mode-input:focus {
+                outline: none;
+                border-color: #0d6efd; /* Bootstrap blue highlight to match your generic colors */
+                box-shadow: 0 0 0 2px rgba(13, 110, 253, 0.25);
+        }
+
+        .search-input.dark-mode-input::placeholder {
+                color: #666;
+        }
+
+/* Dark Mode Results List */
+.search-results-list.dark-mode-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        max-height: 350px;
+        overflow-y: auto;
+        border: 1px solid #333;
+        border-radius: 4px;
+        background-color: #121212;
+}
+
+        .search-results-list.dark-mode-list li {
+                padding: 12px 15px;
+                border-bottom: 1px solid #222;
+                cursor: pointer;
+                transition: background-color 0.1s ease-in-out;
+        }
+
+                .search-results-list.dark-mode-list li:last-child {
+                        border-bottom: none;
+                }
+
+                .search-results-list.dark-mode-list li:hover {
+                        background-color: #2a2d31; /* Subtle highlight */
+                        border-left: 3px solid #0d6efd; /* Accent line on hover */
+                        padding-left: 12px; /* Adjust padding to compensate for border */
+                }
+
+/* Text utility classes */
+.text-muted {
+        color: #888888;
+        font-size: 0.9rem;
+        text-align: center;
+        padding: 10px 0;
+}
