@@ -12,41 +12,34 @@ namespace Domain.Specifications
                 private readonly Guid _roomId;
                 private readonly Guid _clinicId;
                 private readonly Guid _practitionerId;
-                private readonly Guid _customerId;
-                private readonly DateTime _start;
-                private readonly DateTime _end;
+                private readonly TimeSlot _timeslot;
 
 
                 public BookingOverlapSpecification(
                         Guid roomId,
                         Guid clinicId,
                         Guid practitionerId,
-                        Guid customerId,
                         TimeSlot timeslot)
 
                 {
                         this._roomId = roomId;
                         this._clinicId = clinicId;
                         this._practitionerId = practitionerId;
-                        this._customerId = customerId;
-                        this._start = timeslot.StartDateTime;
-                        this._end = timeslot.EndDateTime;
+                        this._timeslot = timeslot;
 
                 }
 
 
                 public override Expression<Func<Booking, bool>> ToExpression()
                 {
-                        TimeSlot søgtPeriode = new TimeSlot(this._start, this._end);
 
                         return b =>
-                                b.Timeslot.Overlaps(søgtPeriode)
+                                b.Timeslot.Overlaps(this._timeslot)
                                 &&
                                 (
                                         b.RoomId.Value == this._roomId ||
                                         b.ClinicId.Value == this._clinicId ||
-                                        b.PractitionerId.Value == this._practitionerId ||
-                                        b.CustomerId.Value == this._customerId
+                                        b.PractitionerId.Value == this._practitionerId
                                 );
                 }
 
