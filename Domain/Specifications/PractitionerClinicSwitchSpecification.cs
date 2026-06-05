@@ -6,12 +6,12 @@ using Domain.Entities;
 
 namespace Domain.Specifications
 {
-        /// <summary>
+        
         /// Finds bookings that prove a practitioner is already assigned to a
         /// different clinic on the requested day.
         /// Used to enforce the rule that practitioners cannot switch clinics
         /// within the same working day.
-        /// </summary>
+       
         public class PractitionerClinicSwitchSpecification : Specification<Booking>
         {
                 private readonly Guid _practitionerId;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Domain.Entities;
+using Domain.Exceptions;
 using Domain.Interfaces.Repositories;
 using Domain.Specifications;
 using Domain.Value_Objects;
@@ -58,7 +59,7 @@ namespace Use_Case.Bookings
                                 var clinicSwitchSpec = new PractitionerClinicSwitchSpecification(
                                         practitionerId: cmd.PractitionerId,
                                         intendedClinicId: cmd.ClinicId,
-                                        date: DateOnly.FromDateTime(cmd.Timeslot.StartDateTime));
+                                        date: DateOnly.FromDateTime(cmd.Timeslot.StartDateTime.DateTime));
 
                                 var clinicConflicts = await this._bookings.FindAsync(clinicSwitchSpec);
 
@@ -96,22 +97,21 @@ namespace Use_Case.Bookings
                                         Succes: false,
                                         BookingId: null,
                                         ErrorMessage: ex.Message);
-                                        catch (PractitionerClinicConflictException ex)
-                                {
-                                        return new CreateBookingResult(
-                                                Succes: false,
-                                                BookingId: null,
-                                                ErrorMessage: ex.Message);
-                                }
-                                catch (Exception ex)
-                                {
-                                        return new CreateBookingResult(
-                                                Succes: false,
-                                                BookingId: null,
-                                                ErrorMessage: $"An unexpected error occurred: {ex.Message}");
-                                }
                         }
-        
+                        catch (PractitionerClinicConflictException ex)
+                        {
+                                return new CreateBookingResult(
+                                        Succes: false,
+                                        BookingId: null,
+                                        ErrorMessage: ex.Message);
+                        }
+                        catch (Exception ex)
+                        {
+                                return new CreateBookingResult(
+                                        Succes: false,
+                                        BookingId: null,
+                                        ErrorMessage: $"An unexpected error occurred: {ex.Message}");
+                        }
                 }
         }
 }
