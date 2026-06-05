@@ -70,7 +70,7 @@
     <ItemTemplate Context="practitioner">
         <div>
             <strong class="popup-item-title">
-                @(!string.IsNullOrWhiteSpace(practitioner.Alias)
+                @(!string.IsNullOrWhiteSpace(value: practitioner.Alias)
                     ? practitioner.Alias
                     : $"{practitioner.PreferredFirstName ?? practitioner.LegalFirstName} {practitioner.PreferredLastName ?? practitioner.LegalLastName}")
             </strong>
