@@ -8,7 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Domain\Domain.csproj" />
     <ProjectReference Include="..\..\Facade\Facade.csproj" />
+    <ProjectReference Include="..\..\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\..\Use Case\Use Case.csproj" />
     <ProjectReference Include="..\UI.Client\UI.Client.csproj" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.7" />
   </ItemGroup>

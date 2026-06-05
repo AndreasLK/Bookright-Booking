@@ -1,7 +1,9 @@
-using Domain.Entities.People;
+using Domain.Entities.Persons;
 using System;
 using System.Collections.Generic;
 using System.Text;
+
+
 
 namespace Domain.Interfaces.Repositories
 {
@@ -10,6 +12,6 @@ namespace Domain.Interfaces.Repositories
         /// Handles specialized queries not covered by the generic repository.
         /// </summary>
         public interface ICustomerRepository : IRepository<Customer>
-        {       
+        {
         }
 }

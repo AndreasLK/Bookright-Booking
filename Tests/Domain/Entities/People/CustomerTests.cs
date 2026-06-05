@@ -1,4 +1,4 @@
-using Domain.Entities.People;
+using Domain.Entities.Persons;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 using Domain.Enums;

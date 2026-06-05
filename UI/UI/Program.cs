@@ -14,6 +14,23 @@ namespace UI
                             .AddInteractiveServerComponents()
                             .AddInteractiveWebAssemblyComponents();
 
+                        builder.Services.AddSingleton<
+                                Domain.Interfaces.Repositories.ICustomerRepository,
+                                Infrastructure.Persistence.InMemoryCustomerRepository
+                                >();
+
+                        builder.Services.AddScoped<Facade.Customers.CustomerService>();
+
+
+                        builder.Services.AddSingleton<Domain.Interfaces.Repositories.IBookingRepository, Infrastructure.Persistence.InMemoryBookingRepository>();
+                        builder.Services.AddSingleton<Domain.Interfaces.Repositories.IClinicRepository, Infrastructure.Persistence.InMemoryClinicRepository>();
+                        builder.Services.AddSingleton<Domain.Interfaces.Repositories.ITreatmentRepository, Infrastructure.Persistence.InMemoryTreatmentRepository>();
+                        builder.Services.AddSingleton<Domain.Interfaces.Repositories.IPractitionerRepository, Infrastructure.Persistence.InMemoryPractitionerRepository>();
+
+                        builder.Services.AddScoped<Facade.Bookings.BookingService>();
+
+                        builder.Services.AddScoped<Facade.Practitioners.PractitionerService>();
+
                         var app = builder.Build();
 
                         // Configure the HTTP request pipeline.
