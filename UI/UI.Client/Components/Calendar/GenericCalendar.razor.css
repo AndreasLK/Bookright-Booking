@@ -44,6 +44,7 @@
         display: flex;
         flex: 1;
         overflow-y: auto;
+        padding-top: 15px;
 }
 
 .time-labels {
@@ -87,6 +88,7 @@
         display: flex;
         flex-direction: column;
         z-index: 5;
+        margin-top: -7px;
 }
 
 .time-slot {
