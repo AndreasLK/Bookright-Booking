@@ -15,6 +15,7 @@ namespace Use_Case.Bookings
                 Guid PractitionerId,
                 Guid TreatmentId,
                 Guid RoomId,
+                Guid CustomerId,
                 TimeSlot Timeslot);
 
         /// <summary>

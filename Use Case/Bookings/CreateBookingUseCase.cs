@@ -59,7 +59,7 @@ namespace Use_Case.Bookings
                                 var clinicSwitchSpec = new PractitionerClinicSwitchSpecification(
                                         practitionerId: cmd.PractitionerId,
                                         intendedClinicId: cmd.ClinicId,
-                                        date: DateOnly.FromDateTime(cmd.Timeslot.StartDateTime.DateTime));
+                                        date: DateOnly.FromDateTime(cmd.Timeslot.StartDateTime));
 
                                 var clinicConflicts = await this._bookings.FindAsync(clinicSwitchSpec);
 
@@ -79,6 +79,7 @@ namespace Use_Case.Bookings
                                         clinic: new ClinicId(cmd.ClinicId),
                                         practitioner: new PractitionerId(cmd.PractitionerId),
                                         treatment: new TreatmentId(cmd.TreatmentId),
+                                        customer: new CustomerId(cmd.CustomerId),
                                         room: new RoomId(cmd.RoomId),
                                         timeslot: cmd.Timeslot);
 
