@@ -1,0 +1,106 @@
+@namespace UI.Client.Components.SmartBookingModal
+@using UI.Client.Components.SearchableDataList
+
+<div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Opret Booking (@StartTime.ToString("dd. MMM HH:mm") - @EndTime.ToString("HH:mm"))</h5>
+                <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="CancelAsync"></button>
+            </div>
+
+            <div class="modal-body">
+                @if (!string.IsNullOrEmpty(ErrorMessage))
+                {
+                    <div class="alert alert-danger">@ErrorMessage</div>
+                }
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Vælg Klinik</label>
+                        @if (SelectedClinic is not null)
+                        {
+                            <div class="alert alert-success p-2 mb-2">Valgt: <strong>@SelectedClinic.Name</strong></div>
+                        }
+                        <SearchableDataList TItem="Facade.Clinics.ClinicDto"
+                                            Items="AvailableClinics"
+                                            OnItemClick="SetClinic">
+                            <ItemTemplate Context="clinic">@clinic.Name</ItemTemplate>
+                        </SearchableDataList>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Vælg Kunde</label>
+                        @if (SelectedCustomer is not null)
+                        {
+                            <div class="alert alert-success p-2 mb-2">Valgt: <strong>@SelectedCustomer.LegalFirstName @SelectedCustomer.LegalLastName</strong></div>
+                        }
+                        <SearchableDataList TItem="Facade.Customers.CustomerSummaryDto"
+                                            Items="AvailableCustomers"
+                                            OnItemClick="SetCustomer">
+                            <ItemTemplate Context="customer">@customer.LegalFirstName @customer.LegalLastName</ItemTemplate>
+                        </SearchableDataList>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">Vælg Behandling</label>
+                        <select class="form-select" @onchange="SetTreatment">
+                            <option value="">-- Vælg Behandling --</option>
+                            @foreach (var treatment in AvailableTreatments)
+                            {
+                                <option value="@treatment.Id">@treatment.Name</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+
+                <hr />
+
+                @if (IsEvaluatingProposal)
+                {
+                    <div class="text-center py-4">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <p class="mt-2 text-muted">Beregner optimal allokering...</p>
+                    </div>
+                }
+                else if (SystemProposal is not null)
+                {
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Lokale (Anbefalet / Manuel)</label>
+                            @if (FinalRoomId is not null)
+                            {
+                                var finalRoom = AvailableRooms.FirstOrDefault(r => r.Id == FinalRoomId);
+                                <div class="alert alert-info p-2 mb-2">Afsat Lokale: <strong>@(finalRoom?.Name ?? "Ukendt")</strong></div>
+                            }
+                            <SearchableDataList TItem="Facade.Rooms.RoomDto"
+                                                Items="AvailableRooms"
+                                                OnItemClick="OverrideRoom">
+                                <ItemTemplate Context="room">@room.Name</ItemTemplate>
+                            </SearchableDataList>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Behandler (Anbefalet / Manuel)</label>
+                            @if (FinalPractitionerId is not null)
+                            {
+                                var finalPrac = AvailablePractitioners.FirstOrDefault(p => p.Id == FinalPractitionerId);
+                                <div class="alert alert-info p-2 mb-2">Afsat Behandler: <strong>@(finalPrac?.DisplayName ?? "Ukendt")</strong></div>
+                            }
+                            <SearchableDataList TItem="Facade.Common.Dtos.PractitionerLookupDto"
+                                                Items="AvailablePractitioners"
+                                                OnItemClick="OverridePractitioner">
+                                <ItemTemplate Context="prac">@prac.DisplayName</ItemTemplate>
+                            </SearchableDataList>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" @onclick="CancelAsync">Annuller</button>
+                <button type="button" class="btn btn-success" @onclick="ConfirmAndSaveBookingAsync">Bekræft & Gem</button>
+            </div>
+        </div>
+    </div>
+</div>
