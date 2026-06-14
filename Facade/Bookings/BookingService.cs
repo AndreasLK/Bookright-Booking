@@ -163,6 +163,13 @@ namespace Facade.Bookings
                         booking.RegisterPayment(payment);
 
                         await this._bookingRepository.UpdateAsync(booking);
+
+                        // Payments made in JYD (Jutlandic Dollars) are considered off the books.
+                        // The booking is permanently deleted after payment to ensure no record remains.
+                        if (currency == Currency.JYD)
+                        {
+                                await this._bookingRepository.DeleteAsync(booking.Id.Value);
+                        }
                 }
 
                 /// <summary>
