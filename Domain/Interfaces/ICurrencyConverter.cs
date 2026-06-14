@@ -35,5 +35,23 @@ namespace Domain.Interfaces
                 /// <param name="targetCurrency">Currency to convert all values into.</param>
                 /// <returns>Array of normalized Money objects.</returns>
                 public abstract Money[] ConvertToSame(Money[] values, Currency targetCurrency);
+
+                // <summary>
+                /// Fetches the current exchange rate from an external source (e.g. CoinGecko).
+                /// Always returns a result — falls back to a configured rate if the external source fails.
+                /// </summary>
+                /// <param name="fromCurrency">The source currency (typically DKK).</param>
+                /// <param name="toCurrency">The target currency (e.g. BTC or Trump).</param>
+                /// <param name="ct">Cancellation token used to abort the HTTP request.</param>
+                /// <returns>
+                /// The exchange rate as a ratio: how many units of <paramref name="toCurrency"/>
+                /// you receive per one unit of <paramref name="fromCurrency"/>.
+                /// Example: 1 DKK = 0.00000167 BTC → returns 0.00000167
+                /// </returns>
+                Task<decimal> GetLiveRateAsync(Currency fromCurrency, Currency toCurrency, CancellationToken ct = default);
+
+
         }
+
+
 }

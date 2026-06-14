@@ -11,6 +11,10 @@ namespace Domain
                 public static readonly TimeSpan MAX_BOOKING_DAYS_IN_FUTURE = TimeSpan.FromDays(90);
                 public const int PRACTITIONER_MAX_LOCATION_SWITCHES_DAILY = 1;
                 public static readonly Currency DEFAULT_CURRENCY = Currency.DKK;
+                public const decimal FALLBACK_RATE_BTC_DKK = 600_000m;
+                public const decimal FALLBACK_RATE_TRUMP_DKK = 15m;
+                public const int EXCHANGE_RATE_CACHE_SECONDS = 30;
+                public const int EXCHANGE_RATE_TIMEOUT_SECONDS = 5;
 
                 //Discounts:
 

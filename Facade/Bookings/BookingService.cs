@@ -1,15 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Domain.Entities;
 using Domain.Enums;
+using Domain.Interfaces;
 using Domain.Interfaces.Repositories;
 using Domain.Specifications;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 using Facade.Common.Dtos;
 using Facade.Common.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Facade.Bookings
 {
@@ -23,6 +24,7 @@ namespace Facade.Bookings
                 private readonly ITreatmentRepository _treatmentRepository;
                 private readonly IPractitionerRepository _practitionerRepository;
                 private readonly IClinicRepository _clinicRepository;
+                private readonly ICurrencyConverter _currencyConverter;
 
                 /// <summary>
                 /// Initializes a new instance of the <see cref="BookingService"/> class.
@@ -32,24 +34,28 @@ namespace Facade.Bookings
                 /// <param name="treatmentRepository">Data store for treatments.</param>
                 /// <param name="practitionerRepository">Data store for practitioners.</param>
                 /// <param name="clinicRepository">Data store for clinics.</param>
+                /// <param name="currencyConverter">Convert payment currency</param>
                 public BookingService(
                     IBookingRepository bookingRepository,
                     ICustomerRepository customerRepository,
                     ITreatmentRepository treatmentRepository,
                     IPractitionerRepository practitionerRepository,
-                    IClinicRepository clinicRepository)
+                    IClinicRepository clinicRepository,
+                    ICurrencyConverter currencyConverter)
                 {
                         ArgumentNullException.ThrowIfNull(argument: bookingRepository, nameof(bookingRepository));
                         ArgumentNullException.ThrowIfNull(argument: customerRepository, nameof(customerRepository));
                         ArgumentNullException.ThrowIfNull(argument: treatmentRepository, nameof(treatmentRepository));
                         ArgumentNullException.ThrowIfNull(argument: practitionerRepository, nameof(practitionerRepository));
                         ArgumentNullException.ThrowIfNull(argument: clinicRepository, nameof(clinicRepository));
+                        ArgumentNullException.ThrowIfNull(argument: currencyConverter, nameof(currencyConverter));
 
                         this._bookingRepository = bookingRepository;
                         this._customerRepository = customerRepository;
                         this._treatmentRepository = treatmentRepository;
                         this._practitionerRepository = practitionerRepository;
                         this._clinicRepository = clinicRepository;
+                        this._currencyConverter = currencyConverter;
                 }
 
                 /// <summary>
@@ -126,17 +132,34 @@ namespace Facade.Bookings
                 }
 
                 /// <summary>
-                /// Registers a payment.
+                /// Registers a payment for a booking in the specified currency.
+                /// If the currency is not DKK, the amount is fetched as a live rate from CoinGecko
+                /// and converted before being stored.
                 /// </summary>
-                /// <param name="bookingId">The unique identifier.</param>
-                /// <param name="amountPaid">The monetary amount provided.</param>
+                /// <param name="bookingId">The unique identifier of the booking.</param>
+                /// <param name="amountInDkk">The monetary amount in DKK.</param>
+                /// <param name="currency">The currency the customer wants to pay with.</param>
                 /// <param name="cancellationToken">Token to monitor for cancellation requests.</param>
-                public async Task RegisterPaymentAsync(Guid bookingId, decimal amountPaid, CancellationToken cancellationToken = default)
+                public async Task RegisterPaymentAsync(
+                        Guid bookingId,
+                        decimal amountInDkk,
+                        Currency currency = Currency.DKK,
+                        CancellationToken cancellationToken = default)
                 {
                         var booking = await this.GetExistingBookingAsync(bookingId);
 
-                        // Execute Domain Behavior on the Entity
-                        var payment = new Money(amountPaid, Currency.DKK);
+                        // Fetch the live exchange rate and convert the amount to the chosen currency.
+                        // If currency is DKK, GetLiveRateAsync returns 1 — no conversion happens.
+                        var rate = await this._currencyConverter.GetLiveRateAsync(
+                                fromCurrency: Currency.DKK,
+                                toCurrency: currency,
+                                ct: cancellationToken);
+
+                        // Multiply by rate: rate = how many units of currency you get per 1 DKK.
+                        // Example: 500 DKK * 0.00000163 = 0.000815 BTC
+                        var convertedAmount = amountInDkk * rate;
+
+                        var payment = new Money(value: convertedAmount, currency: currency);
                         booking.RegisterPayment(payment);
 
                         await this._bookingRepository.UpdateAsync(booking);

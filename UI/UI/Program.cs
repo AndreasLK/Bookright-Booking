@@ -1,3 +1,5 @@
+using Domain.Interfaces;
+using Infrastructure;
 using UI.Client.Pages;
 using UI.Components;
 
@@ -30,6 +32,12 @@ namespace UI
                         builder.Services.AddScoped<Facade.Bookings.BookingService>();
 
                         builder.Services.AddScoped<Facade.Practitioners.PractitionerService>();
+                        // Register IMemoryCache — required by CoinGeckoCurrencyConverter to cache exchange rates.
+                        builder.Services.AddMemoryCache();
+
+                        // Register our live currency converter.
+                        // Whenever something asks for ICurrencyConverter, it receives CoinGeckoCurrencyConverter.
+                        builder.Services.AddHttpClient<ICurrencyConverter, CoinGeckoCurrencyConverter>();
 
                         var app = builder.Build();
 

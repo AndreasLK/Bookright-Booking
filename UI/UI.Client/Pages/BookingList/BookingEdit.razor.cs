@@ -56,7 +56,7 @@ namespace UI.Client.Pages.BookingList
                                 {
                                         await this.BookingService.RegisterPaymentAsync(
                                             bookingId: this.Id,
-                                            amountPaid: model.AmountPaid.Value
+                                            amountInDkk: model.AmountPaid.Value
                                         );
                                 }
 
