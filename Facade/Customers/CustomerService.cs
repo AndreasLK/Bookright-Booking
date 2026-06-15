@@ -137,6 +137,30 @@ namespace Facade.Customers
                         await this._customerRepository.UpdateAsync(entity: existingCustomer);
                 }
 
+                /// <summary>
+                /// Registers a new customer in the system.
+                /// Delegates to RegisterCustomerUseCase which handles validation and persistence.
+                /// </summary>
+                /// <param name="dto">The new customer details from the UI.</param>
+                /// <returns>The new customer's ID if successful, or an error message if not.</returns>
+                public async Task<RegisterCustomerResult> RegisterCustomerAsync(CustomerDetailsDto dto)
+                {
+                        ArgumentNullException.ThrowIfNull(argument: dto, paramName: nameof(dto));
+
+                        var command = new RegisterCustomerCommand(
+                                LegalFirstName: dto.LegalFirstName,
+                                LegalLastName: dto.LegalLastName,
+                                Pronouns: dto.Pronouns,
+                                DateOfBirth: dto.DateOfBirth,
+                                PhoneNumber: dto.PhoneNumber,
+                                Email: dto.Email,
+                                Gender: (Domain.Enums.Gender)dto.Gender,
+                                PersonalNote: null,
+                                ImportantNote: dto.ImportantNote
+                        );
+
+                        return await this._registerCustomerUseCase.ExecuteAsync(command);
+                }
 
         }
 }
