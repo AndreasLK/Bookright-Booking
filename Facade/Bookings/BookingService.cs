@@ -215,7 +215,8 @@ namespace Facade.Bookings
                                 ClinicName = clinic?.Name ?? "Ukendt Klinik",
                                 StartTime = booking.Timeslot?.StartDateTime ?? DateTime.MinValue,
                                 EndTime = booking.Timeslot?.EndDateTime ?? DateTime.MinValue,
-                                AmountPaid = booking.Paid?.Value
+                                AmountPaid = booking.Paid?.Value,
+                                Status = booking.Status
                         };
                 }
 
