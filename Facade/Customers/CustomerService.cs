@@ -2,6 +2,7 @@ using Domain.Entities.Persons;
 using Domain.Interfaces.Repositories;
 using Domain.Value_Objects;
 using Facade.Common.Dtos;
+using UseCase.Customers;
 
 namespace Facade.Customers
 {
@@ -13,19 +14,23 @@ namespace Facade.Customers
         public class CustomerService
         {
                 private readonly ICustomerRepository _customerRepository;
+                private readonly RegisterCustomerUseCase _registerCustomerUseCase;
 
                 /// <summary>
                 /// Initializes a new instance of the <see cref="CustomerService"/> class.
                 /// </summary>
                 /// <param name="customerRepository">The data access implementation for customer entities.</param>
+                /// <param name="registerCustomerUseCase"></param>
                 /// <exception cref="ArgumentNullException">Thrown when the injected repository is null.</exception>
-                public CustomerService(ICustomerRepository customerRepository)
+                public CustomerService(ICustomerRepository customerRepository, RegisterCustomerUseCase registerCustomerUseCase)
+
                 {
                         if (customerRepository is null)
                         {
                                 throw new ArgumentNullException(paramName: nameof(customerRepository));
                         }
                         this._customerRepository = customerRepository;
+                        this._registerCustomerUseCase = registerCustomerUseCase;
                 }
 
                 /// <summary>
