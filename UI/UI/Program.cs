@@ -1,5 +1,6 @@
 using UI.Client.Pages;
 using UI.Components;
+using UseCase.Customers;
 
 namespace UI
 {
@@ -28,7 +29,7 @@ namespace UI
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.IPractitionerRepository, Infrastructure.Persistence.InMemoryPractitionerRepository>();
 
                         builder.Services.AddScoped<Facade.Bookings.BookingService>();
-
+                        builder.Services.AddScoped<RegisterCustomerUseCase>();
                         builder.Services.AddScoped<Facade.Practitioners.PractitionerService>();
 
                         var app = builder.Build();
