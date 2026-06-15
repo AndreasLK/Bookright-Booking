@@ -1,6 +1,7 @@
 using UI.Client.Pages;
 using UI.Components;
 using UseCase.Customers;
+using UseCase.Practitioners;
 
 namespace UI
 {
@@ -31,6 +32,7 @@ namespace UI
                         builder.Services.AddScoped<Facade.Bookings.BookingService>();
                         builder.Services.AddScoped<RegisterCustomerUseCase>();
                         builder.Services.AddScoped<Facade.Practitioners.PractitionerService>();
+                        builder.Services.AddScoped<RegisterPractitionerUseCase>();
 
                         var app = builder.Build();
 
