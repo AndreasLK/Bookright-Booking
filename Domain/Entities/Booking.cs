@@ -5,6 +5,7 @@ using Domain.Value_Objects.Ids;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Domain.Enums;
 
 namespace Domain.Entities
 {
@@ -160,6 +161,26 @@ namespace Domain.Entities
                         }
 
                         this.PractitionerId = newPractitionerId;
+                }
+
+                /// <summary>
+                /// The current status of the booking, derived from payment state and timeslot.
+                /// </summary>
+                public BookingStatus Status
+                {
+                        get
+                        {
+                                if (this.Paid != null && this.Timeslot.StartDateTime > DateTime.Now)
+                                        return BookingStatus.Paid;
+
+                                if (this.Paid != null && this.Timeslot.StartDateTime <= DateTime.Now)
+                                        return BookingStatus.Completed;
+
+                                if (this.Paid == null && this.Timeslot.StartDateTime <= DateTime.Now)
+                                        return BookingStatus.NoShow;
+
+                                return BookingStatus.Scheduled;
+                        }
                 }
         }
 }

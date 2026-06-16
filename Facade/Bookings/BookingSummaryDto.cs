@@ -1,7 +1,6 @@
-using Facade.Common.Attributes;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using Domain.Enums;
+using Facade.Common.Attributes;
 
 namespace Facade.Bookings
 {
@@ -64,7 +63,6 @@ namespace Facade.Bookings
                 /// </summary>
                 public decimal? AmountPaid { get; set; }
 
-
                 /// <summary>
                 /// Formatted date string for UI display.
                 /// </summary>
@@ -75,9 +73,22 @@ namespace Facade.Bookings
                 /// </summary>
                 public string BookingTimeFormatted => $"{this.StartTime:HH:mm} - {this.EndTime:HH:mm}";
 
+
                 /// <summary>
-                /// Localized payment status string.
+                /// The current status of the booking, derived from payment state and timeslot.
                 /// </summary>
-                public string PaymentStatus => this.AmountPaid.HasValue ? "Betalt" : "Mangler Betaling";
+                public BookingStatus Status { get; set; }
+
+                /// <summary>
+                /// Status string for UI display.
+                /// </summary>
+                public string StatusFormatted => this.Status switch
+                {
+                        BookingStatus.Scheduled => "Planlagt",
+                        BookingStatus.Paid => "Betalt",
+                        BookingStatus.Completed => "Gennemført",
+                        BookingStatus.NoShow => "Udeblevet",
+                        _ => "Ukendt"
+                };
         }
 }
