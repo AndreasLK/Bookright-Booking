@@ -71,9 +71,12 @@
                             </div>
 
                             <div class="col-md-2 text-md-end mb-2 mb-md-0">
-                                <span class="badge @(booking.AmountPaid.HasValue ? "bg-success" : "bg-warning text-dark")">
-                                    @booking.PaymentStatus
-                                </span>
+                                    <span class="badge @(booking.Status == BookingStatus.Completed ? "bg-success" : 
+                                                       booking.Status == BookingStatus.Paid ? "bg-primary" : 
+                                                       booking.Status == BookingStatus.NoShow ? "bg-danger" : 
+                                                       "bg-warning text-dark")">
+                                            @booking.StatusFormatted
+                                    </span>
                                 @if (booking.AmountPaid.HasValue)
                                 {
                                     <div class="text-muted small mt-1">@booking.AmountPaid.Value.ToString(format: "N2") kr.</div>

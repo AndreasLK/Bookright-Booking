@@ -223,11 +223,12 @@ namespace Facade.Bookings
                                 CustomerName = customer is not null ? customer.ToDisplayFullName() : "Ukendt Kunde",
                                 PractitionerName = practitioner is not null ? practitioner.ToDisplayFullName() : "Ukendt Behandler",
                                 PractitionerId = booking.PractitionerId.Value,
-                                TreatmentName = treatment is not null ? treatment.Name : "Ukendt Behandling",
-                                ClinicName = clinic is not null ? clinic.Name : "Ukendt Klinik",
-                                StartTime = booking.Timeslot is not null ? booking.Timeslot.StartDateTime : DateTime.MinValue,
-                                EndTime = booking.Timeslot is not null ? booking.Timeslot.EndDateTime : DateTime.MinValue,
-                                AmountPaid = booking.Paid is not null ? booking.Paid.Value : null
+                                TreatmentName = treatment?.Name ?? "Ukendt Behandling",
+                                ClinicName = clinic?.Name ?? "Ukendt Klinik",
+                                StartTime = booking.Timeslot?.StartDateTime ?? DateTime.MinValue,
+                                EndTime = booking.Timeslot?.EndDateTime ?? DateTime.MinValue,
+                                AmountPaid = booking.Paid?.Value,
+                                Status = booking.Status
                         };
                 }
 
