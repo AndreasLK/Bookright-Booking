@@ -152,5 +152,24 @@ namespace Domain.Entities.Persons
                         Email: this.Email,
                         Gender: this.Gender
                 );
+
+
+                /// <summary>
+                /// Resolves the best available full name to display for a person, 
+                /// prioritizing preferred names over legal names.
+                /// </summary>
+                /// <returns>The formatted full name string.</returns>
+                public string ToDisplayFullName()
+                {
+                        string firstName = string.IsNullOrWhiteSpace(value: this.PreferredFirstName)
+                            ? this.LegalFirstName
+                            : this.PreferredFirstName;
+
+                        string lastName = string.IsNullOrWhiteSpace(value: this.PreferredLastName)
+                            ? this.LegalLastName
+                            : this.PreferredLastName;
+
+                        return $"{firstName} {lastName}".Trim();
+                }
         }
 }
