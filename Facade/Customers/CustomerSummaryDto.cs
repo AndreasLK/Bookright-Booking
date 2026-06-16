@@ -1,4 +1,5 @@
 using Facade.Common.Attributes;
+using System;
 
 namespace Facade.Customers
 {
@@ -17,13 +18,13 @@ namespace Facade.Customers
                 /// Official legal first name.
                 /// </summary>
                 [Searchable]
-                public string LegalFirstName { get; set; }
+                public string LegalFirstName { get; set; } = string.Empty;
 
                 /// <summary>
                 /// Official legal last name.
                 /// </summary>
                 [Searchable]
-                public string LegalLastName { get; set; }
+                public string LegalLastName { get; set; } = string.Empty;
 
                 /// <summary>
                 /// Optional preferred first name.
@@ -40,32 +41,31 @@ namespace Facade.Customers
                 /// <summary>
                 /// Customer's personal pronouns.
                 /// </summary>
-                public string Pronouns { get; set; }
+                public string Pronouns { get; set; } = string.Empty;
 
                 /// <summary>
                 /// Primary phone number.
                 /// </summary>
                 [Searchable]
-                public string PhoneNumber { get; set; }
+                public string PhoneNumber { get; set; } = string.Empty;
 
                 /// <summary>
                 /// Primary email address.
                 /// </summary>
                 [Searchable]
-                public string Email { get; set; }
+                public string Email { get; set; } = string.Empty;
 
                 /// <summary>
                 /// Dynamically calculated loyalty tier.
                 /// </summary>
-                public string LoyaltyLevel { get; set; }
+                public string LoyaltyLevel { get; set; } = string.Empty;
 
                 /// <summary>
                 /// Logic to determine the correct name to use when greeting the customer.
                 /// </summary>
                 public string GreetingName =>
-                        string.IsNullOrEmpty(
-                                value: this.PreferredFirstName)
-                                ? this.LegalFirstName : this.PreferredFirstName;
-
+                        string.IsNullOrEmpty(value: this.PreferredFirstName)
+                                ? this.LegalFirstName
+                                : this.PreferredFirstName;
         }
 }

@@ -15,19 +15,28 @@ export function initializeCalendar(containerId, eventsData, dotNetObject) {
                 firstDay: 1,
                 slotMinTime: '08:00:00',
                 slotMaxTime: '18:00:00',
-                slotDuration: '00:15:00',   // Set visual grid to 15 minutes
-                snapDuration: '00:15:00',   // Set snapping precision to 15 minutes
-                slotLabelInterval: '01:00', // Only label every hour to keep the Y-axis clean
+                slotDuration: '00:15:00',   // Visual grid at 15 minutes
+                snapDuration: '00:15:00',   // Snapping logic at 15 minutes
+                slotLabelInterval: '01:00',
                 allDaySlot: false,
                 selectable: true,
                 selectMirror: true,
                 events: eventsData,
 
+                // When user selects a NEW time slot
                 select: function (selectionInfo) {
                         dotNetObject.invokeMethodAsync('OnTimeSlotSelected', selectionInfo.startStr, selectionInfo.endStr)
                                 .catch(error => console.error("Error calling C# OnTimeSlotSelected:", error));
 
                         calendarInstance.unselect();
+                },
+
+                // When the user clicks an EXISTING event
+                eventClick: function (info) {
+                        info.jsEvent.preventDefault(); // Prevents URL navigation
+
+                        dotNetObject.invokeMethodAsync('OnBookingEventClicked', info.event.id)
+                                .catch(error => console.error("Error calling C# OnBookingEventClicked:", error));
                 }
         });
 
@@ -41,7 +50,6 @@ export function updateCalendarEvents(containerId, newEvents) {
         }
 }
 
-// Dynamically sets the selection block size so it perfectly previews the treatment duration
 export function setTreatmentPreviewDuration(durationStr) {
         if (calendarInstance && durationStr) {
                 calendarInstance.setOption('defaultTimedEventDuration', durationStr);

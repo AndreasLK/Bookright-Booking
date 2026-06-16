@@ -12,9 +12,6 @@ using Domain.Interfaces.Repositories;
 
 namespace Facade.Calendar
 {
-        /// <summary>
-        /// Concrete implementation of the calendar facade orchestrating data mapping for the calendar view.
-        /// </summary>
         public class CalendarFacade : ICalendarFacade
         {
                 private readonly IGetCalendarBookingsUseCase _getCalendarBookingsUseCase;
@@ -26,10 +23,9 @@ namespace Facade.Calendar
 
                 private const string DEFAULT_HEX_COLOR = "#3788D8";
                 private const string HEX_FORMAT = "X2";
+                private const string COLOR_PAID_SUCCESS = "#198754";
+                private const string COLOR_UNPAID_PENDING = "#0dcaf0";
 
-                /// <summary>
-                /// Initializes a new instance of the CalendarFacade.
-                /// </summary>
                 public CalendarFacade(
                     IGetCalendarBookingsUseCase getCalendarBookingsUseCase,
                     IClinicRepository clinicRepository,
@@ -46,15 +42,12 @@ namespace Facade.Calendar
                         this._treatmentRepository = treatmentRepository;
                 }
 
-                /// <inheritdoc />
                 public async Task<IEnumerable<CalendarEventViewModel>> GetCalendarEventsAsync(CalendarBookingFilter filter)
                 {
                         IEnumerable<CalendarBookingResultDto> rawData = await this._getCalendarBookingsUseCase.ExecuteAsync(filter: filter);
-
                         return rawData.Select(selector: dto => this.MapToViewModel(dto: dto));
                 }
 
-                /// <inheritdoc />
                 public async Task<CalendarFilterLookupsDto> GetFilterLookupsAsync()
                 {
                         var clinics = await this._clinicRepository.GetAllAsync();
@@ -70,10 +63,10 @@ namespace Facade.Calendar
                             Customers: customers.Select(selector: c => new CustomerSummaryDto
                             {
                                     Id = c.Id.Value,
-                                    LegalFirstName = c.Details.LegalFirstName,
-                                    LegalLastName = c.Details.LegalLastName,
-                                    PhoneNumber = c.Details.PhoneNumber.Value,
-                                    Email = c.Details.Email.Value
+                                    LegalFirstName = c.Details?.LegalFirstName ?? string.Empty,
+                                    LegalLastName = c.Details?.LegalLastName ?? string.Empty,
+                                    PhoneNumber = c.Details?.PhoneNumber?.Value ?? string.Empty,
+                                    Email = c.Details?.Email?.Value ?? string.Empty
                             }),
                             Treatments: treatments.Select(selector: t => new TreatmentLookupDto(
                                 Id: t.Id.Value,
@@ -83,7 +76,6 @@ namespace Facade.Calendar
                         );
                 }
 
-                /// <inheritdoc />
                 public async Task<IEnumerable<CalendarEventViewModel>> RefreshCalendarBookingsAsync(
                     DateTime viewStartDate,
                     DateTime viewEndDate,
@@ -104,43 +96,27 @@ namespace Facade.Calendar
                         return await this.GetCalendarEventsAsync(filter: filter);
                 }
 
-                /// <summary>
-                /// Maps raw booking data into a view model suitable for the calendar UI.
-                /// </summary>
                 private CalendarEventViewModel MapToViewModel(CalendarBookingResultDto dto)
                 {
+                        string eventColor = this.GetStatusColor(isPaid: dto.IsPaid);
+
                         return new CalendarEventViewModel(
                             Id: dto.BookingId.Value,
                             Title: $"{dto.TreatmentName} - {dto.CustomerName}",
                             Start: dto.StartTime,
                             End: dto.EndTime,
-                            BackgroundColor: this.GenerateFixedHexColor(entityIdString: dto.ClinicId.Value.ToString())
+                            BackgroundColor: eventColor
                         );
                 }
 
-                /// <summary>
-                /// Generates a consistent hex color based on an entity ID.
-                /// </summary>
-                private string GenerateFixedHexColor(string entityIdString)
+                private string GetStatusColor(bool isPaid)
                 {
-                        if (string.IsNullOrWhiteSpace(value: entityIdString))
+                        if (isPaid)
                         {
-                                return DEFAULT_HEX_COLOR;
+                                return COLOR_PAID_SUCCESS;
                         }
 
-                        int hash = 0;
-                        foreach (char c in entityIdString)
-                        {
-                                hash = c + ((hash << 5) - hash);
-                        }
-
-                        string color = "#";
-                        for (int i = 0; i < 3; i++)
-                        {
-                                color += ((hash >> (i * 8)) & 0xFF).ToString(format: HEX_FORMAT);
-                        }
-
-                        return color;
+                        return COLOR_UNPAID_PENDING;
                 }
         }
 }

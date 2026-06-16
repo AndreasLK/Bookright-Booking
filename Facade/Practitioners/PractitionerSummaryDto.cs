@@ -19,7 +19,7 @@ namespace Facade.Practitioners
                 /// Display alias or working title.
                 /// </summary>
                 [Searchable]
-                public string Alias { get; set; } = string.Empty;
+                public string? Alias { get; set; }
 
                 /// <summary>
                 /// First name from person details.

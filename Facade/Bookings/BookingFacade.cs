@@ -13,21 +13,23 @@ namespace Facade.Bookings
         {
                 private readonly GetAutoAssignmentProposalUseCase _getAutoAssignmentProposalUseCase;
                 private readonly CreateBookingUseCase _createBookingUseCase;
+                private readonly PayBookingUseCase _payBookingUseCase;
 
                 /// <summary>
                 /// Initializes a new instance of the BookingFacade.
                 /// </summary>
-                /// <param name="getAutoAssignmentProposalUseCase">The use case for generating auto-assignments.</param>
-                /// <param name="createBookingUseCase">The use case for creating bookings.</param>
                 public BookingFacade(
                     GetAutoAssignmentProposalUseCase getAutoAssignmentProposalUseCase,
-                    CreateBookingUseCase createBookingUseCase)
+                    CreateBookingUseCase createBookingUseCase,
+                    PayBookingUseCase payBookingUseCase)
                 {
                         ArgumentNullException.ThrowIfNull(argument: getAutoAssignmentProposalUseCase, paramName: nameof(getAutoAssignmentProposalUseCase));
                         ArgumentNullException.ThrowIfNull(argument: createBookingUseCase, paramName: nameof(createBookingUseCase));
+                        ArgumentNullException.ThrowIfNull(argument: payBookingUseCase, paramName: nameof(payBookingUseCase));
 
                         this._getAutoAssignmentProposalUseCase = getAutoAssignmentProposalUseCase;
                         this._createBookingUseCase = createBookingUseCase;
+                        this._payBookingUseCase = payBookingUseCase;
                 }
 
                 /// <inheritdoc />
@@ -87,6 +89,12 @@ namespace Facade.Bookings
                         Guid newBookingId = await this._createBookingUseCase.ExecuteAsync(command: command);
 
                         return newBookingId;
+                }
+
+                /// <inheritdoc />
+                public async Task MarkBookingAsPaidAsync(Guid bookingId)
+                {
+                        await this._payBookingUseCase.ExecuteAsync(bookingIdRaw: bookingId);
                 }
         }
 }

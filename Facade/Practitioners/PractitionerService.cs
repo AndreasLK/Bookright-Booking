@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 using Domain.Entities;
 using Domain.Entities.Persons;
 using Domain.Interfaces.Repositories;
 using Domain.Value_Objects;
-using UseCase.Practitioners;
+using Use_Case.Practitioners; // Updated to match your Use Case namespace structure
 
 namespace Facade.Practitioners
 {
@@ -20,13 +21,12 @@ namespace Facade.Practitioners
                 /// <summary>
                 /// Initializes a new instance of the <see cref="PractitionerService"/> class.
                 /// </summary>
-                /// <param name="practitionerRepository">Data store for practitioners.</param>
-                /// <param name="registerPractitionerUseCase"></param>
                 public PractitionerService(IPractitionerRepository practitionerRepository, RegisterPractitionerUseCase registerPractitionerUseCase)
                 {
                         ArgumentNullException.ThrowIfNull(argument: practitionerRepository, paramName: nameof(practitionerRepository));
+                        ArgumentNullException.ThrowIfNull(argument: registerPractitionerUseCase, paramName: nameof(registerPractitionerUseCase));
+
                         this._practitionerRepository = practitionerRepository;
-                        ArgumentNullException.ThrowIfNull(argument: registerPractitionerUseCase, nameof(registerPractitionerUseCase));
                         this._registerPractitionerUseCase = registerPractitionerUseCase;
                 }
 
@@ -41,8 +41,8 @@ namespace Facade.Practitioners
                         {
                                 Id = p.Id.Value,
                                 Alias = p.Alias,
-                                FirstName = p.Details.PreferredFirstName ?? p.Details.LegalFirstName,
-                                LastName = p.Details.PreferredLastName ?? p.Details.LegalLastName,
+                                FirstName = p.Details.PreferredFirstName ?? p.Details.LegalFirstName ?? string.Empty,
+                                LastName = p.Details.PreferredLastName ?? p.Details.LegalLastName ?? string.Empty,
                                 Email = p.Details.Email.Value,
                                 PhoneNumber = p.Details.PhoneNumber.Value
                         }).ToList();
@@ -51,12 +51,11 @@ namespace Facade.Practitioners
                 /// <summary>
                 /// Retrieves a single record by its identifier.
                 /// </summary>
-                /// <param name="id">The unique identifier.</param>
                 public async Task<PractitionerSummaryDto?> GetPractitionerByIdAsync(Guid id)
                 {
                         Practitioner? practitioner = await this._practitionerRepository.GetByIdAsync(id: id);
 
-                        if (practitioner == null)
+                        if (practitioner is null)
                         {
                                 return null;
                         }
@@ -65,8 +64,8 @@ namespace Facade.Practitioners
                         {
                                 Id = practitioner.Id.Value,
                                 Alias = practitioner.Alias,
-                                FirstName = practitioner.Details.PreferredFirstName ?? practitioner.Details.LegalFirstName,
-                                LastName = practitioner.Details.PreferredLastName ?? practitioner.Details.LegalLastName,
+                                FirstName = practitioner.Details.PreferredFirstName ?? practitioner.Details.LegalFirstName ?? string.Empty,
+                                LastName = practitioner.Details.PreferredLastName ?? practitioner.Details.LegalLastName ?? string.Empty,
                                 Email = practitioner.Details.Email.Value,
                                 PhoneNumber = practitioner.Details.PhoneNumber.Value
                         };
@@ -75,23 +74,20 @@ namespace Facade.Practitioners
                 /// <summary>
                 /// Updates the basic details and contact information of a practitioner.
                 /// </summary>
-                /// <param name="model">The mutated summary object containing the updates.</param>
                 public async Task UpdatePractitionerAsync(PractitionerSummaryDto model)
                 {
                         ArgumentNullException.ThrowIfNull(argument: model, paramName: nameof(model));
 
                         Practitioner? practitioner = await this._practitionerRepository.GetByIdAsync(id: model.Id);
 
-                        if (practitioner == null)
+                        if (practitioner is null)
                         {
                                 throw new InvalidOperationException(message: $"Practitioner with ID '{model.Id}' was not found.");
                         }
 
-                        // Rebuild value objects safely
                         EmailAddress updatedEmail = new EmailAddress(value: model.Email);
                         PhoneNumber updatedPhone = new PhoneNumber(value: model.PhoneNumber);
 
-                        // Use C# 'with' expression clone on the state projection block
                         PersonDetails updatedDetails = practitioner.Details with
                         {
                                 Email = updatedEmail,
@@ -100,7 +96,6 @@ namespace Facade.Practitioners
                                 PreferredLastName = model.LastName
                         };
 
-                        // Push mutations into your updated domain methods
                         practitioner.UpdateAlias(newAlias: model.Alias);
                         practitioner.UpdateDetails(newDetails: updatedDetails);
 
@@ -109,27 +104,24 @@ namespace Facade.Practitioners
 
                 /// <summary>
                 /// Registers a new practitioner in the system without certificates.
-                /// Certificates can be added separately after registration.
                 /// </summary>
-                /// <param name="model">The new practitioner details from the UI.</param>
-                /// <returns>The new practitioner's ID if successful, or an error message if not.</returns>
                 public async Task<RegisterPractitionerResult> RegisterPractitionerAsync(PractitionerSummaryDto model)
                 {
                         ArgumentNullException.ThrowIfNull(argument: model, paramName: nameof(model));
 
-                        var command = new RegisterPractitionerCommand(
+                        RegisterPractitionerCommand command = new RegisterPractitionerCommand(
                                 LegalFirstName: model.FirstName,
                                 LegalLastName: model.LastName,
                                 Pronouns: string.Empty,
                                 Alias: model.Alias,
-                                DateOfBirth: DateOnly.FromDateTime(DateTime.Now),
+                                DateOfBirth: DateOnly.FromDateTime(dateTime: DateTime.Now),
                                 Email: model.Email,
                                 PhoneNumber: model.PhoneNumber,
                                 Gender: Domain.Enums.Gender.PreferNotToSay,
                                 Certificates: new List<Certificate>().AsReadOnly()
                         );
 
-                        return await this._registerPractitionerUseCase.ExecuteAsync(command);
+                        return await this._registerPractitionerUseCase.ExecuteAsync(cmd: command);
                 }
         }
 }

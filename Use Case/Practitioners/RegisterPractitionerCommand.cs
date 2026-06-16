@@ -1,7 +1,7 @@
 using Domain.Entities;
 using Domain.Enums;
 
-namespace UseCase.Practitioners
+namespace Use_Case.Practitioners
 {
         public record RegisterPractitionerCommand(
                 string LegalFirstName,

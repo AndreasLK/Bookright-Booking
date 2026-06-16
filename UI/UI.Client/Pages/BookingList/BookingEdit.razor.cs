@@ -2,14 +2,18 @@ using Facade.Bookings;
 using Facade.Common.Dtos;
 using Microsoft.AspNetCore.Components;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace UI.Client.Pages.BookingList
 {
         public partial class BookingEdit : ComponentBase
         {
-                [Inject] private BookingService BookingService { get; set; } = default!;
-                [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+                [Inject]
+                private BookingService BookingService { get; set; } = default!;
+
+                [Inject]
+                private NavigationManager NavigationManager { get; set; } = default!;
 
                 [Parameter]
                 public Guid Id { get; set; }
@@ -25,7 +29,7 @@ namespace UI.Client.Pages.BookingList
                         this._booking = await this.BookingService.GetBookingByIdAsync(id: this.Id);
                         this._practitioners = await this.BookingService.GetAvailablePractitionersAsync();
 
-                        if (this._booking != null)
+                        if (this._booking is not null)
                         {
                                 this._isPastBooking = this._booking.StartTime < DateTime.Now;
                         }
@@ -35,14 +39,13 @@ namespace UI.Client.Pages.BookingList
 
                 protected async Task HandleValidSubmitAsync(BookingSummaryDto model)
                 {
-                        if (model != null)
+                        if (model is not null)
                         {
                                 await this.BookingService.RescheduleBookingAsync(
                                     bookingId: this.Id,
                                     newStartTime: model.StartTime,
                                     newEndTime: model.EndTime
                                 );
-
 
                                 if (!this._isPastBooking)
                                 {
@@ -54,9 +57,10 @@ namespace UI.Client.Pages.BookingList
 
                                 if (model.AmountPaid.HasValue)
                                 {
+                                        // FIXED: Parameter name changed from amountInDkk to amountPaid
                                         await this.BookingService.RegisterPaymentAsync(
                                             bookingId: this.Id,
-                                            amountInDkk: model.AmountPaid.Value
+                                            amountPaid: model.AmountPaid.Value
                                         );
                                 }
 

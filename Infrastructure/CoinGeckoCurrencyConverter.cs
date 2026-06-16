@@ -35,11 +35,13 @@ namespace Infrastructure
                 public CoinGeckoCurrencyConverter(
                     HttpClient httpClient,
                     IMemoryCache cache,
-                    ILogger<CoinGeckoCurrencyConverter> logger)
+                    ILogger<CoinGeckoCurrencyConverter> logger,
+                    IConfiguration configuration)
                 {
                         this._httpClient = httpClient;
                         this._cache = cache;
                         this._logger = logger;
+                        this._configuration = configuration;
 
                         // Read timeout from config — defaults to 5 seconds if not set.
                         // This ensures the app does not hang if CoinGecko is slow

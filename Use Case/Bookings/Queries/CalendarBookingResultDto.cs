@@ -1,7 +1,5 @@
 using Domain.Value_Objects.Ids;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Use_Case.Bookings.Queries
 {
@@ -14,6 +12,7 @@ namespace Use_Case.Bookings.Queries
             string TreatmentName,
             string CustomerName,
             DateTime StartTime,
-            DateTime EndTime
+            DateTime EndTime,
+            bool IsPaid
         );
 }

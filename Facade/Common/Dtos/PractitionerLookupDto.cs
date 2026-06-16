@@ -14,7 +14,7 @@ namespace Facade.Common.Dtos
                 /// <summary>
                 /// Formatted name for display purposes.
                 /// </summary>
-                public string DisplayName { get; set; }
+                public string DisplayName { get; set; } = string.Empty;
 
         }
 }

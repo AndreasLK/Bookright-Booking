@@ -3,7 +3,7 @@ using Infrastructure;
 using UI.Client.Pages;
 using UI.Components;
 using UseCase.Customers;
-using UseCase.Practitioners;
+using Use_Case.Practitioners;
 
 namespace UI
 {

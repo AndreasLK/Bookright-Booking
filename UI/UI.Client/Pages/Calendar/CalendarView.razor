@@ -132,3 +132,26 @@
                        OnClose="CloseSmartModal"
                        OnBookingSaved="HandleBookingSavedAsync" />
 }
+
+@* --- PAYMENT / DETAILS MODAL --- *@
+@if (SelectedBookingIdForDetails.HasValue)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title"><i class="bi bi-wallet2"></i> Booking Detaljer</h5>
+                    <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="CloseDetailsModal"></button>
+                </div>
+                <div class="modal-body text-center py-5">
+                    <h4 class="mb-3">Vil du markere denne booking som betalt?</h4>
+                    <p class="text-muted">Systemet vil automatisk udregne den billigste pris for kunden inklusiv eventuelle tillæg og rabatter.</p>
+
+                    <button class="btn btn-success btn-lg mt-3" @onclick="MarkAsPaidAsync">
+                        <i class="bi bi-check-circle-fill"></i> Godkend & Marker Betalt
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}

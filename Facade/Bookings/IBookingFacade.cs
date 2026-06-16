@@ -44,5 +44,11 @@ namespace Facade.Bookings
                     Guid treatmentId,
                     DateTime startDateTime,
                     DateTime endDateTime);
+
+                /// <summary>
+                /// Calculates the final price and marks the specified booking as paid.
+                /// </summary>
+                /// <param name="bookingId">The ID of the booking to pay.</param>
+                public Task MarkBookingAsPaidAsync(Guid bookingId);
         }
 }

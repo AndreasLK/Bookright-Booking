@@ -7,7 +7,7 @@ using Domain.Value_Objects.Ids;
 
 
 
-namespace UseCase.Practitioners
+namespace Use_Case.Practitioners
 {
         public class RegisterPractitionerUseCase
         {
@@ -32,7 +32,6 @@ namespace UseCase.Practitioners
                                         Gender: cmd.Gender);
 
 
-                        
 
 
                                 var practitioner = new Practitioner(id: new PractitionerId(Guid.NewGuid()),

@@ -9,6 +9,7 @@ using Facade.Rooms;
 using Facade.Common.Dtos;
 using Facade.Customers;
 using Facade.Calendar;
+using Facade.Bookings;
 
 namespace UI.Client.Pages.Calendar
 {
@@ -24,6 +25,9 @@ namespace UI.Client.Pages.Calendar
 
                 [Inject]
                 private ICalendarFacade CalendarFacade { get; set; } = default!;
+
+                [Inject]
+                private IBookingFacade BookingFacade { get; set; } = default!;
 
                 [Inject]
                 private IJSRuntime JS { get; set; } = default!;
@@ -45,6 +49,7 @@ namespace UI.Client.Pages.Calendar
                 public TimeSpan? SelectedTreatmentDuration { get; private set; }
                 public string WarningMessage { get; private set; } = string.Empty;
 
+                public Guid? SelectedBookingIdForDetails { get; private set; }
                 protected bool IsSmartModalVisible { get; set; }
                 protected DateTime? DraggedStartTime { get; set; }
                 protected DateTime? DraggedEndTime { get; set; }
@@ -143,12 +148,48 @@ namespace UI.Client.Pages.Calendar
                         }
 
                         this.DraggedStartTime = startTime;
-
-                        // We enforce the strict duration of the selected treatment to prevent erroneous drags
                         this.DraggedEndTime = startTime.Add(value: this.SelectedTreatmentDuration.Value);
                         this.IsSmartModalVisible = true;
 
                         this.StateHasChanged();
+                }
+
+                [JSInvokable]
+                public void OnBookingEventClicked(string bookingIdStr)
+                {
+                        if (Guid.TryParse(input: bookingIdStr, result: out Guid bookingId))
+                        {
+                                this.SelectedBookingIdForDetails = bookingId;
+                                this.WarningMessage = string.Empty;
+                                this.StateHasChanged();
+                        }
+                }
+
+                public async Task MarkAsPaidAsync()
+                {
+                        if (this.SelectedBookingIdForDetails is null)
+                        {
+                                return;
+                        }
+
+                        try
+                        {
+                                await this.BookingFacade.MarkBookingAsPaidAsync(bookingId: this.SelectedBookingIdForDetails.Value);
+
+                                this.CloseDetailsModal();
+                                await this.RefreshCalendarDataAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                                this.WarningMessage = "Kunne ikke betale booking: " + ex.Message;
+                                this.StateHasChanged();
+                        }
+                }
+
+                protected void CloseDetailsModal()
+                {
+                        this.SelectedBookingIdForDetails = null;
+                        this.WarningMessage = string.Empty;
                 }
 
                 protected void ClearWarning()
@@ -272,7 +313,6 @@ namespace UI.Client.Pages.Calendar
                 {
                         this.CloseSmartModal();
 
-                        // We reset the selected treatment after a successful booking
                         this.SelectedTreatmentIdForBooking = null;
                         this.SelectedTreatmentDuration = null;
 
