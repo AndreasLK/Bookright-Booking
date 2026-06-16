@@ -12,6 +12,9 @@ using Domain.Interfaces.Repositories;
 
 namespace Facade.Calendar
 {
+        /// <summary>
+        /// Concrete implementation of the calendar facade orchestrating data mapping for the calendar view.
+        /// </summary>
         public class CalendarFacade : ICalendarFacade
         {
                 private readonly IGetCalendarBookingsUseCase _getCalendarBookingsUseCase;
@@ -24,6 +27,9 @@ namespace Facade.Calendar
                 private const string DEFAULT_HEX_COLOR = "#3788D8";
                 private const string HEX_FORMAT = "X2";
 
+                /// <summary>
+                /// Initializes a new instance of the CalendarFacade.
+                /// </summary>
                 public CalendarFacade(
                     IGetCalendarBookingsUseCase getCalendarBookingsUseCase,
                     IClinicRepository clinicRepository,
@@ -40,12 +46,15 @@ namespace Facade.Calendar
                         this._treatmentRepository = treatmentRepository;
                 }
 
+                /// <inheritdoc />
                 public async Task<IEnumerable<CalendarEventViewModel>> GetCalendarEventsAsync(CalendarBookingFilter filter)
                 {
-                        var rawData = await this._getCalendarBookingsUseCase.ExecuteAsync(filter);
-                        return rawData.Select(dto => this.MapToViewModel(dto));
+                        IEnumerable<CalendarBookingResultDto> rawData = await this._getCalendarBookingsUseCase.ExecuteAsync(filter: filter);
+
+                        return rawData.Select(selector: dto => this.MapToViewModel(dto: dto));
                 }
 
+                /// <inheritdoc />
                 public async Task<CalendarFilterLookupsDto> GetFilterLookupsAsync()
                 {
                         var clinics = await this._clinicRepository.GetAllAsync();
@@ -55,10 +64,10 @@ namespace Facade.Calendar
                         var treatments = await this._treatmentRepository.GetAllAsync();
 
                         return new CalendarFilterLookupsDto(
-                            Clinics: clinics.Select(c => new ClinicDto { Id = c.Id.Value, Name = c.Name }),
-                            Rooms: rooms.Select(r => new RoomDto { Id = r.Id.Value, Name = r.Name }),
-                            Practitioners: practitioners.Select(p => new PractitionerLookupDto { Id = p.Id.Value, DisplayName = p.Alias }),
-                            Customers: customers.Select(c => new CustomerSummaryDto
+                            Clinics: clinics.Select(selector: c => new ClinicDto { Id = c.Id.Value, Name = c.Name }),
+                            Rooms: rooms.Select(selector: r => new RoomDto { Id = r.Id.Value, Name = r.Name }),
+                            Practitioners: practitioners.Select(selector: p => new PractitionerLookupDto { Id = p.Id.Value, DisplayName = p.Alias }),
+                            Customers: customers.Select(selector: c => new CustomerSummaryDto
                             {
                                     Id = c.Id.Value,
                                     LegalFirstName = c.Details.LegalFirstName,
@@ -66,10 +75,15 @@ namespace Facade.Calendar
                                     PhoneNumber = c.Details.PhoneNumber.Value,
                                     Email = c.Details.Email.Value
                             }),
-                            Treatments: treatments.Select(t => new TreatmentLookupDto(Id: t.Id.Value, Name: t.Name))
+                            Treatments: treatments.Select(selector: t => new TreatmentLookupDto(
+                                Id: t.Id.Value,
+                                Name: t.Name,
+                                Duration: t.Duration.Value
+                            ))
                         );
                 }
 
+                /// <inheritdoc />
                 public async Task<IEnumerable<CalendarEventViewModel>> RefreshCalendarBookingsAsync(
                     DateTime viewStartDate,
                     DateTime viewEndDate,
@@ -78,36 +92,54 @@ namespace Facade.Calendar
                     List<Guid> practitionerIds,
                     List<Guid> customerIds)
                 {
-                        var filter = new CalendarBookingFilter(
+                        CalendarBookingFilter filter = new CalendarBookingFilter(
                             ViewStartDate: viewStartDate,
                             ViewEndDate: viewEndDate,
-                            ClinicIds: clinicIds.Select(id => new Domain.Value_Objects.Ids.ClinicId(id)),
-                            RoomIds: roomIds.Select(id => new Domain.Value_Objects.RoomId(id)),
-                            PractitionerIds: practitionerIds.Select(id => new Domain.Value_Objects.Ids.PractitionerId(id)),
-                            CustomerIds: customerIds.Select(id => new Domain.Value_Objects.Ids.CustomerId(id))
+                            ClinicIds: clinicIds.Select(selector: id => new Domain.Value_Objects.Ids.ClinicId(Value: id)),
+                            RoomIds: roomIds.Select(selector: id => new Domain.Value_Objects.RoomId(Value: id)),
+                            PractitionerIds: practitionerIds.Select(selector: id => new Domain.Value_Objects.Ids.PractitionerId(Value: id)),
+                            CustomerIds: customerIds.Select(selector: id => new Domain.Value_Objects.Ids.CustomerId(Value: id))
                         );
 
-                        return await this.GetCalendarEventsAsync(filter);
+                        return await this.GetCalendarEventsAsync(filter: filter);
                 }
 
+                /// <summary>
+                /// Maps raw booking data into a view model suitable for the calendar UI.
+                /// </summary>
                 private CalendarEventViewModel MapToViewModel(CalendarBookingResultDto dto)
                 {
                         return new CalendarEventViewModel(
-                            dto.BookingId.Value,
-                            $"{dto.TreatmentName} - {dto.CustomerName}",
-                            dto.StartTime,
-                            dto.EndTime,
-                            this.GenerateFixedHexColor(dto.ClinicId.Value.ToString())
+                            Id: dto.BookingId.Value,
+                            Title: $"{dto.TreatmentName} - {dto.CustomerName}",
+                            Start: dto.StartTime,
+                            End: dto.EndTime,
+                            BackgroundColor: this.GenerateFixedHexColor(entityIdString: dto.ClinicId.Value.ToString())
                         );
                 }
 
+                /// <summary>
+                /// Generates a consistent hex color based on an entity ID.
+                /// </summary>
                 private string GenerateFixedHexColor(string entityIdString)
                 {
-                        if (string.IsNullOrWhiteSpace(entityIdString)) return DEFAULT_HEX_COLOR;
+                        if (string.IsNullOrWhiteSpace(value: entityIdString))
+                        {
+                                return DEFAULT_HEX_COLOR;
+                        }
+
                         int hash = 0;
-                        foreach (char c in entityIdString) hash = c + ((hash << 5) - hash);
+                        foreach (char c in entityIdString)
+                        {
+                                hash = c + ((hash << 5) - hash);
+                        }
+
                         string color = "#";
-                        for (int i = 0; i < 3; i++) color += ((hash >> (i * 8)) & 0xFF).ToString(HEX_FORMAT);
+                        for (int i = 0; i < 3; i++)
+                        {
+                                color += ((hash >> (i * 8)) & 0xFF).ToString(format: HEX_FORMAT);
+                        }
+
                         return color;
                 }
         }

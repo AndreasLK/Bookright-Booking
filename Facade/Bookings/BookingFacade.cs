@@ -1,14 +1,13 @@
 using Domain.Value_Objects;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Threading.Tasks;
 using Use_Case.Bookings.Commands;
 using Use_Case.Bookings.Queries;
 
 namespace Facade.Bookings
 {
         /// <summary>
-        /// Concrete implementation of the booking facade, orchestrating Use Case execution.
+        /// Concrete implementation of the booking facade, orchestrating Use Case execution without exposing them to the UI.
         /// </summary>
         public class BookingFacade : IBookingFacade
         {
@@ -18,6 +17,8 @@ namespace Facade.Bookings
                 /// <summary>
                 /// Initializes a new instance of the BookingFacade.
                 /// </summary>
+                /// <param name="getAutoAssignmentProposalUseCase">The use case for generating auto-assignments.</param>
+                /// <param name="createBookingUseCase">The use case for creating bookings.</param>
                 public BookingFacade(
                     GetAutoAssignmentProposalUseCase getAutoAssignmentProposalUseCase,
                     CreateBookingUseCase createBookingUseCase)
@@ -30,7 +31,7 @@ namespace Facade.Bookings
                 }
 
                 /// <inheritdoc />
-                public async Task<BookingAssignmentProposalDto> GetAutoAssignmentProposalAsync(
+                public async Task<BookingAssignmentFacadeDto> GetAutoAssignmentProposalAsync(
                     Guid customerId,
                     Guid treatmentId,
                     Guid clinicId,
@@ -42,7 +43,6 @@ namespace Facade.Bookings
                                 throw new ArgumentException(message: "Start time must precede end time.");
                         }
 
-                        // Convert UI primitives to Domain Value Object
                         TimeSlot requestedTimeSlot = new TimeSlot(
                             startDateTime: startDateTime,
                             endDateTime: endDateTime
@@ -55,13 +55,34 @@ namespace Facade.Bookings
                             requestedTimeSlot: requestedTimeSlot
                         );
 
-                        return proposal;
+                        return new BookingAssignmentFacadeDto(
+                            ProposedRoomId: proposal.ProposedRoomId,
+                            ProposedRoomName: proposal.ProposedRoomName,
+                            ProposedPractitionerId: proposal.ProposedPractitionerId,
+                            ProposedPractitionerName: proposal.ProposedPractitionerName,
+                            IsSuccessful: proposal.IsSuccessful
+                        );
                 }
 
                 /// <inheritdoc />
-                public async Task<Guid> CreateBookingAsync(CreateBookingCommand command)
+                public async Task<Guid> CreateBookingAsync(
+                    Guid customerId,
+                    Guid clinicId,
+                    Guid roomId,
+                    Guid practitionerId,
+                    Guid treatmentId,
+                    DateTime startDateTime,
+                    DateTime endDateTime)
                 {
-                        ArgumentNullException.ThrowIfNull(argument: command, paramName: nameof(command));
+                        CreateBookingCommand command = new CreateBookingCommand(
+                            CustomerId: customerId,
+                            ClinicId: clinicId,
+                            RoomId: roomId,
+                            PractitionerId: practitionerId,
+                            TreatmentId: treatmentId,
+                            StartDateTime: startDateTime,
+                            EndDateTime: endDateTime
+                        );
 
                         Guid newBookingId = await this._createBookingUseCase.ExecuteAsync(command: command);
 

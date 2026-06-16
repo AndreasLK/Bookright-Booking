@@ -6,6 +6,7 @@ namespace Facade.Calendar
 {
         public record TreatmentLookupDto(
         Guid Id,
-        string Name
+        string Name,
+        TimeSpan Duration
     );
 }
