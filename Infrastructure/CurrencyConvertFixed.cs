@@ -39,5 +39,12 @@ namespace Infrastructure
                                 .Select(money => this.Convert(money.Value, money.Currency, targetCurrency))
                                 .ToArray();
                 }
+
+                public Task<decimal> GetLiveRateAsync(Currency fromCurrency, Currency toCurrency, CancellationToken ct = default)
+                {
+                        return Task.FromResult(1m);
+                }
         }
+
+
 }
