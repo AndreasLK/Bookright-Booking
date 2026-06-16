@@ -12,28 +12,19 @@ using Facade.Calendar;
 
 namespace UI.Client.Pages.Calendar
 {
-        /// <summary>
-        /// Code-behind for the Main Calendar View component.
-        /// </summary>
         public partial class CalendarView : ComponentBase, IAsyncDisposable
         {
-                private const int CALENDAR_PAST_DAYS_VIEW = -14;
-                private const int CALENDAR_FUTURE_DAYS_VIEW = 30;
                 private const string JS_IMPORT_IDENTIFIER = "import";
                 private const string JS_CALENDAR_MODULE_PATH = "./Pages/Calendar/CalendarView.razor.js";
                 private const string JS_INITIALIZE_FUNCTION = "initializeCalendar";
                 private const string JS_UPDATE_FUNCTION = "updateCalendarEvents";
+                private const string JS_SET_DURATION_FUNCTION = "setTreatmentPreviewDuration";
+                private const string TIMESPAN_FORMAT = @"hh\:mm\:ss";
                 private const string CALENDAR_CONTAINER_ID = "calendar-container";
 
-                /// <summary>
-                /// Gets or sets the injected calendar facade.
-                /// </summary>
                 [Inject]
                 private ICalendarFacade CalendarFacade { get; set; } = default!;
 
-                /// <summary>
-                /// Gets or sets the injected JS runtime.
-                /// </summary>
                 [Inject]
                 private IJSRuntime JS { get; set; } = default!;
 
@@ -50,25 +41,23 @@ namespace UI.Client.Pages.Calendar
 
                 protected List<CalendarEventViewModel> RenderedCalendarEvents { get; set; } = new();
 
+                public Guid? SelectedTreatmentIdForBooking { get; private set; }
+                public TimeSpan? SelectedTreatmentDuration { get; private set; }
+                public string WarningMessage { get; private set; } = string.Empty;
+
                 protected bool IsSmartModalVisible { get; set; }
                 protected DateTime? DraggedStartTime { get; set; }
                 protected DateTime? DraggedEndTime { get; set; }
 
-                private DateTime _currentViewStart;
-                private DateTime _currentViewEnd;
+                private DateTime _currentViewStart = DateTime.Today.AddDays(value: -14);
+                private DateTime _currentViewEnd = DateTime.Today.AddDays(value: 30);
 
                 private IJSObjectReference? _module;
                 private DotNetObjectReference<CalendarView>? _dotNetRef;
                 private bool _isCalendarInitialized = false;
 
-                /// <summary>
-                /// Initializes the calendar view component.
-                /// </summary>
                 protected override async Task OnInitializedAsync()
                 {
-                        this._currentViewStart = DateTime.Today.AddDays(value: CALENDAR_PAST_DAYS_VIEW);
-                        this._currentViewEnd = DateTime.Today.AddDays(value: CALENDAR_FUTURE_DAYS_VIEW);
-
                         CalendarFilterLookupsDto lookups = await this.CalendarFacade.GetFilterLookupsAsync();
 
                         this.AvailableClinics = lookups.Clinics.ToList();
@@ -80,10 +69,6 @@ namespace UI.Client.Pages.Calendar
                         await this.RefreshCalendarDataAsync();
                 }
 
-                /// <summary>
-                /// Handles after-render operations for JS interop setup.
-                /// </summary>
-                /// <param name="firstRender">Indicates whether this is the first render.</param>
                 protected override async Task OnAfterRenderAsync(bool firstRender)
                 {
                         if (!firstRender)
@@ -106,175 +91,147 @@ namespace UI.Client.Pages.Calendar
                         this._isCalendarInitialized = true;
                 }
 
-                /// <summary>
-                /// JS invokable method that handles drag-and-drop time slot selection.
-                /// </summary>
-                /// <param name="start">The string representation of the start date.</param>
-                /// <param name="end">The string representation of the end date.</param>
+                public async Task OnTreatmentSelected(ChangeEventArgs e)
+                {
+                        if (e is null || e.Value is null)
+                        {
+                                return;
+                        }
+
+                        if (Guid.TryParse(input: e.Value.ToString(), result: out Guid id))
+                        {
+                                this.SelectedTreatmentIdForBooking = id;
+                                TreatmentLookupDto? treatment = this.AvailableTreatments.FirstOrDefault(predicate: t => t.Id == id);
+
+                                if (treatment is not null)
+                                {
+                                        this.SelectedTreatmentDuration = treatment.Duration;
+                                        this.WarningMessage = string.Empty;
+
+                                        if (this._module is not null && this._isCalendarInitialized)
+                                        {
+                                                string durationStr = treatment.Duration.ToString(format: TIMESPAN_FORMAT);
+                                                await this._module.InvokeVoidAsync(
+                                                    identifier: JS_SET_DURATION_FUNCTION,
+                                                    args: new object[] { durationStr }
+                                                );
+                                        }
+                                }
+                        }
+                        else
+                        {
+                                this.SelectedTreatmentIdForBooking = null;
+                                this.SelectedTreatmentDuration = null;
+                        }
+                }
+
                 [JSInvokable]
                 public void OnTimeSlotSelected(string start, string end)
                 {
-                        bool isStartValid = DateTime.TryParse(s: start, result: out DateTime startTime);
-                        bool isEndValid = DateTime.TryParse(s: end, result: out DateTime endTime);
+                        if (this.SelectedTreatmentIdForBooking is null || this.SelectedTreatmentDuration is null)
+                        {
+                                this.WarningMessage = "Du skal vælge en behandling i toppen af siden, før du kan markere tid i kalenderen.";
+                                this.StateHasChanged();
+                                return;
+                        }
 
-                        if (!isStartValid || !isEndValid)
+                        bool isStartValid = DateTime.TryParse(s: start, result: out DateTime startTime);
+
+                        if (!isStartValid)
                         {
                                 return;
                         }
 
                         this.DraggedStartTime = startTime;
-                        this.DraggedEndTime = endTime;
+
+                        // We enforce the strict duration of the selected treatment to prevent erroneous drags
+                        this.DraggedEndTime = startTime.Add(value: this.SelectedTreatmentDuration.Value);
                         this.IsSmartModalVisible = true;
+
                         this.StateHasChanged();
                 }
 
-                /// <summary>
-                /// Adds a clinic to the active filters.
-                /// </summary>
-                /// <param name="clinic">The clinic to add.</param>
+                protected void ClearWarning()
+                {
+                        this.WarningMessage = string.Empty;
+                }
+
                 protected async Task AddClinicFilterAsync(ClinicDto clinic)
                 {
-                        if (clinic is null || this.SelectedClinics.Any(predicate: c => c.Id == clinic.Id))
+                        if (clinic is not null && !this.SelectedClinics.Any(predicate: c => c.Id == clinic.Id))
                         {
-                                return;
+                                this.SelectedClinics.Add(item: clinic);
+                                await this.RefreshCalendarDataAsync();
+                                this.StateHasChanged();
                         }
-
-                        this.SelectedClinics.Add(item: clinic);
-                        await this.RefreshCalendarDataAsync();
-                        this.StateHasChanged();
                 }
 
-                /// <summary>
-                /// Removes a clinic from the active filters.
-                /// </summary>
-                /// <param name="clinicToRemove">The clinic to remove.</param>
                 protected async Task RemoveClinicFilterAsync(ClinicDto clinicToRemove)
                 {
-                        if (clinicToRemove is null)
-                        {
-                                return;
-                        }
-
-                        int removedCount = this.SelectedClinics.RemoveAll(match: c => c.Id == clinicToRemove.Id);
-
-                        if (removedCount > 0)
+                        if (this.SelectedClinics.RemoveAll(match: c => c.Id == clinicToRemove.Id) > 0)
                         {
                                 await this.RefreshCalendarDataAsync();
                                 this.StateHasChanged();
                         }
                 }
 
-                /// <summary>
-                /// Adds a room to the active filters.
-                /// </summary>
-                /// <param name="room">The room to add.</param>
                 protected async Task AddRoomFilterAsync(RoomDto room)
                 {
-                        if (room is null || this.SelectedRooms.Any(predicate: r => r.Id == room.Id))
+                        if (room is not null && !this.SelectedRooms.Any(predicate: r => r.Id == room.Id))
                         {
-                                return;
+                                this.SelectedRooms.Add(item: room);
+                                await this.RefreshCalendarDataAsync();
+                                this.StateHasChanged();
                         }
-
-                        this.SelectedRooms.Add(item: room);
-                        await this.RefreshCalendarDataAsync();
-                        this.StateHasChanged();
                 }
 
-                /// <summary>
-                /// Removes a room from the active filters.
-                /// </summary>
-                /// <param name="roomToRemove">The room to remove.</param>
                 protected async Task RemoveRoomFilterAsync(RoomDto roomToRemove)
                 {
-                        if (roomToRemove is null)
-                        {
-                                return;
-                        }
-
-                        int removedCount = this.SelectedRooms.RemoveAll(match: r => r.Id == roomToRemove.Id);
-
-                        if (removedCount > 0)
+                        if (this.SelectedRooms.RemoveAll(match: r => r.Id == roomToRemove.Id) > 0)
                         {
                                 await this.RefreshCalendarDataAsync();
                                 this.StateHasChanged();
                         }
                 }
 
-                /// <summary>
-                /// Adds a practitioner to the active filters.
-                /// </summary>
-                /// <param name="practitioner">The practitioner to add.</param>
                 protected async Task AddPractitionerFilterAsync(PractitionerLookupDto practitioner)
                 {
-                        if (practitioner is null || this.SelectedPractitioners.Any(predicate: p => p.Id == practitioner.Id))
+                        if (practitioner is not null && !this.SelectedPractitioners.Any(predicate: p => p.Id == practitioner.Id))
                         {
-                                return;
+                                this.SelectedPractitioners.Add(item: practitioner);
+                                await this.RefreshCalendarDataAsync();
+                                this.StateHasChanged();
                         }
-
-                        this.SelectedPractitioners.Add(item: practitioner);
-                        await this.RefreshCalendarDataAsync();
-                        this.StateHasChanged();
                 }
 
-                /// <summary>
-                /// Removes a practitioner from the active filters.
-                /// </summary>
-                /// <param name="practitionerToRemove">The practitioner to remove.</param>
                 protected async Task RemovePractitionerFilterAsync(PractitionerLookupDto practitionerToRemove)
                 {
-                        if (practitionerToRemove is null)
-                        {
-                                return;
-                        }
-
-                        int removedCount = this.SelectedPractitioners.RemoveAll(match: p => p.Id == practitionerToRemove.Id);
-
-                        if (removedCount > 0)
+                        if (this.SelectedPractitioners.RemoveAll(match: p => p.Id == practitionerToRemove.Id) > 0)
                         {
                                 await this.RefreshCalendarDataAsync();
                                 this.StateHasChanged();
                         }
                 }
 
-                /// <summary>
-                /// Adds a customer to the active filters.
-                /// </summary>
-                /// <param name="customer">The customer to add.</param>
                 protected async Task AddCustomerFilterAsync(CustomerSummaryDto customer)
                 {
-                        if (customer is null || this.SelectedCustomers.Any(predicate: c => c.Id == customer.Id))
+                        if (customer is not null && !this.SelectedCustomers.Any(predicate: c => c.Id == customer.Id))
                         {
-                                return;
+                                this.SelectedCustomers.Add(item: customer);
+                                await this.RefreshCalendarDataAsync();
+                                this.StateHasChanged();
                         }
-
-                        this.SelectedCustomers.Add(item: customer);
-                        await this.RefreshCalendarDataAsync();
-                        this.StateHasChanged();
                 }
 
-                /// <summary>
-                /// Removes a customer from the active filters.
-                /// </summary>
-                /// <param name="customerToRemove">The customer to remove.</param>
                 protected async Task RemoveCustomerFilterAsync(CustomerSummaryDto customerToRemove)
                 {
-                        if (customerToRemove is null)
-                        {
-                                return;
-                        }
-
-                        int removedCount = this.SelectedCustomers.RemoveAll(match: c => c.Id == customerToRemove.Id);
-
-                        if (removedCount > 0)
+                        if (this.SelectedCustomers.RemoveAll(match: c => c.Id == customerToRemove.Id) > 0)
                         {
                                 await this.RefreshCalendarDataAsync();
                                 this.StateHasChanged();
                         }
                 }
 
-                /// <summary>
-                /// Refreshes the calendar data from the facade based on selected filters.
-                /// </summary>
                 private async Task RefreshCalendarDataAsync()
                 {
                         List<Guid> clinicIds = this.SelectedClinics.Select(selector: c => c.Id).ToList();
@@ -304,9 +261,6 @@ namespace UI.Client.Pages.Calendar
                         this.StateHasChanged();
                 }
 
-                /// <summary>
-                /// Closes the smart booking modal and resets dragged time state.
-                /// </summary>
                 protected void CloseSmartModal()
                 {
                         this.IsSmartModalVisible = false;
@@ -314,18 +268,17 @@ namespace UI.Client.Pages.Calendar
                         this.DraggedEndTime = null;
                 }
 
-                /// <summary>
-                /// Handles successful booking save and refreshes calendar view.
-                /// </summary>
                 protected async Task HandleBookingSavedAsync()
                 {
                         this.CloseSmartModal();
+
+                        // We reset the selected treatment after a successful booking
+                        this.SelectedTreatmentIdForBooking = null;
+                        this.SelectedTreatmentDuration = null;
+
                         await this.RefreshCalendarDataAsync();
                 }
 
-                /// <summary>
-                /// Disposes of async resources like JS modules.
-                /// </summary>
                 public async ValueTask DisposeAsync()
                 {
                         if (this._module is not null)
@@ -336,7 +289,6 @@ namespace UI.Client.Pages.Calendar
                                 }
                                 catch (JSDisconnectedException)
                                 {
-                                        // Ignore standard Blazor disconnects
                                 }
                         }
 

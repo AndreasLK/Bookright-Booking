@@ -22,9 +22,7 @@
                         {
                             <div class="alert alert-success p-2 mb-2">Valgt: <strong>@SelectedClinic.Name</strong></div>
                         }
-                        <SearchableDataList TItem="Facade.Clinics.ClinicDto"
-                                            Items="AvailableClinics"
-                                            OnItemClick="SetClinic">
+                        <SearchableDataList TItem="Facade.Clinics.ClinicDto" Items="AvailableClinics" OnItemClick="SetClinic">
                             <ItemTemplate Context="clinic">@clinic.Name</ItemTemplate>
                         </SearchableDataList>
                     </div>
@@ -35,22 +33,21 @@
                         {
                             <div class="alert alert-success p-2 mb-2">Valgt: <strong>@SelectedCustomer.LegalFirstName @SelectedCustomer.LegalLastName</strong></div>
                         }
-                        <SearchableDataList TItem="Facade.Customers.CustomerSummaryDto"
-                                            Items="AvailableCustomers"
-                                            OnItemClick="SetCustomer">
+                        <SearchableDataList TItem="Facade.Customers.CustomerSummaryDto" Items="AvailableCustomers" OnItemClick="SetCustomer">
                             <ItemTemplate Context="customer">@customer.LegalFirstName @customer.LegalLastName</ItemTemplate>
                         </SearchableDataList>
                     </div>
 
                     <div class="col-md-4">
-                        <label class="form-label fw-bold">Vælg Behandling</label>
-                        <select class="form-select" @onchange="SetTreatment">
-                            <option value="">-- Vælg Behandling --</option>
-                            @foreach (var treatment in AvailableTreatments)
-                            {
-                                <option value="@treatment.Id">@treatment.Name</option>
-                            }
-                        </select>
+                        <label class="form-label fw-bold">Behandling</label>
+                        @{
+                            var lockedTreatment = AvailableTreatments.FirstOrDefault(t => t.Id == PreselectedTreatmentId);
+                        }
+                        <div class="alert alert-secondary p-3 mb-2 border-secondary">
+                            <strong>@(lockedTreatment?.Name ?? "Ukendt")</strong>
+                            <br />
+                            <small class="text-muted"><i class="bi bi-lock-fill"></i> Fastlåst fra kalendervalg</small>
+                        </div>
                     </div>
                 </div>
 
@@ -73,9 +70,7 @@
                                 var finalRoom = AvailableRooms.FirstOrDefault(r => r.Id == FinalRoomId);
                                 <div class="alert alert-info p-2 mb-2">Afsat Lokale: <strong>@(finalRoom?.Name ?? "Ukendt")</strong></div>
                             }
-                            <SearchableDataList TItem="Facade.Rooms.RoomDto"
-                                                Items="AvailableRooms"
-                                                OnItemClick="OverrideRoom">
+                            <SearchableDataList TItem="Facade.Rooms.RoomDto" Items="AvailableRooms" OnItemClick="OverrideRoom">
                                 <ItemTemplate Context="room">@room.Name</ItemTemplate>
                             </SearchableDataList>
                         </div>
@@ -87,9 +82,7 @@
                                 var finalPrac = AvailablePractitioners.FirstOrDefault(p => p.Id == FinalPractitionerId);
                                 <div class="alert alert-info p-2 mb-2">Afsat Behandler: <strong>@(finalPrac?.DisplayName ?? "Ukendt")</strong></div>
                             }
-                            <SearchableDataList TItem="Facade.Common.Dtos.PractitionerLookupDto"
-                                                Items="AvailablePractitioners"
-                                                OnItemClick="OverridePractitioner">
+                            <SearchableDataList TItem="Facade.Common.Dtos.PractitionerLookupDto" Items="AvailablePractitioners" OnItemClick="OverridePractitioner">
                                 <ItemTemplate Context="prac">@prac.DisplayName</ItemTemplate>
                             </SearchableDataList>
                         </div>

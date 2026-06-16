@@ -10,102 +10,97 @@
     <div class="row mb-3">
         <div class="col">
             <h2>Klinik Kalender</h2>
-            <p class="text-muted">Træk på kalenderen for at oprette en ny booking. Brug filtrene herunder til at afgrænse visningen.</p>
+            <p class="text-muted">Brug filtrene herunder til at afgrænse visningen.</p>
         </div>
     </div>
+
+    @* --- STEP 1: SELECT TREATMENT PREVIEW --- *@
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm border-primary">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="bi bi-calendar-plus"></i> Opret ny booking</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted"><strong>1. Vælg en behandling først</strong> for at låse varigheden. Klik herefter på et ledigt tidspunkt i kalenderen for at placere bookingen.</p>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Behandlingstype</label>
+                            <select class="form-select border-primary fw-bold" @onchange="OnTreatmentSelected">
+                                <option value="">-- Vælg Behandling --</option>
+                                @foreach (var treatment in AvailableTreatments)
+                                {
+                                    <option value="@treatment.Id">@treatment.Name (@treatment.Duration.TotalMinutes min)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* --- ERROR MESSAGES --- *@
+    @if (!string.IsNullOrEmpty(WarningMessage))
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle-fill"></i> @WarningMessage
+            <button type="button" class="btn-close" @onclick="ClearWarning"></button>
+        </div>
+    }
 
     @* --- MULTI-SELECT FILTERS SECTION --- *@
     <div class="row mb-4 p-3 bg-light rounded border">
         <h5 class="mb-3"><i class="bi bi-funnel"></i> Filtrer Kalender</h5>
 
-        @* Clinics Filter *@
         <div class="col-md-3">
             <label class="form-label fw-bold">Klinikker</label>
-            <SearchableDataList TItem="Facade.Clinics.ClinicDto"
-                                Items="AvailableClinics"
-                                OnItemDoubleClick="AddClinicFilterAsync">
-                <ItemTemplate Context="clinic">
-                    @clinic.Name
-                </ItemTemplate>
+            <SearchableDataList TItem="Facade.Clinics.ClinicDto" Items="AvailableClinics" OnItemDoubleClick="AddClinicFilterAsync">
+                <ItemTemplate Context="clinic">@clinic.Name</ItemTemplate>
             </SearchableDataList>
-
             <div class="mt-2">
                 @foreach (var clinic in SelectedClinics)
                 {
-                    <span class="badge bg-primary me-1 mb-1 p-2">
-                        @clinic.Name
-                        <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"
-                                @onclick="() => RemoveClinicFilterAsync(clinic)"></button>
-                    </span>
+                    <span class="badge bg-primary me-1 mb-1 p-2">@clinic.Name <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;" @onclick="() => RemoveClinicFilterAsync(clinic)"></button></span>
                 }
             </div>
         </div>
 
-        @* Rooms Filter *@
         <div class="col-md-3">
             <label class="form-label fw-bold">Lokaler</label>
-            <SearchableDataList TItem="Facade.Rooms.RoomDto"
-                                Items="AvailableRooms"
-                                OnItemDoubleClick="AddRoomFilterAsync">
-                <ItemTemplate Context="room">
-                    @room.Name
-                </ItemTemplate>
+            <SearchableDataList TItem="Facade.Rooms.RoomDto" Items="AvailableRooms" OnItemDoubleClick="AddRoomFilterAsync">
+                <ItemTemplate Context="room">@room.Name</ItemTemplate>
             </SearchableDataList>
-
             <div class="mt-2">
                 @foreach (var room in SelectedRooms)
                 {
-                    <span class="badge bg-info text-dark me-1 mb-1 p-2">
-                        @room.Name
-                        <button type="button" class="btn-close ms-2" style="font-size: 0.5rem;"
-                                @onclick="() => RemoveRoomFilterAsync(room)"></button>
-                    </span>
+                    <span class="badge bg-info text-dark me-1 mb-1 p-2">@room.Name <button type="button" class="btn-close ms-2" style="font-size: 0.5rem;" @onclick="() => RemoveRoomFilterAsync(room)"></button></span>
                 }
             </div>
         </div>
 
-        @* Practitioners Filter *@
         <div class="col-md-3">
             <label class="form-label fw-bold">Behandlere</label>
-            <SearchableDataList TItem="Facade.Common.Dtos.PractitionerLookupDto"
-                                Items="AvailablePractitioners"
-                                OnItemDoubleClick="AddPractitionerFilterAsync">
-                <ItemTemplate Context="practitioner">
-                    @practitioner.DisplayName
-                </ItemTemplate>
+            <SearchableDataList TItem="Facade.Common.Dtos.PractitionerLookupDto" Items="AvailablePractitioners" OnItemDoubleClick="AddPractitionerFilterAsync">
+                <ItemTemplate Context="practitioner">@practitioner.DisplayName</ItemTemplate>
             </SearchableDataList>
-
             <div class="mt-2">
                 @foreach (var practitioner in SelectedPractitioners)
                 {
-                    <span class="badge bg-success me-1 mb-1 p-2">
-                        @practitioner.DisplayName
-                        <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;"
-                                @onclick="() => RemovePractitionerFilterAsync(practitioner)"></button>
-                    </span>
+                    <span class="badge bg-success me-1 mb-1 p-2">@practitioner.DisplayName <button type="button" class="btn-close btn-close-white ms-2" style="font-size: 0.5rem;" @onclick="() => RemovePractitionerFilterAsync(practitioner)"></button></span>
                 }
             </div>
         </div>
 
-        @* Customers Filter *@
         <div class="col-md-3">
             <label class="form-label fw-bold">Kunder</label>
-            <SearchableDataList TItem="Facade.Customers.CustomerSummaryDto"
-                                Items="AvailableCustomers"
-                                OnItemDoubleClick="AddCustomerFilterAsync">
-                <ItemTemplate Context="customer">
-                    @customer.LegalFirstName @customer.LegalLastName
-                </ItemTemplate>
+            <SearchableDataList TItem="Facade.Customers.CustomerSummaryDto" Items="AvailableCustomers" OnItemDoubleClick="AddCustomerFilterAsync">
+                <ItemTemplate Context="customer">@customer.LegalFirstName @customer.LegalLastName</ItemTemplate>
             </SearchableDataList>
-
             <div class="mt-2">
                 @foreach (var customer in SelectedCustomers)
                 {
-                    <span class="badge bg-warning text-dark me-1 mb-1 p-2">
-                        @customer.LegalFirstName @customer.LegalLastName
-                        <button type="button" class="btn-close ms-2" style="font-size: 0.5rem;"
-                                @onclick="() => RemoveCustomerFilterAsync(customer)"></button>
-                    </span>
+                    <span class="badge bg-warning text-dark me-1 mb-1 p-2">@customer.LegalFirstName @customer.LegalLastName <button type="button" class="btn-close ms-2" style="font-size: 0.5rem;" @onclick="() => RemoveCustomerFilterAsync(customer)"></button></span>
                 }
             </div>
         </div>
@@ -124,10 +119,11 @@
 </div>
 
 @* --- SMART MODAL INTEGRATION --- *@
-@if (IsSmartModalVisible && DraggedStartTime.HasValue && DraggedEndTime.HasValue)
+@if (IsSmartModalVisible && DraggedStartTime.HasValue && DraggedEndTime.HasValue && SelectedTreatmentIdForBooking.HasValue)
 {
     <SmartBookingModal StartTime="DraggedStartTime.Value"
                        EndTime="DraggedEndTime.Value"
+                       PreselectedTreatmentId="SelectedTreatmentIdForBooking.Value"
                        AvailableCustomers="AvailableCustomers"
                        AvailableClinics="AvailableClinics"
                        AvailableRooms="AvailableRooms"

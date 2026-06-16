@@ -96,7 +96,7 @@ namespace Facade.Calendar
                             ViewStartDate: viewStartDate,
                             ViewEndDate: viewEndDate,
                             ClinicIds: clinicIds.Select(selector: id => new Domain.Value_Objects.Ids.ClinicId(Value: id)),
-                            RoomIds: roomIds.Select(selector: id => new Domain.Value_Objects.RoomId(Value: id)),
+                            RoomIds: roomIds.Select(selector: id => new Domain.Value_Objects.Ids.RoomId(Value: id)),
                             PractitionerIds: practitionerIds.Select(selector: id => new Domain.Value_Objects.Ids.PractitionerId(Value: id)),
                             CustomerIds: customerIds.Select(selector: id => new Domain.Value_Objects.Ids.CustomerId(Value: id))
                         );
