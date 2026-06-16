@@ -164,5 +164,44 @@ namespace Use_Case.BestDiscount
 
                         return (historicalSpendMoney, campaignUsage);
                 }
+
+                /// <summary>
+                /// Assembles a DiscountContext for a potential booking that has not yet been saved to the database.
+                /// </summary>
+                public async Task<DiscountContext> CreatePreviewAsync(
+                        CustomerId customerId,
+                        TreatmentId treatmentId,
+                        TimeSlot timeslot)
+                {
+                        IEnumerable<Campaign> activeCampaigns = await this._campaignRepository.GetActiveAsync();
+
+                        Treatment? currentTreatment = await this._treatmentRepository.GetByIdAsync(id: treatmentId.Value);
+                        ArgumentNullException.ThrowIfNull(argument: currentTreatment, paramName: nameof(currentTreatment));
+
+                        Money currentBookingPrice = currentTreatment.Price;
+
+                        Customer? customer = await this._customerRepository.GetByIdAsync(id: customerId.Value);
+                        ArgumentNullException.ThrowIfNull(argument: customer, paramName: nameof(customer));
+
+                        Month customerBirthMonth = (Month)customer.DateOfBirth.Month;
+
+                        IReadOnlyList<Booking> customerBookingsSinceEarliestCooldown = await this.GetBookingsSinceEarliestCooldown(
+                                customerId: customerId,
+                                findCampaignUsageBefore: timeslot.EndDateTime,
+                                activeCampaigns: activeCampaigns);
+
+                        var result = this.GetHistoricalSpendAndUsage(customerBookingsSinceEarliestCooldown: customerBookingsSinceEarliestCooldown);
+                        Money totalHistoricalSpend = result.Item1;
+                        Dictionary<CampaignId, List<DateTime>> campaignUsage = result.Item2;
+
+                        return new DiscountContext(
+                                basePrice: currentBookingPrice,
+                                treatmentId: treatmentId,
+                                totalHistoricalSpend: totalHistoricalSpend,
+                                activeCampaigns: activeCampaigns.ToList(),
+                                timeUsedEligbleCampaigns: campaignUsage,
+                                customerBirthMonth: customerBirthMonth
+                        );
+                }
         }
 }

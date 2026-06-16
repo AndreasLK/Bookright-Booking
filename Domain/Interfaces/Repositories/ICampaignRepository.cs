@@ -7,6 +7,6 @@ namespace Domain.Interfaces.Repositories
 {
         public interface ICampaignRepository : IRepository<Campaign>
         {
-                Task<IEnumerable<Campaign>> GetActiveAsync();
+                public Task<IEnumerable<Campaign>> GetActiveAsync();
         }
 }

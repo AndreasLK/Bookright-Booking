@@ -1,98 +1,87 @@
-using System.Collections.Concurrent;
 using Domain.Entities;
-using Domain.Interfaces.Repositories;
 using Domain.Value_Objects;
-using Domain.Value_Objects.Ids;
-using System.Threading;
-using Domain.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Use_Case.BestDiscount
 {
         /// <summary>
-        /// Evaluates all active promotional campaigns concurrently to determine the 
-        /// lowest possible price for a booking.
+        /// Represents the outcome of the discount evaluation process.
+        /// </summary>
+        public record DiscountEvaluationResult(
+            Money FinalPrice,
+            string AppliedCampaignName,
+            List<string> EvaluatedCampaignNames
+        );
+
+        /// <summary>
+        /// Evaluates all eligible campaigns and determines the absolute best discount for the customer.
         /// </summary>
         public class DiscountService
         {
-
-                private readonly IBookingRepository _bookingRepository;
-                private readonly ITreatmentRepository _treatmentRepository;
-                private readonly ICurrencyConverter _currencyConverter;
-
                 /// <summary>
-                /// Initializes a new instance of the <see cref="DiscountService"/> class.
+                /// Iterates through active campaigns, applies their specific strategies, and selects the one resulting in the lowest price.
                 /// </summary>
-                /// <param name="bookingRepository">Repository for booking records.</param>
-                /// <param name="treatmentRepository">Repository for treatment pricing details.</param>
-                /// <param name="currencyConverter">Service to normalize diverse currencies for accurate price comparisons.</param>
-                /// <exception cref="ArgumentNullException">Thrown if any dependency is null.</exception>
-                public DiscountService(IBookingRepository bookingRepository, ITreatmentRepository treatmentRepository, ICurrencyConverter currencyConverter)
+                public DiscountEvaluationResult GetBestDiscount(DiscountContext context)
                 {
-                        ArgumentNullException.ThrowIfNull(bookingRepository);
-                        ArgumentNullException.ThrowIfNull(treatmentRepository);
-                        ArgumentNullException.ThrowIfNull(currencyConverter);
+                        ArgumentNullException.ThrowIfNull(argument: context, paramName: nameof(context));
 
-                        this._bookingRepository = bookingRepository;
-                        this._treatmentRepository = treatmentRepository;
-                        this._currencyConverter = currencyConverter;
-                }
+                        Money bestPrice = context.BasePrice;
+                        string bestCampaignName = "Ingen";
+                        List<string> evaluatedCampaigns = new List<string>();
 
-                /// <summary>
-                /// Calculates the absolute lowest price available by evaluating all active campaigns in parallel.
-                /// </summary>
-                /// <param name="context">Aggregated booking and customer data required for calculations.</param>
-                /// <returns>The most advantageous price, defaulting to the base price if no better discount exists.</returns>
-                /// <exception cref="ArgumentNullException">Thrown when <paramref name="context"/> is null.</exception>
-                public Money GetBestDiscount(DiscountContext context)
-                {
-                        ArgumentNullException.ThrowIfNull(context);
+                        if (context.ActiveCampaigns is null || !context.ActiveCampaigns.Any())
+                        {
+                                return new DiscountEvaluationResult(
+                                    FinalPrice: bestPrice,
+                                    AppliedCampaignName: bestCampaignName,
+                                    EvaluatedCampaignNames: evaluatedCampaigns
+                                );
+                        }
 
-                        var calculatedPrices = new ConcurrentBag<Money>();
+                        foreach (Campaign campaign in context.ActiveCampaigns)
+                        {
+                                bool isEligible = true;
 
-                        Parallel.ForEach(context.ActiveCampaigns, campaign =>
+                                // Enforce campaign cooldown periods
+                                if (context.TimeUsedEligbleCampaigns.TryGetValue(key: campaign.Id, value: out List<DateTime>? usageDates))
                                 {
-                                        List<DateTime> campaignUsage = new List<DateTime>();
-
-                                        if (context.TimeUsedEligbleCampaigns.TryGetValue(campaign.Id, out List<DateTime>? usage))
+                                        if (usageDates is not null && usageDates.Any())
                                         {
-                                                campaignUsage = usage;
+                                                DateTime lastUsed = usageDates.Max();
+                                                if ((DateTime.Now - lastUsed) < campaign.Cooldown)
+                                                {
+                                                        isEligible = false;
+                                                }
                                         }
+                                }
 
-                                        Money finalPrice = campaign.Strategy.GetFinalPrice(
-                                                totalPurchase: context.TotalHistoricalSpend,
-                                                currentPurchasePrice: context.BasePrice,
-                                                treatmentId: context.TreatmentId,
-                                                customerBirthMonth: context.CustomerBirthMonth,
-                                                timesUsedCampaign: campaignUsage);
+                                if (isEligible)
+                                {
+                                        evaluatedCampaigns.Add(item: campaign.Name);
 
-                                        calculatedPrices.Add(finalPrice);
-                                });
+                                        Money calculatedPrice = campaign.Strategy.GetFinalPrice(
+                                            totalPurchase: context.TotalHistoricalSpend,
+                                            currentPurchasePrice: context.BasePrice,
+                                            treatmentId: context.TreatmentId,
+                                            customerBirthMonth: context.CustomerBirthMonth,
+                                            timesUsedCampaign: usageDates ?? new List<DateTime>()
+                                        );
 
-
-
-                        Money? bestDiscountPrice = calculatedPrices.OrderBy(
-                                money => this._currencyConverter.Convert(
-                                        money: money,
-                                        toCurrency: context.BasePrice.Currency)
-                                .Value)
-                                .FirstOrDefault();
-
-                        if (bestDiscountPrice is null)
-                        {
-                                return context.BasePrice;
+                                        if (calculatedPrice.Value < bestPrice.Value)
+                                        {
+                                                bestPrice = calculatedPrice;
+                                                bestCampaignName = campaign.Name;
+                                        }
+                                }
                         }
 
-                        decimal normalizedDiscountValue = this._currencyConverter.Convert(
-                                money: bestDiscountPrice,
-                                toCurrency: context.BasePrice.Currency)
-                                .Value;
-
-                        if (normalizedDiscountValue >= context.BasePrice.Value)
-                        {
-                                return context.BasePrice;
-                        }
-
-                        return bestDiscountPrice;
+                        return new DiscountEvaluationResult(
+                            FinalPrice: bestPrice,
+                            AppliedCampaignName: bestCampaignName,
+                            EvaluatedCampaignNames: evaluatedCampaigns
+                        );
                 }
         }
 }

@@ -5,7 +5,8 @@ using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Use_Case.Bookings.Commands
 {
@@ -52,9 +53,9 @@ namespace Use_Case.Bookings.Commands
                             endDateTime: command.EndDateTime
                         );
 
-                        // 1. Concurrency Check: Ensure the room and practitioner are STILL available
+                        // 1. Concurrency Check: Ensure the room, practitioner, AND customer are STILL available
                         await this.EnsureNoDoubleBookingAsync(
-                            clinicId: command.ClinicId,
+                            customerId: command.CustomerId,
                             roomId: command.RoomId,
                             practitionerId: command.PractitionerId,
                             timeSlot: requestedTimeSlot
@@ -86,16 +87,15 @@ namespace Use_Case.Bookings.Commands
                 }
 
                 /// <summary>
-                /// Verifies that no existing booking overlaps with the requested timeslot for the given room or practitioner.
+                /// Verifies that no existing booking overlaps with the requested timeslot for the given customer, room, or practitioner.
                 /// </summary>
                 private async Task EnsureNoDoubleBookingAsync(
-                    Guid clinicId,
+                    Guid customerId,
                     Guid roomId,
                     Guid practitionerId,
                     TimeSlot timeSlot)
                 {
                         OverlappingBookingsSpecification overlapSpec = new OverlappingBookingsSpecification(
-                            clinicId: clinicId,
                             requestedTimeSlot: timeSlot
                         );
 
@@ -116,6 +116,12 @@ namespace Use_Case.Bookings.Commands
                         if (isPractitionerTaken)
                         {
                                 throw new InvalidOperationException(message: "The selected practitioner is no longer available for this timeslot.");
+                        }
+
+                        bool isCustomerTaken = overlappingBookings.Any(predicate: b => b.CustomerId.Value == customerId);
+                        if (isCustomerTaken)
+                        {
+                                throw new InvalidOperationException(message: "The customer already has a booking during this timeslot.");
                         }
                 }
         }

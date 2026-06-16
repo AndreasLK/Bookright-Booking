@@ -13,8 +13,14 @@ using Facade.Bookings;
 
 namespace UI.Client.Pages.Calendar
 {
+        /// <summary>
+        /// Code-behind for the Main Calendar View component.
+        /// Handles filtering, JS initialization, and Modal state management.
+        /// </summary>
         public partial class CalendarView : ComponentBase, IAsyncDisposable
         {
+                private const int CALENDAR_PAST_DAYS_VIEW = -14;
+                private const int CALENDAR_FUTURE_DAYS_VIEW = 30;
                 private const string JS_IMPORT_IDENTIFIER = "import";
                 private const string JS_CALENDAR_MODULE_PATH = "./Pages/Calendar/CalendarView.razor.js";
                 private const string JS_INITIALIZE_FUNCTION = "initializeCalendar";
@@ -50,12 +56,14 @@ namespace UI.Client.Pages.Calendar
                 public string WarningMessage { get; private set; } = string.Empty;
 
                 public Guid? SelectedBookingIdForDetails { get; private set; }
+                public BookingPricingDetailsDto? SelectedBookingPrice { get; private set; }
+
                 protected bool IsSmartModalVisible { get; set; }
                 protected DateTime? DraggedStartTime { get; set; }
                 protected DateTime? DraggedEndTime { get; set; }
 
-                private DateTime _currentViewStart = DateTime.Today.AddDays(value: -14);
-                private DateTime _currentViewEnd = DateTime.Today.AddDays(value: 30);
+                private DateTime _currentViewStart;
+                private DateTime _currentViewEnd;
 
                 private IJSObjectReference? _module;
                 private DotNetObjectReference<CalendarView>? _dotNetRef;
@@ -63,6 +71,9 @@ namespace UI.Client.Pages.Calendar
 
                 protected override async Task OnInitializedAsync()
                 {
+                        this._currentViewStart = DateTime.Today.AddDays(value: CALENDAR_PAST_DAYS_VIEW);
+                        this._currentViewEnd = DateTime.Today.AddDays(value: CALENDAR_FUTURE_DAYS_VIEW);
+
                         CalendarFilterLookupsDto lookups = await this.CalendarFacade.GetFilterLookupsAsync();
 
                         this.AvailableClinics = lookups.Clinics.ToList();
@@ -135,7 +146,7 @@ namespace UI.Client.Pages.Calendar
                 {
                         if (this.SelectedTreatmentIdForBooking is null || this.SelectedTreatmentDuration is null)
                         {
-                                this.WarningMessage = "Du skal vælge en behandling i toppen af siden, før du kan markere tid i kalenderen.";
+                                this.WarningMessage = "Du skal vælge en behandling i trin 1, før du kan placere bookingen i kalenderen.";
                                 this.StateHasChanged();
                                 return;
                         }
@@ -155,12 +166,23 @@ namespace UI.Client.Pages.Calendar
                 }
 
                 [JSInvokable]
-                public void OnBookingEventClicked(string bookingIdStr)
+                public async Task OnBookingEventClicked(string bookingIdStr)
                 {
                         if (Guid.TryParse(input: bookingIdStr, result: out Guid bookingId))
                         {
                                 this.SelectedBookingIdForDetails = bookingId;
                                 this.WarningMessage = string.Empty;
+                                this.SelectedBookingPrice = null;
+
+                                try
+                                {
+                                        this.SelectedBookingPrice = await this.BookingFacade.GetSavedBookingPriceAsync(bookingId: bookingId);
+                                }
+                                catch (Exception ex)
+                                {
+                                        this.WarningMessage = "Kunne ikke beregne pris: " + ex.Message;
+                                }
+
                                 this.StateHasChanged();
                         }
                 }
@@ -181,7 +203,7 @@ namespace UI.Client.Pages.Calendar
                         }
                         catch (Exception ex)
                         {
-                                this.WarningMessage = "Kunne ikke betale booking: " + ex.Message;
+                                this.WarningMessage = "Systemfejl ved betaling: " + ex.Message;
                                 this.StateHasChanged();
                         }
                 }
@@ -189,6 +211,7 @@ namespace UI.Client.Pages.Calendar
                 protected void CloseDetailsModal()
                 {
                         this.SelectedBookingIdForDetails = null;
+                        this.SelectedBookingPrice = null;
                         this.WarningMessage = string.Empty;
                 }
 

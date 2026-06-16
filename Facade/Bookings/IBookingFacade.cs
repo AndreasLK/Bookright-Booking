@@ -50,5 +50,28 @@ namespace Facade.Bookings
                 /// </summary>
                 /// <param name="bookingId">The ID of the booking to pay.</param>
                 public Task MarkBookingAsPaidAsync(Guid bookingId);
+
+                /// <summary>
+                /// Calculates the estimated final price for a potential booking before it is saved, 
+                /// including applicable surcharges and discounts.
+                /// </summary>
+                /// <param name="customerId">The unique identifier of the customer.</param>
+                /// <param name="treatmentId">The unique identifier of the selected treatment.</param>
+                /// <param name="startDateTime">The planned start time of the booking.</param>
+                /// <param name="endDateTime">The planned end time of the booking.</param>
+                /// <returns>The calculated final price as an itemized reciept.</returns>
+                public Task<BookingPricingDetailsDto> GetBookingPricePreviewAsync(
+                    Guid customerId,
+                    Guid treatmentId,
+                    DateTime startDateTime,
+                    DateTime endDateTime);
+
+                /// <summary>
+                /// Calculates the exact final price for an existing booking, 
+                /// including applicable surcharges and discounts based on the customer's history.
+                /// </summary>
+                /// <param name="bookingId">The unique identifier of the saved booking.</param>
+                /// <returns>The calculated final price as an itemized reciept.</returns>
+                public Task<BookingPricingDetailsDto> GetSavedBookingPriceAsync(Guid bookingId);
         }
 }

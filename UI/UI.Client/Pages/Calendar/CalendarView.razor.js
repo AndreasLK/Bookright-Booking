@@ -23,7 +23,7 @@ export function initializeCalendar(containerId, eventsData, dotNetObject) {
                 selectMirror: true,
                 events: eventsData,
 
-                // When user selects a NEW time slot
+                // When user selects a NEW time slot by dragging or clicking empty space
                 select: function (selectionInfo) {
                         dotNetObject.invokeMethodAsync('OnTimeSlotSelected', selectionInfo.startStr, selectionInfo.endStr)
                                 .catch(error => console.error("Error calling C# OnTimeSlotSelected:", error));
@@ -50,6 +50,7 @@ export function updateCalendarEvents(containerId, newEvents) {
         }
 }
 
+// Dynamically sets the selection block size so it perfectly previews the treatment duration
 export function setTreatmentPreviewDuration(durationStr) {
         if (calendarInstance && durationStr) {
                 calendarInstance.setOption('defaultTimedEventDuration', durationStr);

@@ -4,162 +4,72 @@ using Domain.Interfaces.Repositories;
 using Domain.Specifications;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Infrastructure.Persistence
 {
-        /// <summary>
-        /// A fully functional in-memory implementation of the customer repository.
-        /// Evaluates specifications, queries, and state changes locally without a database.
-        /// </summary>
         public class InMemoryCustomerRepository : ICustomerRepository
         {
-                private readonly List<Customer> _customers = new List<Customer>();
+                private readonly List<Customer> _customers = new();
 
-                /// <summary>
-                /// Initializes a new instance of the <see cref="InMemoryCustomerRepository"/> class.
-                /// Seeds initial mock data if the collection is empty.
-                /// </summary>
-                public InMemoryCustomerRepository()
-                {
-                        if (this._customers.Count == 0)
-                        {
-                                this.SeedData();
-                        }
-                }
+                public InMemoryCustomerRepository() => this.SeedData();
 
-                /// <inheritdoc/>
-                public Task<Customer?> GetByIdAsync(Guid id)
-                {
-                        Customer? customer = this._customers.FirstOrDefault(predicate: c => c.Id.Value == id);
-                        return Task.FromResult(result: customer);
-                }
+                public Task<Customer?> GetByIdAsync(Guid id) => Task.FromResult(result: this._customers.FirstOrDefault(predicate: c => c.Id.Value == id));
+                public Task<IReadOnlyList<Customer>> GetAllAsync() => Task.FromResult<IReadOnlyList<Customer>>(result: this._customers.AsReadOnly());
+                public Task<Customer> AddAsync(Customer entity) { this._customers.Add(item: entity); return Task.FromResult(result: entity); }
 
-                /// <inheritdoc/>
-                public Task<IReadOnlyList<Customer>> GetAllAsync()
-                {
-                        IReadOnlyList<Customer> readOnlyList = this._customers.AsReadOnly();
-                        return Task.FromResult(result: readOnlyList);
-                }
-
-                /// <inheritdoc/>
-                public Task<IReadOnlyList<Customer>> FindAsync(Specification<Customer> specification)
-                {
-                        ArgumentNullException.ThrowIfNull(argument: specification, paramName: nameof(specification));
-
-                        // Convert the list to an IQueryable so we can dynamically chain the specification's expression trees
-                        IQueryable<Customer> query = this._customers.AsQueryable();
-
-                        // 1. Apply the Filtering Rule
-                        query = query.Where(predicate: specification.ToExpression());
-
-                        // 2. Apply Sorting
-                        if (specification.OrderBy is not null)
-                        {
-                                query = query.OrderBy(keySelector: specification.OrderBy);
-                        }
-                        else if (specification.OrderByDescending is not null)
-                        {
-                                query = query.OrderByDescending(keySelector: specification.OrderByDescending);
-                        }
-
-                        // 3. Apply Pagination / Record Limits
-                        if (specification.Take.HasValue)
-                        {
-                                query = query.Take(count: specification.Take.Value);
-                        }
-
-                        IReadOnlyList<Customer> results = query.ToList().AsReadOnly();
-                        return Task.FromResult(result: results);
-                }
-
-                /// <inheritdoc/>
-                public Task<Customer> AddAsync(Customer entity)
-                {
-                        ArgumentNullException.ThrowIfNull(argument: entity, paramName: nameof(entity));
-
-                        this._customers.Add(item: entity);
-                        return Task.FromResult(result: entity);
-                }
-
-                /// <inheritdoc/>
                 public Task UpdateAsync(Customer entity)
                 {
-                        ArgumentNullException.ThrowIfNull(argument: entity, paramName: nameof(entity));
-
                         int index = this._customers.FindIndex(match: c => c.Id.Value == entity.Id.Value);
-
-                        if (index != -1)
-                        {
-                                this._customers[index] = entity;
-                        }
-
+                        if (index != -1) this._customers[index] = entity;
                         return Task.CompletedTask;
                 }
 
-                /// <inheritdoc/>
-                public Task<bool> DeleteAsync(Guid id)
-                {
-                        int removedCount = this._customers.RemoveAll(match: c => c.Id.Value == id);
-                        bool wasRemoved = removedCount > 0;
+                public Task<bool> DeleteAsync(Guid id) => Task.FromResult(result: this._customers.RemoveAll(match: c => c.Id.Value == id) > 0);
 
-                        return Task.FromResult(result: wasRemoved);
+                public Task<IReadOnlyList<Customer>> FindAsync(Specification<Customer> specification)
+                {
+                        IQueryable<Customer> query = this._customers.AsQueryable().Where(predicate: specification.ToExpression());
+                        if (specification.OrderBy is not null) query = query.OrderBy(keySelector: specification.OrderBy);
+                        else if (specification.OrderByDescending is not null) query = query.OrderByDescending(keySelector: specification.OrderByDescending);
+                        if (specification.Take.HasValue) query = query.Take(count: specification.Take.Value);
+                        return Task.FromResult<IReadOnlyList<Customer>>(result: query.ToList().AsReadOnly());
                 }
 
-                /// <summary>
-                /// Populates the initial memory state with test customers for development and UI testing.
-                /// Data is migrated from the UI mock components into strict Domain entities.
-                /// </summary>
                 private void SeedData()
                 {
-                        // 1. Migrate Jonathan Doe (From CustomerSearch and CustomerDetails UI)
-                        PersonDetails jonathanDetails = new PersonDetails(
-                                LegalFirstName: "Jonathan",
-                                LegalLastName: "Doe",
-                                Pronouns: "He/Him",
-                                DateOfBirth: new DateOnly(year: 1990, month: 5, day: 14),
-                                PhoneNumber: new PhoneNumber(value: "555-0101"),
-                                Email: new EmailAddress(value: "jonny@example.com"),
-                                Gender: Gender.Man,
-                                PreferredFirstName: "Jonny",
-                                PreferredLastName: null
-                        );
-
-                        Customer jonathan = new Customer(
-                                id: new CustomerId(Value: Guid.NewGuid()),
+                        this._customers.Add(item: new Customer(
+                                id: new CustomerId(Value: Guid.Parse(input: "D1111111-1111-1111-1111-111111111111")),
                                 personalNote: null,
-                                importantNote: "Allergic to certain massage oils.",
+                                importantNote: "Allergisk overfor mandelolie.",
                                 preferredPratitionerId: null,
                                 preferredGender: null,
                                 sygsikringDanmarkMember: true,
-                                details: jonathanDetails
-                        );
+                                details: new PersonDetails("Jonathan", "Doe", "He/Him", new DateOnly(1990, 5, 14), new PhoneNumber("555-0101"), new EmailAddress("jonny@example.com"), Gender.Man, "Jonny", null)
+                        ));
 
-                        this._customers.Add(item: jonathan);
-
-                        // 2. Migrate Elizabeth Windsor (From CustomerSearch UI)
-                        PersonDetails elizabethDetails = new PersonDetails(
-                                LegalFirstName: "Elizabeth",
-                                LegalLastName: "Windsor",
-                                Pronouns: "She/They",
-                                DateOfBirth: new DateOnly(year: 1926, month: 4, day: 21), // Placeholder DOB
-                                PhoneNumber: new PhoneNumber(value: "555-0103"),
-                                Email: new EmailAddress(value: "liz@example.com"),
-                                Gender: Gender.Woman,
-                                PreferredFirstName: "Liz",
-                                PreferredLastName: "Mountbatten"
-                        );
-
-                        Customer elizabeth = new Customer(
-                                id: new CustomerId(Value: Guid.NewGuid()),
-                                personalNote: "Prefers afternoon appointments.",
+                        this._customers.Add(item: new Customer(
+                                id: new CustomerId(Value: Guid.Parse(input: "D2222222-2222-2222-2222-222222222222")),
+                                personalNote: "Foretrækker eftermiddag.",
                                 importantNote: null,
                                 preferredPratitionerId: null,
                                 preferredGender: null,
                                 sygsikringDanmarkMember: false,
-                                details: elizabethDetails
-                        );
+                                details: new PersonDetails("Elizabeth", "Windsor", "She/They", new DateOnly(1950, 4, 21), new PhoneNumber("555-0103"), new EmailAddress("liz@example.com"), Gender.Woman, "Liz", null)
+                        ));
 
-                        this._customers.Add(item: elizabeth);
+                        this._customers.Add(item: new Customer(
+                                id: new CustomerId(Value: Guid.Parse(input: "D3333333-3333-3333-3333-333333333333")),
+                                personalNote: "Altid i godt humør.",
+                                importantNote: "Dårligt knæ (venstre).",
+                                preferredPratitionerId: null,
+                                preferredGender: null,
+                                sygsikringDanmarkMember: true,
+                                details: new PersonDetails("Mette", "Frederiksen", "She/Her", new DateOnly(1977, 11, 19), new PhoneNumber("555-0105"), new EmailAddress("mette@example.com"), Gender.Woman, "Mette", null)
+                        ));
                 }
         }
 }

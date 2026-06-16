@@ -8,9 +8,6 @@ using Use_Case.BestDiscount;
 
 namespace Use_Case.Bookings.Commands
 {
-        /// <summary>
-        /// Command Use Case for processing payment on a booking.
-        /// </summary>
         public class PayBookingUseCase
         {
                 private readonly IBookingRepository _bookingRepository;
@@ -25,34 +22,20 @@ namespace Use_Case.Bookings.Commands
                         this._pricingService = pricingService;
                 }
 
-                /// <summary>
-                /// Calculates the final price and registers the booking as paid.
-                /// </summary>
                 public async Task ExecuteAsync(Guid bookingIdRaw)
                 {
                         BookingId bookingId = new BookingId(Value: bookingIdRaw);
                         Booking? booking = await this._bookingRepository.GetByIdAsync(id: bookingId.Value);
 
-                        if (booking is null)
-                        {
-                                throw new InvalidOperationException(message: "Booking could not be found.");
-                        }
+                        if (booking is null) throw new InvalidOperationException(message: "Booking could not be found.");
+                        if (booking.Paid is not null) throw new InvalidOperationException(message: "Booking is already paid.");
 
-                        if (booking.Paid is not null)
-                        {
-                                throw new InvalidOperationException(message: "Booking is already paid.");
-                        }
-
-                        Money finalPrice = await this._pricingService.GetFinalPriceAsync(
+                        PricingBreakdown breakdown = await this._pricingService.GetFinalPriceAsync(
                             customerId: booking.CustomerId,
                             bookingId: booking.Id
                         );
 
-                        booking.RegisterPayment(payment: finalPrice);
-
-                        // If you merged BookingStatus, you would also set it here:
-                        // booking.ChangeStatus(BookingStatus.Completed);
-
+                        booking.RegisterPayment(payment: breakdown.FinalPrice);
                         await this._bookingRepository.UpdateAsync(entity: booking);
                 }
         }

@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Facade.Calendar
 {
@@ -9,6 +7,7 @@ namespace Facade.Calendar
             string Title,
             DateTime Start,
             DateTime End,
-            string BackgroundColor
+            string BackgroundColor,
+            string TextColor
         );
 }

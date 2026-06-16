@@ -1,9 +1,8 @@
-using Domain.Interfaces;
-using Infrastructure;
 using UI.Client.Pages;
 using UI.Components;
-using UseCase.Customers;
 using Use_Case.Practitioners;
+using UseCase.Customers;
+using System.Net.Http;
 
 namespace UI
 {
@@ -18,6 +17,10 @@ namespace UI
                             .AddInteractiveServerComponents()
                             .AddInteractiveWebAssemblyComponents();
 
+                        // --- CORE FRAMEWORK SERVICES ---
+                        // FIXED: Added Memory Cache so CoinGeckoCurrencyConverter can cache API results
+                        builder.Services.AddMemoryCache();
+
                         // --- REPOSITORIES ---
                         builder.Services.AddSingleton<
                                 Domain.Interfaces.Repositories.ICustomerRepository,
@@ -28,29 +31,32 @@ namespace UI
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.IClinicRepository, Infrastructure.Persistence.InMemoryClinicRepository>();
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.ITreatmentRepository, Infrastructure.Persistence.InMemoryTreatmentRepository>();
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.IPractitionerRepository, Infrastructure.Persistence.InMemoryPractitionerRepository>();
-
-                        builder.Services.AddScoped<RegisterCustomerUseCase>();
-                        // Added Room Repository
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.IRoomRepository, Infrastructure.Persistence.InMemoryRoomRepository>();
+                        builder.Services.AddSingleton<Domain.Interfaces.Repositories.ICampaignRepository, Infrastructure.Persistence.InMemoryCampaignRepository>();
+
+                        // --- EXTERNAL INFRASTRUCTURE ---
+                        builder.Services.AddSingleton(implementationInstance: new HttpClient());
+                        builder.Services.AddSingleton<Domain.Interfaces.ICurrencyConverter, Infrastructure.CoinGeckoCurrencyConverter>();
 
                         // --- DOMAIN SERVICES ---
                         builder.Services.AddScoped<Domain.Services.BookingAssignmentDomainService>();
 
+                        // --- PRICING & DISCOUNT SERVICES ---
+                        builder.Services.AddScoped<Use_Case.BestDiscount.DiscountContextFactory>();
+                        builder.Services.AddScoped<Use_Case.BestDiscount.DiscountService>();
+                        builder.Services.AddScoped<Use_Case.BestDiscount.PricingService>();
+
                         // --- USE CASES ---
+                        builder.Services.AddScoped<RegisterCustomerUseCase>();
                         builder.Services.AddScoped<Use_Case.Bookings.Queries.IGetCalendarBookingsUseCase, Use_Case.Bookings.Queries.GetCalendarBookingsUseCase>();
                         builder.Services.AddScoped<Use_Case.Bookings.Queries.GetAutoAssignmentProposalUseCase>();
                         builder.Services.AddScoped<Use_Case.Bookings.Commands.CreateBookingUseCase>();
+                        builder.Services.AddScoped<Use_Case.Bookings.Commands.PayBookingUseCase>();
 
                         // --- FACADES & LEGACY SERVICES ---
                         builder.Services.AddScoped<Facade.Customers.CustomerService>();
                         builder.Services.AddScoped<Facade.Bookings.BookingService>();
                         builder.Services.AddScoped<Facade.Practitioners.PractitionerService>();
-                        // Register IMemoryCache — required by CoinGeckoCurrencyConverter to cache exchange rates.
-                        builder.Services.AddMemoryCache();
-
-                        // Register our live currency converter.
-                        // Whenever something asks for ICurrencyConverter, it receives CoinGeckoCurrencyConverter.
-                        builder.Services.AddHttpClient<ICurrencyConverter, CoinGeckoCurrencyConverter>();
                         builder.Services.AddScoped<RegisterPractitionerUseCase>();
 
                         // New Interfaces

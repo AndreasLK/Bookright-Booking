@@ -9,10 +9,14 @@ using Microsoft.AspNetCore.Components;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Use_Case.Bookings.Commands;
+using System.Linq;
 
 namespace UI.Client.Components.SmartBookingModal
 {
+        /// <summary>
+        /// Code-behind for the Smart Booking Modal component.
+        /// Orchestrates the creation of a booking and fetches detailed price previews.
+        /// </summary>
         public partial class SmartBookingModal : ComponentBase
         {
                 [Inject]
@@ -56,6 +60,8 @@ namespace UI.Client.Components.SmartBookingModal
                 public Guid? FinalPractitionerId { get; private set; }
 
                 public BookingAssignmentFacadeDto? SystemProposal { get; private set; }
+                public BookingPricingDetailsDto? CalculatedPreviewPrice { get; private set; }
+
                 public bool IsEvaluatingProposal { get; private set; } = false;
                 public string ErrorMessage { get; private set; } = string.Empty;
 
@@ -105,10 +111,10 @@ namespace UI.Client.Components.SmartBookingModal
                                 return;
                         }
 
-                        _ = this.ResolveProposalAsync();
+                        _ = this.ResolveProposalAndPriceAsync();
                 }
 
-                private async Task ResolveProposalAsync()
+                private async Task ResolveProposalAndPriceAsync()
                 {
                         this.IsEvaluatingProposal = true;
                         this.ErrorMessage = string.Empty;
@@ -117,6 +123,13 @@ namespace UI.Client.Components.SmartBookingModal
 
                         try
                         {
+                                this.CalculatedPreviewPrice = await this.BookingFacade.GetBookingPricePreviewAsync(
+                                    customerId: this.SelectedCustomer!.Id,
+                                    treatmentId: this.SelectedTreatmentId!.Value,
+                                    startDateTime: this.StartTime,
+                                    endDateTime: this.EndTime
+                                );
+
                                 this.SystemProposal = await this.BookingFacade.GetAutoAssignmentProposalAsync(
                                     customerId: this.SelectedCustomer!.Id,
                                     treatmentId: this.SelectedTreatmentId!.Value,
@@ -133,7 +146,7 @@ namespace UI.Client.Components.SmartBookingModal
                         }
                         catch (Exception)
                         {
-                                this.ErrorMessage = "Kunne ikke hente anbefaling fra systemet.";
+                                this.ErrorMessage = "Kunne ikke hente anbefaling eller prisberegning fra systemet.";
                         }
                         finally
                         {

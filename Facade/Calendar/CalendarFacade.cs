@@ -12,6 +12,9 @@ using Domain.Interfaces.Repositories;
 
 namespace Facade.Calendar
 {
+        /// <summary>
+        /// Concrete implementation of the calendar facade orchestrating data mapping for the calendar view.
+        /// </summary>
         public class CalendarFacade : ICalendarFacade
         {
                 private readonly IGetCalendarBookingsUseCase _getCalendarBookingsUseCase;
@@ -21,11 +24,9 @@ namespace Facade.Calendar
                 private readonly ICustomerRepository _customerRepository;
                 private readonly ITreatmentRepository _treatmentRepository;
 
-                private const string DEFAULT_HEX_COLOR = "#3788D8";
-                private const string HEX_FORMAT = "X2";
-                private const string COLOR_PAID_SUCCESS = "#198754";
-                private const string COLOR_UNPAID_PENDING = "#0dcaf0";
-
+                /// <summary>
+                /// Initializes a new instance of the CalendarFacade.
+                /// </summary>
                 public CalendarFacade(
                     IGetCalendarBookingsUseCase getCalendarBookingsUseCase,
                     IClinicRepository clinicRepository,
@@ -42,12 +43,15 @@ namespace Facade.Calendar
                         this._treatmentRepository = treatmentRepository;
                 }
 
+                /// <inheritdoc />
                 public async Task<IEnumerable<CalendarEventViewModel>> GetCalendarEventsAsync(CalendarBookingFilter filter)
                 {
                         IEnumerable<CalendarBookingResultDto> rawData = await this._getCalendarBookingsUseCase.ExecuteAsync(filter: filter);
+
                         return rawData.Select(selector: dto => this.MapToViewModel(dto: dto));
                 }
 
+                /// <inheritdoc />
                 public async Task<CalendarFilterLookupsDto> GetFilterLookupsAsync()
                 {
                         var clinics = await this._clinicRepository.GetAllAsync();
@@ -76,6 +80,7 @@ namespace Facade.Calendar
                         );
                 }
 
+                /// <inheritdoc />
                 public async Task<IEnumerable<CalendarEventViewModel>> RefreshCalendarBookingsAsync(
                     DateTime viewStartDate,
                     DateTime viewEndDate,
@@ -96,27 +101,49 @@ namespace Facade.Calendar
                         return await this.GetCalendarEventsAsync(filter: filter);
                 }
 
+                /// <summary>
+                /// Maps raw booking data into a view model suitable for the calendar UI.
+                /// </summary>
                 private CalendarEventViewModel MapToViewModel(CalendarBookingResultDto dto)
                 {
-                        string eventColor = this.GetStatusColor(isPaid: dto.IsPaid);
+                        string pastelClinicColor = this.GeneratePastelColor(entityIdString: dto.ClinicId.Value.ToString());
 
                         return new CalendarEventViewModel(
                             Id: dto.BookingId.Value,
                             Title: $"{dto.TreatmentName} - {dto.CustomerName}",
                             Start: dto.StartTime,
                             End: dto.EndTime,
-                            BackgroundColor: eventColor
+                            BackgroundColor: pastelClinicColor,
+                            TextColor: "#212529" // High contrast dark-grey text for readability against pastels
                         );
                 }
 
-                private string GetStatusColor(bool isPaid)
+                /// <summary>
+                /// Generates a soft pastel color based on the entity ID using the HSL color space.
+                /// FullCalendar natively supports standard CSS 'hsl(H, S%, L%)' strings.
+                /// </summary>
+                private string GeneratePastelColor(string entityIdString)
                 {
-                        if (isPaid)
+                        if (string.IsNullOrWhiteSpace(value: entityIdString))
                         {
-                                return COLOR_PAID_SUCCESS;
+                                return "hsl(200, 70%, 85%)"; // Default soft pastel blue
                         }
 
-                        return COLOR_UNPAID_PENDING;
+                        int hash = 0;
+                        foreach (char c in entityIdString)
+                        {
+                                hash = c + ((hash << 5) - hash);
+                        }
+
+                        // Prevent Math.Abs from throwing an OverflowException on int.MinValue
+                        int safeHash = hash == int.MinValue ? 0 : Math.Abs(value: hash);
+
+                        // Map the hash to a Hue on the 360-degree color wheel
+                        int hue = safeHash % 360;
+
+                        // Saturation 70% keeps the color recognizable
+                        // Lightness 85% washes it out perfectly into a soft pastel
+                        return $"hsl({hue}, 70%, 85%)";
                 }
         }
 }

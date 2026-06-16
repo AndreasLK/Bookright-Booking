@@ -9,8 +9,8 @@
 <div class="container-fluid mt-4">
     <div class="row mb-3">
         <div class="col">
-            <h2>Klinik Kalender</h2>
-            <p class="text-muted">Brug filtrene herunder til at afgrænse visningen.</p>
+            <h2><i class="bi bi-calendar3"></i> Klinik Kalender</h2>
+            <p class="text-muted">Brug filtrene herunder til at afgrænse visningen og oprette nye bookinger.</p>
         </div>
     </div>
 
@@ -21,12 +21,12 @@
                 <div class="card-header bg-primary text-white">
                     <h5 class="mb-0"><i class="bi bi-calendar-plus"></i> Opret ny booking</h5>
                 </div>
-                <div class="card-body">
+                <div class="card-body bg-light">
                     <p class="text-muted"><strong>1. Vælg en behandling først</strong> for at låse varigheden. Klik herefter på et ledigt tidspunkt i kalenderen for at placere bookingen.</p>
                     <div class="row">
                         <div class="col-md-4">
                             <label class="form-label fw-bold">Behandlingstype</label>
-                            <select class="form-select border-primary fw-bold" @onchange="OnTreatmentSelected">
+                            <select class="form-select border-primary fw-bold shadow-sm" @onchange="OnTreatmentSelected">
                                 <option value="">-- Vælg Behandling --</option>
                                 @foreach (var treatment in AvailableTreatments)
                                 {
@@ -43,18 +43,18 @@
     @* --- ERROR MESSAGES --- *@
     @if (!string.IsNullOrEmpty(WarningMessage))
     {
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
             <i class="bi bi-exclamation-triangle-fill"></i> @WarningMessage
             <button type="button" class="btn-close" @onclick="ClearWarning"></button>
         </div>
     }
 
     @* --- MULTI-SELECT FILTERS SECTION --- *@
-    <div class="row mb-4 p-3 bg-light rounded border">
-        <h5 class="mb-3"><i class="bi bi-funnel"></i> Filtrer Kalender</h5>
+    <div class="row mb-4 p-4 bg-white rounded shadow-sm border">
+        <h5 class="mb-4"><i class="bi bi-funnel"></i> Filtrer Kalender Visning</h5>
 
         <div class="col-md-3">
-            <label class="form-label fw-bold">Klinikker</label>
+            <label class="form-label fw-bold text-primary">Klinikker</label>
             <SearchableDataList TItem="Facade.Clinics.ClinicDto" Items="AvailableClinics" OnItemDoubleClick="AddClinicFilterAsync">
                 <ItemTemplate Context="clinic">@clinic.Name</ItemTemplate>
             </SearchableDataList>
@@ -67,7 +67,7 @@
         </div>
 
         <div class="col-md-3">
-            <label class="form-label fw-bold">Lokaler</label>
+            <label class="form-label fw-bold text-info">Lokaler</label>
             <SearchableDataList TItem="Facade.Rooms.RoomDto" Items="AvailableRooms" OnItemDoubleClick="AddRoomFilterAsync">
                 <ItemTemplate Context="room">@room.Name</ItemTemplate>
             </SearchableDataList>
@@ -80,7 +80,7 @@
         </div>
 
         <div class="col-md-3">
-            <label class="form-label fw-bold">Behandlere</label>
+            <label class="form-label fw-bold text-success">Behandlere</label>
             <SearchableDataList TItem="Facade.Common.Dtos.PractitionerLookupDto" Items="AvailablePractitioners" OnItemDoubleClick="AddPractitionerFilterAsync">
                 <ItemTemplate Context="practitioner">@practitioner.DisplayName</ItemTemplate>
             </SearchableDataList>
@@ -93,7 +93,7 @@
         </div>
 
         <div class="col-md-3">
-            <label class="form-label fw-bold">Kunder</label>
+            <label class="form-label fw-bold text-warning">Kunder</label>
             <SearchableDataList TItem="Facade.Customers.CustomerSummaryDto" Items="AvailableCustomers" OnItemDoubleClick="AddCustomerFilterAsync">
                 <ItemTemplate Context="customer">@customer.LegalFirstName @customer.LegalLastName</ItemTemplate>
             </SearchableDataList>
@@ -143,13 +143,69 @@
                     <h5 class="modal-title"><i class="bi bi-wallet2"></i> Booking Detaljer</h5>
                     <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="CloseDetailsModal"></button>
                 </div>
-                <div class="modal-body text-center py-5">
-                    <h4 class="mb-3">Vil du markere denne booking som betalt?</h4>
-                    <p class="text-muted">Systemet vil automatisk udregne den billigste pris for kunden inklusiv eventuelle tillæg og rabatter.</p>
+                <div class="modal-body text-center py-4">
+                    @if (!string.IsNullOrEmpty(WarningMessage))
+                    {
+                        <div class="alert alert-danger shadow-sm">@WarningMessage</div>
+                    }
 
-                    <button class="btn btn-success btn-lg mt-3" @onclick="MarkAsPaidAsync">
-                        <i class="bi bi-check-circle-fill"></i> Godkend & Marker Betalt
-                    </button>
+                    <h4 class="mb-4">Vil du markere denne booking som betalt?</h4>
+
+                    @if (SelectedBookingPrice is not null)
+                    {
+                        <div class="card bg-light border-0 shadow-sm text-start mx-auto mb-4" style="max-width: 400px;">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-3"><i class="bi bi-receipt"></i> Systemudregnet Prisoversigt</h6>
+
+                                <div class="d-flex justify-content-between mb-1">
+                                    <span>Basispris</span>
+                                    <span>@SelectedBookingPrice.BasePrice.ToString("0.00") kr.</span>
+                                </div>
+
+                                @if (SelectedBookingPrice.SurchargeAmount > 0)
+                                {
+                                    <div class="d-flex justify-content-between mb-1 text-danger">
+                                        <span>Tillæg (@SelectedBookingPrice.SurchargeReason)</span>
+                                        <span>+@SelectedBookingPrice.SurchargeAmount.ToString("0.00") kr.</span>
+                                    </div>
+                                }
+
+                                @if (SelectedBookingPrice.DiscountAmount > 0)
+                                {
+                                    <div class="d-flex justify-content-between mb-1 text-success">
+                                        <span>Rabat (@SelectedBookingPrice.DiscountReason)</span>
+                                        <span>-@SelectedBookingPrice.DiscountAmount.ToString("0.00") kr.</span>
+                                    </div>
+                                }
+
+                                <hr class="my-2" />
+
+                                <div class="d-flex justify-content-between fw-bold fs-4 text-primary">
+                                    <span>Total</span>
+                                    <span>@SelectedBookingPrice.FinalPrice.ToString("0.00") kr.</span>
+                                </div>
+
+                                @if (SelectedBookingPrice.EvaluatedDiscounts.Any())
+                                {
+                                    <div class="mt-3 text-muted" style="font-size: 0.8rem;">
+                                        <i class="bi bi-info-circle"></i> Udregnet som billigste pris for kunden ud fra:
+                                        <em>@string.Join(", ", SelectedBookingPrice.EvaluatedDiscounts)</em>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    }
+                    else if (string.IsNullOrEmpty(WarningMessage))
+                    {
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                        <h5 class="mt-3 text-muted">Beregner pris og undersøger rabatter...</h5>
+                    }
+
+                    <div class="mt-2">
+                        <button class="btn btn-success btn-lg w-100 shadow-sm" disabled="@(SelectedBookingPrice == null)" @onclick="MarkAsPaidAsync">
+                            <i class="bi bi-check-circle-fill me-2"></i> Godkend & Marker Betalt
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

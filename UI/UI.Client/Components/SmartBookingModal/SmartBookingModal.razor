@@ -3,16 +3,16 @@
 
 <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
     <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content">
+        <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Opret Booking (@StartTime.ToString("dd. MMM HH:mm") - @EndTime.ToString("HH:mm"))</h5>
+                <h5 class="modal-title"><i class="bi bi-calendar-check"></i> Opret Booking (@StartTime.ToString("dd. MMM HH:mm") - @EndTime.ToString("HH:mm"))</h5>
                 <button type="button" class="btn-close btn-close-white" aria-label="Close" @onclick="CancelAsync"></button>
             </div>
 
-            <div class="modal-body">
+            <div class="modal-body py-4">
                 @if (!string.IsNullOrEmpty(ErrorMessage))
                 {
-                    <div class="alert alert-danger">@ErrorMessage</div>
+                    <div class="alert alert-danger shadow-sm"><i class="bi bi-exclamation-triangle-fill"></i> @ErrorMessage</div>
                 }
 
                 <div class="row mb-4">
@@ -20,7 +20,7 @@
                         <label class="form-label fw-bold">Vælg Klinik</label>
                         @if (SelectedClinic is not null)
                         {
-                            <div class="alert alert-success p-2 mb-2">Valgt: <strong>@SelectedClinic.Name</strong></div>
+                            <div class="alert alert-success p-2 mb-2 shadow-sm">Valgt: <strong>@SelectedClinic.Name</strong></div>
                         }
                         <SearchableDataList TItem="Facade.Clinics.ClinicDto" Items="AvailableClinics" OnItemClick="SetClinic">
                             <ItemTemplate Context="clinic">@clinic.Name</ItemTemplate>
@@ -31,7 +31,7 @@
                         <label class="form-label fw-bold">Vælg Kunde</label>
                         @if (SelectedCustomer is not null)
                         {
-                            <div class="alert alert-success p-2 mb-2">Valgt: <strong>@SelectedCustomer.LegalFirstName @SelectedCustomer.LegalLastName</strong></div>
+                            <div class="alert alert-success p-2 mb-2 shadow-sm">Valgt: <strong>@SelectedCustomer.LegalFirstName @SelectedCustomer.LegalLastName</strong></div>
                         }
                         <SearchableDataList TItem="Facade.Customers.CustomerSummaryDto" Items="AvailableCustomers" OnItemClick="SetCustomer">
                             <ItemTemplate Context="customer">@customer.LegalFirstName @customer.LegalLastName</ItemTemplate>
@@ -43,32 +43,32 @@
                         @{
                             var lockedTreatment = AvailableTreatments.FirstOrDefault(t => t.Id == PreselectedTreatmentId);
                         }
-                        <div class="alert alert-secondary p-3 mb-2 border-secondary">
+                        <div class="alert alert-secondary p-3 mb-2 border-secondary shadow-sm">
                             <strong>@(lockedTreatment?.Name ?? "Ukendt")</strong>
                             <br />
-                            <small class="text-muted"><i class="bi bi-lock-fill"></i> Fastlåst fra kalendervalg</small>
+                            <small class="text-muted"><i class="bi bi-lock-fill"></i> Fastlåst fra kalendervalg i trin 1</small>
                         </div>
                     </div>
                 </div>
 
-                <hr />
+                <hr class="text-muted" />
 
                 @if (IsEvaluatingProposal)
                 {
-                    <div class="text-center py-4">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2 text-muted">Beregner optimal allokering...</p>
+                    <div class="text-center py-5">
+                        <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+                        <h5 class="mt-3 text-muted">Beregner optimal allokering og udregner pris...</h5>
                     </div>
                 }
                 else if (SystemProposal is not null)
                 {
                     <div class="row">
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Lokale (Anbefalet / Manuel)</label>
+                            <label class="form-label fw-bold">Lokale (Anbefalet / Manuelt overskriv)</label>
                             @if (FinalRoomId is not null)
                             {
                                 var finalRoom = AvailableRooms.FirstOrDefault(r => r.Id == FinalRoomId);
-                                <div class="alert alert-info p-2 mb-2">Afsat Lokale: <strong>@(finalRoom?.Name ?? "Ukendt")</strong></div>
+                                <div class="alert alert-info p-2 mb-2 shadow-sm">Afsat Lokale: <strong>@(finalRoom?.Name ?? "Ukendt")</strong></div>
                             }
                             <SearchableDataList TItem="Facade.Rooms.RoomDto" Items="AvailableRooms" OnItemClick="OverrideRoom">
                                 <ItemTemplate Context="room">@room.Name</ItemTemplate>
@@ -76,11 +76,11 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="form-label fw-bold">Behandler (Anbefalet / Manuel)</label>
+                            <label class="form-label fw-bold">Behandler (Anbefalet / Manuelt overskriv)</label>
                             @if (FinalPractitionerId is not null)
                             {
                                 var finalPrac = AvailablePractitioners.FirstOrDefault(p => p.Id == FinalPractitionerId);
-                                <div class="alert alert-info p-2 mb-2">Afsat Behandler: <strong>@(finalPrac?.DisplayName ?? "Ukendt")</strong></div>
+                                <div class="alert alert-info p-2 mb-2 shadow-sm">Afsat Behandler: <strong>@(finalPrac?.DisplayName ?? "Ukendt")</strong></div>
                             }
                             <SearchableDataList TItem="Facade.Common.Dtos.PractitionerLookupDto" Items="AvailablePractitioners" OnItemClick="OverridePractitioner">
                                 <ItemTemplate Context="prac">@prac.DisplayName</ItemTemplate>
@@ -90,9 +90,58 @@
                 }
             </div>
 
+            @if (CalculatedPreviewPrice is not null && !IsEvaluatingProposal)
+            {
+                <div class="px-4 pb-4">
+                    <div class="card bg-light border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted mb-3"><i class="bi bi-receipt"></i> Prisoversigt (Forhåndsvisning)</h6>
+
+                            <div class="d-flex justify-content-between mb-1">
+                                <span>Basispris</span>
+                                <span>@CalculatedPreviewPrice.BasePrice.ToString("0.00") kr.</span>
+                            </div>
+
+                            @if (CalculatedPreviewPrice.SurchargeAmount > 0)
+                            {
+                                <div class="d-flex justify-content-between mb-1 text-danger">
+                                    <span>Tillæg (@CalculatedPreviewPrice.SurchargeReason)</span>
+                                    <span>+@CalculatedPreviewPrice.SurchargeAmount.ToString("0.00") kr.</span>
+                                </div>
+                            }
+
+                            @if (CalculatedPreviewPrice.DiscountAmount > 0)
+                            {
+                                <div class="d-flex justify-content-between mb-1 text-success">
+                                    <span>Rabat (@CalculatedPreviewPrice.DiscountReason)</span>
+                                    <span>-@CalculatedPreviewPrice.DiscountAmount.ToString("0.00") kr.</span>
+                                </div>
+                            }
+
+                            <hr class="my-2" />
+
+                            <div class="d-flex justify-content-between fw-bold fs-5 text-primary">
+                                <span>Total Estimeret Pris</span>
+                                <span>@CalculatedPreviewPrice.FinalPrice.ToString("0.00") kr.</span>
+                            </div>
+
+                            @if (CalculatedPreviewPrice.EvaluatedDiscounts.Any())
+                            {
+                                <div class="mt-3 text-muted" style="font-size: 0.8rem;">
+                                    <i class="bi bi-info-circle"></i> Systemet udregnede den billigste pris ud fra følgende kampagner:
+                                    <em>@string.Join(", ", CalculatedPreviewPrice.EvaluatedDiscounts)</em>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+
             <div class="modal-footer bg-light">
-                <button type="button" class="btn btn-secondary" @onclick="CancelAsync">Annuller</button>
-                <button type="button" class="btn btn-success" @onclick="ConfirmAndSaveBookingAsync">Bekræft & Gem</button>
+                <button type="button" class="btn btn-secondary px-4" @onclick="CancelAsync">Annuller</button>
+                <button type="button" class="btn btn-success px-4" @onclick="ConfirmAndSaveBookingAsync">
+                    <i class="bi bi-save"></i> Bekræft & Gem Booking
+                </button>
             </div>
         </div>
     </div>

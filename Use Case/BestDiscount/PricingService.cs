@@ -4,14 +4,28 @@ using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
 using Domain.Interfaces.Repositories;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
 namespace Use_Case.BestDiscount
 {
         /// <summary>
+        /// A comprehensive breakdown of how a final price was calculated.
+        /// </summary>
+        public record PricingBreakdown(
+            Money BasePrice,
+            Money SurchargeAmount,
+            string SurchargeReason,
+            Money DiscountAmount,
+            string DiscountReason,
+            List<string> EvaluatedDiscounts,
+            Money FinalPrice
+        );
+
+        /// <summary>
         /// Orchestrates the data aggregation and calculation processes to determine 
-        /// the final optimized price for a customer's booking, including surcharges and discounts.
+        /// the final optimized price and its itemized breakdown.
         /// </summary>
         public class PricingService
         {
@@ -37,57 +51,71 @@ namespace Use_Case.BestDiscount
                         this._treatmentRepository = treatmentRepository;
                 }
 
-                /// <summary>
-                /// Asynchronously calculates the absolute lowest final price available for a specific booking.
-                /// </summary>
-                /// <param name="customerId">Unique identifier of the customer.</param>
-                /// <param name="bookingId">Unique identifier of the current booking.</param>
-                /// <returns>Final optimized price after evaluating all eligible promotional campaigns and surcharges.</returns>
-                public async Task<Money> GetFinalPriceAsync(CustomerId customerId, BookingId bookingId)
+                public async Task<PricingBreakdown> GetFinalPriceAsync(CustomerId customerId, BookingId bookingId)
                 {
                         Booking? booking = await this._bookingRepository.GetByIdAsync(id: bookingId.Value);
-
-                        if (booking is null)
-                        {
-                                throw new InvalidOperationException(message: "Booking not found.");
-                        }
+                        if (booking is null) throw new InvalidOperationException(message: "Booking not found.");
 
                         Treatment? treatment = await this._treatmentRepository.GetByIdAsync(id: booking.TreatmentId.Value);
-
-                        if (treatment is null)
-                        {
-                                throw new InvalidOperationException(message: "Treatment not found.");
-                        }
-
-                        Money basePrice = treatment.Price;
-                        Money surchargedPrice = this.ApplySurcharges(basePrice: basePrice, timeslot: booking.Timeslot);
+                        if (treatment is null) throw new InvalidOperationException(message: "Treatment not found.");
 
                         DiscountContext context = await this._discountContextFactory.CreateAsync(customerId: customerId, bookingId: bookingId);
 
-                        // We use the 'with' expression to non-destructively mutate the init-only record
-                        DiscountContext contextWithSurcharge = context with { BasePrice = surchargedPrice };
+                        return this.CalculateBreakdown(basePrice: treatment.Price, timeslot: booking.Timeslot, context: context);
+                }
 
-                        Money finalDiscountedPrice = this._discountService.GetBestDiscount(context: contextWithSurcharge);
+                public async Task<PricingBreakdown> GetPreviewPriceAsync(CustomerId customerId, TreatmentId treatmentId, TimeSlot timeslot)
+                {
+                        Treatment? treatment = await this._treatmentRepository.GetByIdAsync(id: treatmentId.Value);
+                        if (treatment is null) throw new InvalidOperationException(message: "Treatment not found.");
 
-                        return finalDiscountedPrice;
+                        DiscountContext context = await this._discountContextFactory.CreatePreviewAsync(
+                            customerId: customerId,
+                            treatmentId: treatmentId,
+                            timeslot: timeslot);
+
+                        return this.CalculateBreakdown(basePrice: treatment.Price, timeslot: timeslot, context: context);
                 }
 
                 /// <summary>
-                /// Applies weekend and evening surcharges based on domain configuration.
+                /// Executes the math to determine the exact monetary value of surcharges and discounts.
                 /// </summary>
-                private Money ApplySurcharges(Money basePrice, TimeSlot timeslot)
+                private PricingBreakdown CalculateBreakdown(Money basePrice, TimeSlot timeslot, DiscountContext context)
+                {
+                        // 1. Calculate Surcharges
+                        Money surchargedPrice = this.ApplySurcharges(basePrice: basePrice, timeslot: timeslot, out string surchargeReason);
+                        Money surchargeAmount = new Money(value: surchargedPrice.Value - basePrice.Value, currency: basePrice.Currency);
+
+                        // 2. Calculate Discounts
+                        DiscountContext contextWithSurcharge = context with { BasePrice = surchargedPrice };
+                        DiscountEvaluationResult discountResult = this._discountService.GetBestDiscount(context: contextWithSurcharge);
+                        Money discountAmount = new Money(value: surchargedPrice.Value - discountResult.FinalPrice.Value, currency: basePrice.Currency);
+
+                        return new PricingBreakdown(
+                            BasePrice: basePrice,
+                            SurchargeAmount: surchargeAmount,
+                            SurchargeReason: surchargeReason,
+                            DiscountAmount: discountAmount,
+                            DiscountReason: discountResult.AppliedCampaignName,
+                            EvaluatedDiscounts: discountResult.EvaluatedCampaignNames,
+                            FinalPrice: discountResult.FinalPrice
+                        );
+                }
+
+                private Money ApplySurcharges(Money basePrice, TimeSlot timeslot, out string reason)
                 {
                         bool isWeekend = Config.SURCHARGE_WEEKEND_DAYS.Contains(value: (Domain.Enums.Weekday)timeslot.StartDateTime.DayOfWeek);
-
                         TimeOnly startTime = TimeOnly.FromDateTime(dateTime: timeslot.StartDateTime);
                         bool isEvening = startTime >= Config.SURCHARGE_START_TIME || startTime <= Config.SURCHARGE_END_TIME;
 
                         if (isWeekend || isEvening)
                         {
+                                reason = isWeekend ? "Weekend-tillæg" : "Aften-tillæg";
                                 decimal surchargedValue = basePrice.Value * Config.AFTERNOON_AND_WEEKEND_SURCHARGE_MULTIPLIER;
                                 return new Money(value: surchargedValue, currency: basePrice.Currency);
                         }
 
+                        reason = "Ingen";
                         return basePrice;
                 }
         }
