@@ -1,5 +1,7 @@
 using UI.Client.Pages;
 using UI.Components;
+using UseCase.Customers;
+using UseCase.Practitioners;
 
 namespace UI
 {
@@ -25,7 +27,8 @@ namespace UI
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.ITreatmentRepository, Infrastructure.Persistence.InMemoryTreatmentRepository>();
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.IPractitionerRepository, Infrastructure.Persistence.InMemoryPractitionerRepository>();
 
-                        // Added Room Repository (Required by our new Auto Assignment Use Case)
+                        builder.Services.AddScoped<RegisterCustomerUseCase>();
+                        // Added Room Repository
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.IRoomRepository, Infrastructure.Persistence.InMemoryRoomRepository>();
 
                         // --- DOMAIN SERVICES ---
@@ -40,6 +43,7 @@ namespace UI
                         builder.Services.AddScoped<Facade.Customers.CustomerService>();
                         builder.Services.AddScoped<Facade.Bookings.BookingService>();
                         builder.Services.AddScoped<Facade.Practitioners.PractitionerService>();
+                        builder.Services.AddScoped<RegisterPractitionerUseCase>();
 
                         // New Interfaces
                         builder.Services.AddScoped<Facade.Calendar.ICalendarFacade, Facade.Calendar.CalendarFacade>();

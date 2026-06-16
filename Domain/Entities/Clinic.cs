@@ -61,7 +61,7 @@ namespace Domain.Entities
                                 throw new ArgumentException(message: "Name cannot be empty or whitespace.", paramName: nameof(name));
 
 
-                        ArgumentNullException.ThrowIfNull(argument: id,paramName: nameof(id));
+                        ArgumentNullException.ThrowIfNull(argument: id, paramName: nameof(id));
                         ArgumentNullException.ThrowIfNull(argument: name, paramName: nameof(name));
                         ArgumentNullException.ThrowIfNull(argument: address, paramName: nameof(address));
                         ArgumentNullException.ThrowIfNull(argument: phoneNumber, paramName: nameof(phoneNumber));

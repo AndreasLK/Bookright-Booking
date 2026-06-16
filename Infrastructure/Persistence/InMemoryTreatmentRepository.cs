@@ -40,20 +40,81 @@ namespace Infrastructure.Persistence
 
                 private void SeedData()
                 {
+                        // Fysioterapi — three durations
                         this._treatments.Add(new Treatment(
                             id: new TreatmentId(Guid.Parse("F1111111-1111-1111-1111-111111111111")),
-                            name: "Sportsmassage",
-                            categoryId: new TreatmentCategoryId(Guid.NewGuid()),
-                            price: new Money(600, Currency.DKK),
+                            name: "Fysioterapi 30 min",
+                            categoryId: new TreatmentCategoryId(Guid.Parse("A1111111-1111-1111-1111-111111111111")),
+                            price: new Money(395, Currency.DKK),
+                            duration: new Duration(value: TimeSpan.FromMinutes(30))
+                        ));
+
+                        this._treatments.Add(new Treatment(
+                            id: new TreatmentId(Guid.Parse("F1111111-1111-1111-1111-111111111112")),
+                            name: "Fysioterapi 45 min",
+                            categoryId: new TreatmentCategoryId(Guid.Parse("A1111111-1111-1111-1111-111111111111")),
+                            price: new Money(589, Currency.DKK),
+                            duration: new Duration(value: TimeSpan.FromMinutes(45))
+                        ));
+
+                        this._treatments.Add(new Treatment(
+                            id: new TreatmentId(Guid.Parse("F1111111-1111-1111-1111-111111111113")),
+                            name: "Fysioterapi 60 min",
+                            categoryId: new TreatmentCategoryId(Guid.Parse("A1111111-1111-1111-1111-111111111111")),
+                            price: new Money(745, Currency.DKK),
+                            duration: new Duration(value: TimeSpan.FromMinutes(60))
+                        ));
+
+                        // Sportsmassage — two durations
+                        this._treatments.Add(new Treatment(
+                            id: new TreatmentId(Guid.Parse("F2222222-2222-2222-2222-222222222222")),
+                            name: "Sportsmassage 30 min",
+                            categoryId: new TreatmentCategoryId(Guid.Parse("A2222222-2222-2222-2222-222222222222")),
+                            price: new Money(350, Currency.DKK),
+                            duration: new Duration(value: TimeSpan.FromMinutes(30))
+                        ));
+
+                        this._treatments.Add(new Treatment(
+                            id: new TreatmentId(Guid.Parse("F2222222-2222-2222-2222-222222222223")),
+                            name: "Sportsmassage 60 min",
+                            categoryId: new TreatmentCategoryId(Guid.Parse("A2222222-2222-2222-2222-222222222222")),
+                            price: new Money(699, Currency.DKK),
+                            duration: new Duration(value: TimeSpan.FromMinutes(60))
+                        ));
+
+                        // Akupunktur — one duration
+                        this._treatments.Add(new Treatment(
+                            id: new TreatmentId(Guid.Parse("F3333333-3333-3333-3333-333333333333")),
+                            name: "Akupunktur 45 min",
+                            categoryId: new TreatmentCategoryId(Guid.Parse("A3333333-3333-3333-3333-333333333333")),
+                            price: new Money(550, Currency.DKK),
+                            duration: new Duration(value: TimeSpan.FromMinutes(45))
+                        ));
+
+                        // Kostvejledning — two variations
+                        this._treatments.Add(new Treatment(
+                            id: new TreatmentId(Guid.Parse("F4444444-4444-4444-4444-444444444444")),
+                            name: "Kostvejledning - Førstegangskonsultation 60 min",
+                            categoryId: new TreatmentCategoryId(Guid.Parse("A4444444-4444-4444-4444-444444444444")),
+                            price: new Money(799, Currency.DKK),
                             duration: new Duration(value: TimeSpan.FromMinutes(60))
                         ));
 
                         this._treatments.Add(new Treatment(
-                            id: new TreatmentId(Guid.Parse("F2222222-2222-2222-2222-222222222222")),
-                            name: "Akupunktur",
-                            categoryId: new TreatmentCategoryId(Guid.NewGuid()),
+                            id: new TreatmentId(Guid.Parse("F4444444-4444-4444-4444-444444444445")),
+                            name: "Kostvejledning - Opfølgning 30 min",
+                            categoryId: new TreatmentCategoryId(Guid.Parse("A4444444-4444-4444-4444-444444444444")),
                             price: new Money(450, Currency.DKK),
-                            duration: new Duration(value: TimeSpan.FromMinutes(45))
+                            duration: new Duration(value: TimeSpan.FromMinutes(30))
+                        ));
+
+                        // Holdtræning/genoptræning — max 6 deltagere, pris pr. deltager
+                        this._treatments.Add(new Treatment(
+                            id: new TreatmentId(Guid.Parse("F5555555-5555-5555-5555-555555555555")),
+                            name: "Holdtræning/Genoptræning 60 min",
+                            categoryId: new TreatmentCategoryId(Guid.Parse("A5555555-5555-5555-5555-555555555555")),
+                            price: new Money(150, Currency.DKK),
+                            duration: new Duration(value: TimeSpan.FromMinutes(60))
                         ));
                 }
         }
