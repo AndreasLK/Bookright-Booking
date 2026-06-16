@@ -1,0 +1,48 @@
+using System;
+using System.Threading.Tasks;
+
+namespace Facade.Bookings
+{
+        /// <summary>
+        /// Defines the contract for booking-related operations, acting as the strict bridge 
+        /// between the UI presentation layer and the underlying Use Cases.
+        /// </summary>
+        public interface IBookingFacade
+        {
+                /// <summary>
+                /// Orchestrates the automatic selection of a room and practitioner based on domain rules.
+                /// </summary>
+                /// <param name="customerId">The unique identifier of the customer.</param>
+                /// <param name="treatmentId">The unique identifier of the desired treatment.</param>
+                /// <param name="clinicId">The unique identifier of the clinic.</param>
+                /// <param name="startDateTime">The start time of the requested booking.</param>
+                /// <param name="endDateTime">The end time of the requested booking.</param>
+                /// <returns>A proposal DTO containing the system's recommendation.</returns>
+                public Task<BookingAssignmentFacadeDto> GetAutoAssignmentProposalAsync(
+                    Guid customerId,
+                    Guid treatmentId,
+                    Guid clinicId,
+                    DateTime startDateTime,
+                    DateTime endDateTime);
+
+                /// <summary>
+                /// Validates and executes the creation of a new booking via the underlying Use Case.
+                /// </summary>
+                /// <param name="customerId">The ID of the customer.</param>
+                /// <param name="clinicId">The ID of the clinic.</param>
+                /// <param name="roomId">The ID of the room.</param>
+                /// <param name="practitionerId">The ID of the practitioner.</param>
+                /// <param name="treatmentId">The ID of the treatment.</param>
+                /// <param name="startDateTime">The start time of the booking.</param>
+                /// <param name="endDateTime">The end time of the booking.</param>
+                /// <returns>The unique identifier of the successfully created booking.</returns>
+                public Task<Guid> CreateBookingAsync(
+                    Guid customerId,
+                    Guid clinicId,
+                    Guid roomId,
+                    Guid practitionerId,
+                    Guid treatmentId,
+                    DateTime startDateTime,
+                    DateTime endDateTime);
+        }
+}

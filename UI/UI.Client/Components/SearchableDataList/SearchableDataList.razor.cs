@@ -1,49 +1,80 @@
 using Microsoft.AspNetCore.Components;
-using UI.Client.Extensions;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using Facade.Common.Attributes;
 
 namespace UI.Client.Components.SearchableDataList
 {
-        /// <summary>
-        /// A generic list component that provides real-time search filtering and double-click selection.
-        /// </summary>
-        /// <typeparam name="TItem">The type of items displayed in the list.</typeparam>
         public partial class SearchableDataList<TItem> : ComponentBase
         {
-                /// <summary>
-                /// The complete collection of items to be displayed and filtered.
-                /// </summary>
-                [Parameter]
-                public IEnumerable<TItem> Items { get; set; } = Array.Empty<TItem>();
+                [Parameter] public IEnumerable<TItem> Items { get; set; } = Array.Empty<TItem>();
+                [Parameter] public RenderFragment<TItem> ItemTemplate { get; set; } = default!;
 
-                /// <summary>
-                /// The visual template used to render each individual item in the list.
-                /// </summary>
-                [Parameter]
-                [EditorRequired]
-                public RenderFragment<TItem> ItemTemplate { get; set; } = default!;
+                [Parameter] public EventCallback<TItem> OnItemClick { get; set; }
+                [Parameter] public EventCallback<TItem> OnItemDoubleClick { get; set; }
 
-                /// <summary>
-                /// The callback invoked when a user double-clicks an item.
-                /// </summary>
-                [Parameter]
-                public EventCallback<TItem> OnItemDoubleClick { get; set; }
+                public string SearchTerm { get; set; } = string.Empty;
 
-                /// <summary>
-                /// Gets or sets the current search term entered by the user.
-                /// </summary>
-                protected string SearchTerm { get; set; } = string.Empty;
+                protected IEnumerable<TItem> FilteredItems
+                {
+                        get
+                        {
+                                if (string.IsNullOrWhiteSpace(value: this.SearchTerm))
+                                {
+                                        return this.Items;
+                                }
 
-                /// <summary>
-                /// Gets the dynamically filtered list of items based on the current search term.
-                /// Utilizes the custom ApplySearch extension method.
-                /// </summary>
-                protected IEnumerable<TItem> FilteredItems => this.Items.ApplySearch(searchTerm: this.SearchTerm);
+                                var properties = typeof(TItem).GetProperties()
+                                    .Where(predicate: prop => Attribute.IsDefined(element: prop, attributeType: typeof(SearchableAttribute)))
+                                    .ToArray();
 
-                /// <summary>
-                /// Handles the double-click event on an item and triggers the callback.
-                /// </summary>
-                /// <param name="item">The item that was double-clicked.</param>
-                protected async Task HandleDoubleClickAsync(TItem item)
+                                return this.Items.Where(predicate: item => this.EvaluatesToTrueForSearchTerm(item: item, properties: properties));
+                        }
+                }
+
+                private bool EvaluatesToTrueForSearchTerm(TItem item, PropertyInfo[] properties)
+                {
+                        if (item is null)
+                        {
+                                return false;
+                        }
+
+                        if (properties is null || properties.Length == 0)
+                        {
+                                string? stringValue = item.ToString();
+                                return stringValue is not null && stringValue.Contains(value: this.SearchTerm, comparisonType: StringComparison.OrdinalIgnoreCase);
+                        }
+
+                        foreach (PropertyInfo prop in properties)
+                        {
+                                object? val = prop.GetValue(obj: item);
+
+                                if (val is null)
+                                {
+                                        continue;
+                                }
+
+                                if (val.ToString()!.Contains(value: this.SearchTerm, comparisonType: StringComparison.OrdinalIgnoreCase))
+                                {
+                                        return true;
+                                }
+                        }
+
+                        return false;
+                }
+
+                protected async Task HandleItemClickAsync(TItem item)
+                {
+                        if (this.OnItemClick.HasDelegate)
+                        {
+                                await this.OnItemClick.InvokeAsync(arg: item);
+                        }
+                }
+
+                protected async Task HandleItemDoubleClickAsync(TItem item)
                 {
                         if (this.OnItemDoubleClick.HasDelegate)
                         {
