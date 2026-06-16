@@ -2,6 +2,8 @@ using Domain.Interfaces;
 using Infrastructure;
 using UI.Client.Pages;
 using UI.Components;
+using UseCase.Customers;
+using UseCase.Practitioners;
 
 namespace UI
 {
@@ -16,21 +18,32 @@ namespace UI
                             .AddInteractiveServerComponents()
                             .AddInteractiveWebAssemblyComponents();
 
+                        // --- REPOSITORIES ---
                         builder.Services.AddSingleton<
                                 Domain.Interfaces.Repositories.ICustomerRepository,
                                 Infrastructure.Persistence.InMemoryCustomerRepository
                                 >();
-
-                        builder.Services.AddScoped<Facade.Customers.CustomerService>();
-
 
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.IBookingRepository, Infrastructure.Persistence.InMemoryBookingRepository>();
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.IClinicRepository, Infrastructure.Persistence.InMemoryClinicRepository>();
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.ITreatmentRepository, Infrastructure.Persistence.InMemoryTreatmentRepository>();
                         builder.Services.AddSingleton<Domain.Interfaces.Repositories.IPractitionerRepository, Infrastructure.Persistence.InMemoryPractitionerRepository>();
 
-                        builder.Services.AddScoped<Facade.Bookings.BookingService>();
+                        builder.Services.AddScoped<RegisterCustomerUseCase>();
+                        // Added Room Repository
+                        builder.Services.AddSingleton<Domain.Interfaces.Repositories.IRoomRepository, Infrastructure.Persistence.InMemoryRoomRepository>();
 
+                        // --- DOMAIN SERVICES ---
+                        builder.Services.AddScoped<Domain.Services.BookingAssignmentDomainService>();
+
+                        // --- USE CASES ---
+                        builder.Services.AddScoped<Use_Case.Bookings.Queries.IGetCalendarBookingsUseCase, Use_Case.Bookings.Queries.GetCalendarBookingsUseCase>();
+                        builder.Services.AddScoped<Use_Case.Bookings.Queries.GetAutoAssignmentProposalUseCase>();
+                        builder.Services.AddScoped<Use_Case.Bookings.Commands.CreateBookingUseCase>();
+
+                        // --- FACADES & LEGACY SERVICES ---
+                        builder.Services.AddScoped<Facade.Customers.CustomerService>();
+                        builder.Services.AddScoped<Facade.Bookings.BookingService>();
                         builder.Services.AddScoped<Facade.Practitioners.PractitionerService>();
                         // Register IMemoryCache — required by CoinGeckoCurrencyConverter to cache exchange rates.
                         builder.Services.AddMemoryCache();
@@ -38,6 +51,11 @@ namespace UI
                         // Register our live currency converter.
                         // Whenever something asks for ICurrencyConverter, it receives CoinGeckoCurrencyConverter.
                         builder.Services.AddHttpClient<ICurrencyConverter, CoinGeckoCurrencyConverter>();
+                        builder.Services.AddScoped<RegisterPractitionerUseCase>();
+
+                        // New Interfaces
+                        builder.Services.AddScoped<Facade.Calendar.ICalendarFacade, Facade.Calendar.CalendarFacade>();
+                        builder.Services.AddScoped<Facade.Bookings.IBookingFacade, Facade.Bookings.BookingFacade>();
 
                         var app = builder.Build();
 

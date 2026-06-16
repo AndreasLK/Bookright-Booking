@@ -1,34 +1,29 @@
+@namespace UI.Client.Components.SearchableDataList
 @typeparam TItem
-@using UI.Client.Extensions
 
+<div class="searchable-data-list">
+    <input type="text"
+           class="form-control mb-2"
+           placeholder="Søg..."
+           @bind="SearchTerm"
+           @bind:event="oninput" />
 
-<div class="searchable-list">
-        @*Search Bar*@
-        <div class="mb-3">
-                <input type="text"
-                       class="form-control"
-                       placeholder="Søg..."
-                       @bind="SearchTerm"
-                       @bind:event="oninput"/>
-        </div>
+    <div class="list-group shadow-sm" style="max-height: 200px; overflow-y: auto;">
+        @foreach (var item in FilteredItems)
+        {
+            <button type="button"
+                    class="list-group-item list-group-item-action"
+                    @onclick="() => HandleItemClickAsync(item)"
+                    @ondblclick="() => HandleItemDoubleClickAsync(item)">
+                @ItemTemplate(item)
+            </button>
+        }
 
-        @*Data List*@
-        <div class="item-container">
-                @if (FilteredItems.Any())
-                {
-                        @foreach (TItem item in FilteredItems)
-                        {
-                                <div @ondblclick="() => HandleDoubleClickAsync(item)" style="cursor: pointer;">
-                                        @ItemTemplate(item)
-                                </div>
-                                
-                        }
-                }
-                else
-                {
-                        <div class="alert alert-info">
-                                No results found.
-                        </div>
-                }
-        </div>
+        @if (!FilteredItems.Any())
+        {
+            <div class="text-muted p-3 text-center">
+                <small>Ingen resultater fundet.</small>
+            </div>
+        }
+    </div>
 </div>

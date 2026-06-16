@@ -1,9 +1,11 @@
-using Domain.Entities.Persons;
-using Domain.Interfaces.Repositories;
-using Domain.Value_Objects;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Domain.Entities;
+using Domain.Entities.Persons;
+using Domain.Interfaces.Repositories;
+using Domain.Value_Objects;
+using UseCase.Practitioners;
 
 namespace Facade.Practitioners
 {
@@ -13,15 +15,19 @@ namespace Facade.Practitioners
         public class PractitionerService
         {
                 private readonly IPractitionerRepository _practitionerRepository;
+                private readonly RegisterPractitionerUseCase _registerPractitionerUseCase;
 
                 /// <summary>
                 /// Initializes a new instance of the <see cref="PractitionerService"/> class.
                 /// </summary>
                 /// <param name="practitionerRepository">Data store for practitioners.</param>
-                public PractitionerService(IPractitionerRepository practitionerRepository)
+                /// <param name="registerPractitionerUseCase"></param>
+                public PractitionerService(IPractitionerRepository practitionerRepository, RegisterPractitionerUseCase registerPractitionerUseCase)
                 {
                         ArgumentNullException.ThrowIfNull(argument: practitionerRepository, paramName: nameof(practitionerRepository));
                         this._practitionerRepository = practitionerRepository;
+                        ArgumentNullException.ThrowIfNull(argument: registerPractitionerUseCase, nameof(registerPractitionerUseCase));
+                        this._registerPractitionerUseCase = registerPractitionerUseCase;
                 }
 
                 /// <summary>
@@ -99,6 +105,31 @@ namespace Facade.Practitioners
                         practitioner.UpdateDetails(newDetails: updatedDetails);
 
                         await this._practitionerRepository.UpdateAsync(entity: practitioner);
+                }
+
+                /// <summary>
+                /// Registers a new practitioner in the system without certificates.
+                /// Certificates can be added separately after registration.
+                /// </summary>
+                /// <param name="model">The new practitioner details from the UI.</param>
+                /// <returns>The new practitioner's ID if successful, or an error message if not.</returns>
+                public async Task<RegisterPractitionerResult> RegisterPractitionerAsync(PractitionerSummaryDto model)
+                {
+                        ArgumentNullException.ThrowIfNull(argument: model, paramName: nameof(model));
+
+                        var command = new RegisterPractitionerCommand(
+                                LegalFirstName: model.FirstName,
+                                LegalLastName: model.LastName,
+                                Pronouns: string.Empty,
+                                Alias: model.Alias,
+                                DateOfBirth: DateOnly.FromDateTime(DateTime.Now),
+                                Email: model.Email,
+                                PhoneNumber: model.PhoneNumber,
+                                Gender: Domain.Enums.Gender.PreferNotToSay,
+                                Certificates: new List<Certificate>().AsReadOnly()
+                        );
+
+                        return await this._registerPractitionerUseCase.ExecuteAsync(command);
                 }
         }
 }
