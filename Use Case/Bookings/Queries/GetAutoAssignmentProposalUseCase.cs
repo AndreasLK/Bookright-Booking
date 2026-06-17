@@ -79,7 +79,6 @@ namespace Use_Case.Bookings.Queries
 
                         // 1. Fetch overlapping bookings for the selected timeslot
                         OverlappingBookingsSpecification overlapSpec = new OverlappingBookingsSpecification(
-                            clinicId: clinicId,
                             requestedTimeSlot: requestedTimeSlot
                         );
 
