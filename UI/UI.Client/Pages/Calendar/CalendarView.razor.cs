@@ -10,6 +10,8 @@ using Facade.Common.Dtos;
 using Facade.Customers;
 using Facade.Calendar;
 using Facade.Bookings;
+using Domain.Enums;
+using Domain.Interfaces;
 
 namespace UI.Client.Pages.Calendar
 {
@@ -21,12 +23,14 @@ namespace UI.Client.Pages.Calendar
         {
                 private const int CALENDAR_PAST_DAYS_VIEW = -14;
                 private const int CALENDAR_FUTURE_DAYS_VIEW = 30;
+                private const decimal DEFAULT_EXCHANGE_RATE = 1m;
                 private const string JS_IMPORT_IDENTIFIER = "import";
                 private const string JS_CALENDAR_MODULE_PATH = "./Pages/Calendar/CalendarView.razor.js";
                 private const string JS_INITIALIZE_FUNCTION = "initializeCalendar";
                 private const string JS_UPDATE_FUNCTION = "updateCalendarEvents";
                 private const string JS_SET_DURATION_FUNCTION = "setTreatmentPreviewDuration";
                 private const string TIMESPAN_FORMAT = @"hh\:mm\:ss";
+                private const string PRICE_FORMAT = "0.00";
                 private const string CALENDAR_CONTAINER_ID = "calendar-container";
 
                 [Inject]
@@ -34,6 +38,9 @@ namespace UI.Client.Pages.Calendar
 
                 [Inject]
                 private IBookingFacade BookingFacade { get; set; } = default!;
+
+                [Inject]
+                private ICurrencyConverter CurrencyConverter { get; set; } = default!;
 
                 [Inject]
                 private IJSRuntime JS { get; set; } = default!;
@@ -57,6 +64,10 @@ namespace UI.Client.Pages.Calendar
 
                 public Guid? SelectedBookingIdForDetails { get; private set; }
                 public BookingPricingDetailsDto? SelectedBookingPrice { get; private set; }
+
+                public Currency SelectedCurrency { get; private set; } = Currency.DKK;
+                protected bool IsConvertingCurrency { get; private set; } = false;
+                private decimal _exchangeRate = DEFAULT_EXCHANGE_RATE;
 
                 protected bool IsSmartModalVisible { get; set; }
                 protected DateTime? DraggedStartTime { get; set; }
@@ -173,6 +184,8 @@ namespace UI.Client.Pages.Calendar
                                 this.SelectedBookingIdForDetails = bookingId;
                                 this.WarningMessage = string.Empty;
                                 this.SelectedBookingPrice = null;
+                                this.SelectedCurrency = Currency.DKK;
+                                this._exchangeRate = DEFAULT_EXCHANGE_RATE;
 
                                 try
                                 {
@@ -187,6 +200,41 @@ namespace UI.Client.Pages.Calendar
                         }
                 }
 
+                protected async Task ChangeCurrencyAsync(Currency currency)
+                {
+                        this.SelectedCurrency = currency;
+                        this.IsConvertingCurrency = true;
+                        this.StateHasChanged();
+
+                        try
+                        {
+                                if (currency == Currency.DKK || currency == Currency.JYD)
+                                {
+                                        this._exchangeRate = DEFAULT_EXCHANGE_RATE;
+                                }
+                                else
+                                {
+                                        this._exchangeRate = await this.CurrencyConverter.GetLiveRateAsync(fromCurrency: Currency.DKK, toCurrency: currency);
+                                }
+                        }
+                        catch (Exception ex)
+                        {
+                                this.WarningMessage = "Kunne ikke hente valutakurs: " + ex.Message;
+                                this._exchangeRate = DEFAULT_EXCHANGE_RATE;
+                                this.SelectedCurrency = Currency.DKK;
+                        }
+                        finally
+                        {
+                                this.IsConvertingCurrency = false;
+                                this.StateHasChanged();
+                        }
+                }
+
+                protected string FormatPrice(decimal dkkPrice)
+                {
+                        return (dkkPrice * this._exchangeRate).ToString(format: PRICE_FORMAT) + " " + this.SelectedCurrency.ToString();
+                }
+
                 public async Task MarkAsPaidAsync()
                 {
                         if (this.SelectedBookingIdForDetails is null)
@@ -196,7 +244,7 @@ namespace UI.Client.Pages.Calendar
 
                         try
                         {
-                                await this.BookingFacade.MarkBookingAsPaidAsync(bookingId: this.SelectedBookingIdForDetails.Value);
+                                await this.BookingFacade.MarkBookingAsPaidAsync(bookingId: this.SelectedBookingIdForDetails.Value, currency: this.SelectedCurrency);
 
                                 this.CloseDetailsModal();
                                 await this.RefreshCalendarDataAsync();
@@ -213,6 +261,8 @@ namespace UI.Client.Pages.Calendar
                         this.SelectedBookingIdForDetails = null;
                         this.SelectedBookingPrice = null;
                         this.WarningMessage = string.Empty;
+                        this.SelectedCurrency = Currency.DKK;
+                        this._exchangeRate = DEFAULT_EXCHANGE_RATE;
                 }
 
                 protected void ClearWarning()

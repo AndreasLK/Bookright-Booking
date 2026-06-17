@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
@@ -62,9 +63,9 @@ namespace Facade.Bookings
                         return await this._createBookingUseCase.ExecuteAsync(command: command);
                 }
 
-                public async Task MarkBookingAsPaidAsync(Guid bookingId)
+                public async Task MarkBookingAsPaidAsync(Guid bookingId, Currency currency)
                 {
-                        await this._payBookingUseCase.ExecuteAsync(bookingIdRaw: bookingId);
+                        await this._payBookingUseCase.ExecuteAsync(bookingIdRaw: bookingId, currency: currency);
                 }
 
                 public async Task<BookingPricingDetailsDto> GetBookingPricePreviewAsync(Guid customerId, Guid treatmentId, DateTime startDateTime, DateTime endDateTime)

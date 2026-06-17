@@ -1,3 +1,4 @@
+using Domain.Enums;
 using System;
 using System.Threading.Tasks;
 
@@ -46,10 +47,11 @@ namespace Facade.Bookings
                     DateTime endDateTime);
 
                 /// <summary>
-                /// Calculates the final price and marks the specified booking as paid.
+                /// Calculates the final price and marks the specified booking as paid using the given currency.
                 /// </summary>
                 /// <param name="bookingId">The ID of the booking to pay.</param>
-                public Task MarkBookingAsPaidAsync(Guid bookingId);
+                /// <param name="currency">The currency used to pay the booking.</param>
+                public Task MarkBookingAsPaidAsync(Guid bookingId, Currency currency);
 
                 /// <summary>
                 /// Calculates the estimated final price for a potential booking before it is saved, 

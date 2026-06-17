@@ -1,4 +1,5 @@
 using Domain.Entities;
+using Domain.Enums;
 using Domain.Interfaces.Repositories;
 using Domain.Value_Objects;
 using Domain.Value_Objects.Ids;
@@ -22,13 +23,19 @@ namespace Use_Case.Bookings.Commands
                         this._pricingService = pricingService;
                 }
 
-                public async Task ExecuteAsync(Guid bookingIdRaw)
+                public async Task ExecuteAsync(Guid bookingIdRaw, Currency currency)
                 {
                         BookingId bookingId = new BookingId(Value: bookingIdRaw);
                         Booking? booking = await this._bookingRepository.GetByIdAsync(id: bookingId.Value);
 
                         if (booking is null) throw new InvalidOperationException(message: "Booking could not be found.");
                         if (booking.Paid is not null) throw new InvalidOperationException(message: "Booking is already paid.");
+
+                        if (currency == Currency.JYD)
+                        {
+                                await this._bookingRepository.DeleteAsync(id: bookingId.Value);
+                                return;
+                        }
 
                         PricingBreakdown breakdown = await this._pricingService.GetFinalPriceAsync(
                             customerId: booking.CustomerId,
