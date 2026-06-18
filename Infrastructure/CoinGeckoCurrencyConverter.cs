@@ -83,7 +83,6 @@ namespace Infrastructure
                                 var rate = await this.FetchFromCoinGeckoAsync(toCurrency, ct);
 
                                 // Save the rate in memory for the configured number of seconds.
-                                var cacheSeconds = this._configuration.GetValue<int>("ExchangeRateFallback:CacheSeconds", defaultValue: 30);
                                 this._cache.Set(cacheKey, rate, TimeSpan.FromSeconds(Config.EXCHANGE_RATE_CACHE_SECONDS));
 
                                 this._logger.LogInformation(message: "Live rate fetched for {To}: {Rate}", toCurrency, rate);
