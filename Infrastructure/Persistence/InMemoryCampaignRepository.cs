@@ -70,7 +70,7 @@ namespace Infrastructure.Persistence
                         // 1. Summer Promo (15% off, active now)
                         Campaign summerPromo = new Campaign(
                             id: new CampaignId(Value: Guid.NewGuid()),
-                            name: "Sommerrabat 2024",
+                            name: "Sommerrabat 2026",
                             description: "Få 15% rabat på alle behandlinger over 500 kr. i hele sommerperioden.",
                             startDate: DateTime.Now.AddMonths(months: -1),
                             endDate: DateTime.Now.AddMonths(months: 2),
